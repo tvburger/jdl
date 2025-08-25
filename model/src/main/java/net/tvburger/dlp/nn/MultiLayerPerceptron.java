@@ -1,13 +1,14 @@
 package net.tvburger.dlp.nn;
 
-import java.util.ArrayList;
-import java.util.List;
+import net.tvburger.dlp.nn.activations.Activations;
+
+import java.util.*;
 
 public class MultiLayerPerceptron implements NeuralNetwork {
 
     private final List<List<Neuron>> layers;
 
-    public static MultiLayerPerceptron create(int... depth) {
+    public static MultiLayerPerceptron create(ActivationFunction outputActivationFunction, int... depth) {
         List<List<Neuron>> layers = new ArrayList<>();
         for (int d = 0; d < depth.length; d++) {
             if (d == 0) {
@@ -20,8 +21,16 @@ public class MultiLayerPerceptron implements NeuralNetwork {
                 List<Neuron> layerNeurons = new ArrayList<>();
                 List<Neuron> previousLayer = layers.getLast();
                 for (int i = 0; i < depth[d]; i++) {
-                    String name = d + 1 == depth.length ? "Output" : "Hidden";
-                    layerNeurons.add(new Neuron(name + "(" + layers.size() + "," + i + ")", previousLayer));
+                    String name;
+                    ActivationFunction activationFunction;
+                    if (depth.length == d + 1) {
+                        name = "Output";
+                        activationFunction = outputActivationFunction;
+                    } else {
+                        name = "Hidden";
+                        activationFunction = Activations.reLU();
+                    }
+                    layerNeurons.add(new Neuron(name + "(" + layers.size() + "," + i + ")", previousLayer, activationFunction));
                 }
                 layers.add(layerNeurons);
             }
@@ -36,6 +45,42 @@ public class MultiLayerPerceptron implements NeuralNetwork {
     @Override
     public Architecture getArchitecture() {
         return null;
+    }
+
+    @Override
+    public int getWidth(int i) {
+        return layers.get(i).size();
+    }
+
+    @Override
+    public int getDepth() {
+        return layers.size() - 1;
+    }
+
+    @Override
+    public Neuron getNeuron(int layer, int index) {
+        return layers.get(layer).get(index);
+    }
+
+    @Override
+    public Map<Neuron, Float> getOutputConnections(int layer, int index) {
+        Map<Neuron, Float> connections = new HashMap<>();
+        Neuron source = layers.get(layer).get(index);
+        if (layer < layers.size() - 1) {
+            for (Neuron target : layers.get(layer + 1)) {
+                connections.put(target, findWeight(target, source));
+            }
+        }
+        return connections;
+    }
+
+    private float findWeight(Neuron target, Neuron source) {
+        for (int i = 0; i < target.inputs.size(); i++) {
+            if (target.inputs.get(i) == source) {
+                return target.weights[i];
+            }
+        }
+        return 0.0f;
     }
 
     @Override
@@ -73,7 +118,7 @@ public class MultiLayerPerceptron implements NeuralNetwork {
     @Override
     public float[] estimate(float... inputs) {
         for (List<Neuron> layer : layers) {
-            layer.forEach(Neuron::reset);
+            layer.forEach(Neuron::deactivate);
         }
         for (int i = 0; i < inputs.length; i++) {
             ((InputNeuron) layers.get(0).get(i)).setInputValue(inputs[i]);
@@ -100,8 +145,13 @@ public class MultiLayerPerceptron implements NeuralNetwork {
     public void dumpNodeOutputs() {
         System.out.println("=[ MLP Nodes Dump ]=");
         for (List<Neuron> layer : layers) {
-            layer.forEach(n -> System.out.println(n.name + "{" + n.activated + ", " + n.logit + ", " + n.output + "}"));
+            layer.forEach(n -> System.out.println(n.name + "{" + n.activated + ", " + n.logit + ", " + n.output + "}" + Arrays.toString(n.getWeights()) + "+" + n.getBias()));
         }
         System.out.println("====================");
+    }
+
+    @Override
+    public ActivationFunction getOutputActivationFunction() {
+        return layers.get(layers.size() - 1).getFirst().activationFunction;
     }
 }

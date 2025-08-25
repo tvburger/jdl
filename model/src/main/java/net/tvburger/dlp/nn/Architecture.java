@@ -1,7 +1,6 @@
 package net.tvburger.dlp.nn;
 
-import net.tvburger.dlp.ActivationFunction;
-import net.tvburger.dlp.LossFunction;
+import net.tvburger.dlp.learning.LossFunction;
 
 public interface Architecture {
 

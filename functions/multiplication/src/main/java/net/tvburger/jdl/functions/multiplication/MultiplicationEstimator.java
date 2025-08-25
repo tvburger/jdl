@@ -1,4 +1,4 @@
-package net.tvburger.jdl.functions.add;
+package net.tvburger.jdl.functions.multiplication;
 
 import net.tvburger.dlp.DataSet;
 import net.tvburger.dlp.learning.GradientDescent;
@@ -8,38 +8,39 @@ import net.tvburger.dlp.nn.activations.Activations;
 import net.tvburger.dlp.nn.initializers.Initializers;
 import net.tvburger.dlp.utils.Floats;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
-public class AddEstimator {
+public class MultiplicationEstimator {
 
     public static void main(String[] args) {
-        MultiLayerPerceptron mlp = MultiLayerPerceptron.create(Activations.reLU(), 2, 1);
+        MultiLayerPerceptron mlp = MultiLayerPerceptron.create(Activations.linear(), 2, 10, 1);
         System.out.println(Arrays.toString(mlp.getParameters()));
         mlp.init(Initializers.random());
         System.out.println(Arrays.toString(mlp.getParameters()));
 
-        float[] inputs = new float[]{5.0f, 5.0f};
+        float[] inputs = new float[]{20.0f, 5.0f};
         mlp.dumpNodeOutputs();
         float[] estimate = mlp.estimate(inputs);
         System.out.println(Arrays.toString(inputs) + " -> " + Arrays.toString(estimate));
 
-        DataSet trainingSet = new DataSet(List.of(
-                Floats.s(Floats.a(1.0f, 3.0f), Floats.a(4.0f)),
-                Floats.s(Floats.a(2.0f, 2.0f), Floats.a(4.0f)),
-                Floats.s(Floats.a(10.0f, 20.0f), Floats.a(30.0f)),
-                Floats.s(Floats.a(0.5f, 0.7f), Floats.a(1.2f)),
-                Floats.s(Floats.a(-6f, 20.0f), Floats.a(14.0f)),
-                Floats.s(Floats.a(30.0f, 8.0f), Floats.a(38.0f))
-        ));
+        ArrayList<DataSet.Sample> samples = new ArrayList<>();
+        DataSet trainingSet = new DataSet(samples);
+
+        for (int i = 1; i < 500; i++) {
+            for (int j = 1; j < 500; j++) {
+                samples.add(Floats.s(Floats.a(i / 10.0f, j), Floats.a(i * j / 10.0f)));
+            }
+        }
 
         GradientDescent gradientDescent = new GradientDescent(Losses.halfMSE());
         gradientDescent.setLearningRate(0.01f);
 
         for (int i = 0; i < 100; i++) {
             gradientDescent.train(mlp, trainingSet);
+//            mlp.dumpNodeOutputs();
 
-            inputs = Floats.a(5.0f, 5.0f);
+            inputs = Floats.a(20.0f, 5.0f);
             estimate = mlp.estimate(inputs);
             System.out.println(Arrays.toString(inputs) + " -> " + Arrays.toString(estimate));
         }

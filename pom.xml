@@ -11,6 +11,7 @@
     <modules>
         <module>model</module>
         <module>functions/add</module>
+        <module>functions/multiplication</module>
         <module>functions/xor</module>
     </modules>
 

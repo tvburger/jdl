@@ -1,8 +1,18 @@
 package net.tvburger.dlp.nn;
 
+import java.util.Map;
+
 public interface NeuralNetwork {
 
     Architecture getArchitecture();
+
+    int getWidth(int layer);
+
+    int getDepth();
+
+    Neuron getNeuron(int layer, int index);
+
+    Map<Neuron, Float> getOutputConnections(int layer, int index);
 
     int getParameterCount();
 
@@ -13,5 +23,7 @@ public interface NeuralNetwork {
     void init(Initializer initializer);
 
     void dumpNodeOutputs();
+
+    ActivationFunction getOutputActivationFunction();
 
 }

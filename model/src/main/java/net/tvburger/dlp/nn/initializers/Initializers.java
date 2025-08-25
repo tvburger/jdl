@@ -1,4 +1,4 @@
-package net.tvburger.dlp.initializers;
+package net.tvburger.dlp.nn.initializers;
 
 public final class Initializers {
 

@@ -1,14 +1,16 @@
 package net.tvburger.dlp.nn;
 
-import net.tvburger.dlp.ActivationFunction;
-import net.tvburger.dlp.activations.Activations;
+import net.tvburger.dlp.nn.activations.Activations;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class Neuron {
 
     protected String name;
     protected List<Neuron> inputs;
+    protected float[] storedInputs;
+    protected int totalActivations;
     protected float[] weights;
     protected float bias;
     protected float logit;
@@ -24,6 +26,7 @@ public class Neuron {
         this.name = name;
         this.inputs = inputs == null ? List.of() : inputs;
         this.weights = new float[this.inputs.size()];
+        this.storedInputs = new float[this.inputs.size()];
         this.activationFunction = activationFunction;
     }
 
@@ -37,9 +40,12 @@ public class Neuron {
         }
         logit = bias;
         for (int i = 0; i < inputs.size(); i++) {
-            logit += inputs.get(i).getOutput() * weights[i];
+            float input = inputs.get(i).getOutput();
+            logit += input * weights[i];
+            storedInputs[i] += input;
         }
         output = activationFunction.activate(logit);
+        totalActivations++;
         activated = true;
     }
 
@@ -47,8 +53,21 @@ public class Neuron {
         return activated;
     }
 
-    public void reset() {
+    public synchronized void deactivate() {
         activated = false;
+    }
+
+    public synchronized void reset() {
+        Arrays.fill(storedInputs, 0.0f);
+        totalActivations = 0;
+    }
+
+    public float[] getStoredInputs() {
+        return storedInputs;
+    }
+
+    public int getTotalActivations() {
+        return totalActivations;
     }
 
     public float[] getWeights() {
