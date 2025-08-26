@@ -8,13 +8,14 @@ import java.util.Arrays;
 public class LogicalFunctions {
 
     public static void main(String[] args) {
-        NeuralNetwork perceptron = Perceptron.create(2, 4, 1);
+        NeuralNetwork perceptron = Perceptron.create(2, 0, 1);
         perceptron.init(new PerceptronInitializer());
 
         DataSet dataSet = DataSets.loadOr();
         DataSet trainingSet = dataSet.subset(1, dataSet.samples().size());
         DataSet validationSet = trainingSet;
         PerceptronTrainer trainer = new PerceptronTrainer();
+        perceptron.dumpNodeOutputs();
         for (int i = 0; i < 1000; i++) {
             trainer.train(perceptron, trainingSet);
         }

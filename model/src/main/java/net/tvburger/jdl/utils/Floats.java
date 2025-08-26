@@ -20,4 +20,8 @@ public final class Floats {
     public static DataSet.Sample s(float[] feature, float[] targetOutput) {
         return new DataSet.Sample(feature, targetOutput);
     }
+
+    public static boolean greaterThan(float f1, float f2) {
+        return f1 > f2 && !equals(f1, f2);
+    }
 }

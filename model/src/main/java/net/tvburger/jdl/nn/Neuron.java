@@ -111,7 +111,7 @@ public class Neuron {
 
     @Override
     public String toString() {
-        return name + "{" + activated + ", " + logit + ", " + output + "}" + Arrays.toString(weights) + "+" + bias;
+        return name + "{" + activated + ", " + logit + ", " + output + "}" + Arrays.toString(weights) + (bias >= 0.0 ? "+" : "") + bias;
     }
 
     public ActivationFunction getActivationFunction() {

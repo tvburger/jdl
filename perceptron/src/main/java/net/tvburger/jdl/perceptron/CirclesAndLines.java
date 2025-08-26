@@ -15,15 +15,14 @@ public class CirclesAndLines {
         DataSet trainingSet = dataSet.subset(11, dataSet.samples().size());
         DataSet validationSet = dataSet.subset(1, 11);
         PerceptronTrainer trainer = new PerceptronTrainer();
-//        perceptron.dumpNodeOutputs();
-        trainer.train(perceptron, trainingSet);
-//        perceptron.dumpNodeOutputs();
+        for (int i = 0; i < 10; i++) {
+            trainer.train(perceptron, trainingSet);
+        }
+        perceptron.dumpNodeOutputs();
 
         for (DataSet.Sample sample : validationSet.samples()) {
             float[] estimate = perceptron.estimate(sample.features());
-            perceptron.dumpNodeOutputs();
-            System.out.println(Arrays.toString(estimate));
-            break;
+            System.out.println("real = " + Arrays.toString(sample.targetOutputs()) + " estimated = " + Arrays.toString(estimate));
         }
 
     }

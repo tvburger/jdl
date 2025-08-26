@@ -39,6 +39,6 @@ public class Step implements ActivationFunction {
 
     @Override
     public float activate(float logit) {
-        return threshold < 0 ? lowValue : highValue;
+        return logit < threshold ? lowValue : highValue;
     }
 }

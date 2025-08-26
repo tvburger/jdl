@@ -6,6 +6,8 @@ import net.tvburger.jdl.nn.NeuralNetwork;
 import net.tvburger.jdl.nn.Neuron;
 import net.tvburger.jdl.utils.Floats;
 
+import java.util.Arrays;
+
 public class PerceptronTrainer implements Trainer {
 
     @Override
@@ -22,11 +24,14 @@ public class PerceptronTrainer implements Trainer {
         for (DataSet.Sample sample : trainingSet.samples()) {
             float[] estimate = perceptron.estimate(sample.features());
             for (int i = 0; i < estimate.length; i++) {
-                int sign = estimate[i] >= 0.0f ? +1 : -1;
-                if (Floats.equals(sample.targetOutputs()[i], estimate[i])) {
-                    continue;
+                int sign = Floats.greaterThan(sample.targetOutputs()[i], 0.0f) ? +1 : -1;
+                Neuron neuron = perceptron.getNeuron(2, i);
+                if (!Floats.equals(sample.targetOutputs()[i], estimate[i])) {
+                    System.out.println("Training: real = " + Arrays.toString(sample.targetOutputs()) + " estimated = " + Arrays.toString(estimate) + ": features = " + Arrays.toString(sample.features()));
+                    System.out.println("Sample target output = " + sample.targetOutputs()[i] + ", sign = " + sign);
+                    updateParameters(neuron, sign);
                 }
-                updateParameters(perceptron.getNeuron(2, i), sign);
+                neuron.reset();
             }
         }
     }
@@ -38,7 +43,7 @@ public class PerceptronTrainer implements Trainer {
         for (int i = 0; i < weights.length; i++) {
             weights[i] += y * storedInputs[i] / neuron.getTotalActivations();
         }
-        neuron.reset();
+        System.out.println(neuron);
     }
 
 }
