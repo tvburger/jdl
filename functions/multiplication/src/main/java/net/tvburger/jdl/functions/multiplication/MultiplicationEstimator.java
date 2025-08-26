@@ -1,12 +1,12 @@
 package net.tvburger.jdl.functions.multiplication;
 
-import net.tvburger.dlp.DataSet;
-import net.tvburger.dlp.learning.GradientDescent;
-import net.tvburger.dlp.learning.loss.Losses;
-import net.tvburger.dlp.nn.MultiLayerPerceptron;
-import net.tvburger.dlp.nn.activations.Activations;
-import net.tvburger.dlp.nn.initializers.Initializers;
-import net.tvburger.dlp.utils.Floats;
+import net.tvburger.jdl.DataSet;
+import net.tvburger.jdl.learning.GradientDescent;
+import net.tvburger.jdl.learning.loss.Losses;
+import net.tvburger.jdl.nn.activations.Activations;
+import net.tvburger.jdl.nn.initializers.Initializers;
+import net.tvburger.jdl.utils.Floats;
+import net.tvburger.jdl.mlp.MultiLayerPerceptron;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,20 +27,21 @@ public class MultiplicationEstimator {
         ArrayList<DataSet.Sample> samples = new ArrayList<>();
         DataSet trainingSet = new DataSet(samples);
 
-        for (int i = 1; i < 500; i++) {
-            for (int j = 1; j < 500; j++) {
+        for (int i = 1; i < 50; i++) {
+            for (int j = 1; j < 50; j++) {
                 samples.add(Floats.s(Floats.a(i / 10.0f, j), Floats.a(i * j / 10.0f)));
             }
         }
 
         GradientDescent gradientDescent = new GradientDescent(Losses.halfMSE());
-        gradientDescent.setLearningRate(0.01f);
+        gradientDescent.setLearningRate(0.0001f);
 
         for (int i = 0; i < 100; i++) {
-            gradientDescent.train(mlp, trainingSet);
-//            mlp.dumpNodeOutputs();
+            for (DataSet.Sample sample : trainingSet.samples()) {
+                gradientDescent.train(mlp, DataSet.of(sample));
 
-            inputs = Floats.a(20.0f, 5.0f);
+            }
+            inputs = Floats.a(3.5f, 2.8f);
             estimate = mlp.estimate(inputs);
             System.out.println(Arrays.toString(inputs) + " -> " + Arrays.toString(estimate));
         }

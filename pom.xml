@@ -10,6 +10,8 @@
 
     <modules>
         <module>model</module>
+        <module>perceptron</module>
+        <module>mlp</module>
         <module>functions/add</module>
         <module>functions/multiplication</module>
         <module>functions/xor</module>

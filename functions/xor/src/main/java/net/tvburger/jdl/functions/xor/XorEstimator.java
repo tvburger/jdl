@@ -1,8 +1,8 @@
 package net.tvburger.jdl.functions.xor;
 
-import net.tvburger.dlp.nn.activations.Activations;
-import net.tvburger.dlp.nn.initializers.Initializers;
-import net.tvburger.dlp.nn.MultiLayerPerceptron;
+import net.tvburger.jdl.mlp.MultiLayerPerceptron;
+import net.tvburger.jdl.nn.activations.Activations;
+import net.tvburger.jdl.nn.initializers.Initializers;
 
 import java.util.Arrays;
 

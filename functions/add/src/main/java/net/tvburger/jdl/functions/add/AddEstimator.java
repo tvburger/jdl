@@ -1,12 +1,12 @@
 package net.tvburger.jdl.functions.add;
 
-import net.tvburger.dlp.DataSet;
-import net.tvburger.dlp.learning.GradientDescent;
-import net.tvburger.dlp.learning.loss.Losses;
-import net.tvburger.dlp.nn.MultiLayerPerceptron;
-import net.tvburger.dlp.nn.activations.Activations;
-import net.tvburger.dlp.nn.initializers.Initializers;
-import net.tvburger.dlp.utils.Floats;
+import net.tvburger.jdl.DataSet;
+import net.tvburger.jdl.learning.GradientDescent;
+import net.tvburger.jdl.learning.loss.Losses;
+import net.tvburger.jdl.mlp.MultiLayerPerceptron;
+import net.tvburger.jdl.nn.activations.Activations;
+import net.tvburger.jdl.nn.initializers.Initializers;
+import net.tvburger.jdl.utils.Floats;
 
 import java.util.Arrays;
 import java.util.List;
@@ -34,10 +34,12 @@ public class AddEstimator {
         ));
 
         GradientDescent gradientDescent = new GradientDescent(Losses.halfMSE());
-        gradientDescent.setLearningRate(0.01f);
+        gradientDescent.setLearningRate(0.0001f);
 
         for (int i = 0; i < 100; i++) {
-            gradientDescent.train(mlp, trainingSet);
+            for (DataSet.Sample sample : trainingSet.samples()) {
+                gradientDescent.train(mlp, DataSet.of(sample));
+            }
 
             inputs = Floats.a(5.0f, 5.0f);
             estimate = mlp.estimate(inputs);
