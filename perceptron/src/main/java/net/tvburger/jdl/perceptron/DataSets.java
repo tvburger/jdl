@@ -37,8 +37,20 @@ public class DataSets {
     }
 
     public static DataSet loadOr() {
+        return loadLogicalDataSet("or");
+    }
+
+    public static DataSet loadAnd() {
+        return loadLogicalDataSet("or");
+    }
+
+    public static DataSet loadXor() {
+        return loadLogicalDataSet("and");
+    }
+
+    private static DataSet loadLogicalDataSet(String name) {
         List<DataSet.Sample> samples = new ArrayList<>();
-        try (Scanner scanner = new Scanner(Objects.requireNonNull(DataSets.class.getClassLoader().getResourceAsStream("or.csv")))) {
+        try (Scanner scanner = new Scanner(Objects.requireNonNull(DataSets.class.getClassLoader().getResourceAsStream(name + ".csv")))) {
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
                 if (!line.isEmpty()) {
