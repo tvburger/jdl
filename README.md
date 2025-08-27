@@ -2,6 +2,8 @@
 
 A Java-based deep learning framework that implements various neural network architectures and learning algorithms from scratch. This project serves as both a learning tool and a practical implementation of neural network concepts.
 
+For detailed class and sequence diagrams of all modules, please see the [Technical Diagrams](diagrams.md).
+
 ## Project Structure
 
 The project is organized into several modules:
