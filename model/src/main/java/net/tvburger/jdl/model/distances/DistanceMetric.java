@@ -1,0 +1,22 @@
+package net.tvburger.jdl.model.distances;
+
+import net.tvburger.jdl.common.patterns.DomainObject;
+import net.tvburger.jdl.common.patterns.Strategy;
+
+/**
+ * This class represents a specific distance metrics to calculate the distances.
+ */
+@DomainObject
+@Strategy(role = Strategy.Role.INTERFACE)
+public interface DistanceMetric {
+
+    /**
+     * Calculates the distance between the 2 points
+     *
+     * @param point1 point1 to compare
+     * @param point2 point2 to compare
+     * @return the difference between point1 and point2
+     */
+    float distance(float[] point1, float[] point2);
+
+}

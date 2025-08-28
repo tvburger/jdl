@@ -1,7 +1,7 @@
 package net.tvburger.jdl.perceptron;
 
-import net.tvburger.jdl.nn.Neuron;
-import net.tvburger.jdl.nn.activations.Activations;
+import net.tvburger.jdl.model.nn.Neuron;
+import net.tvburger.jdl.model.nn.activations.Activations;
 
 import java.util.List;
 

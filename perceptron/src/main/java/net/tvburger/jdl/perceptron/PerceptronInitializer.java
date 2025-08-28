@@ -1,8 +1,8 @@
 package net.tvburger.jdl.perceptron;
 
-import net.tvburger.jdl.nn.Initializer;
-import net.tvburger.jdl.nn.InputNeuron;
-import net.tvburger.jdl.nn.Neuron;
+import net.tvburger.jdl.model.nn.InputNeuron;
+import net.tvburger.jdl.model.nn.Neuron;
+import net.tvburger.jdl.model.nn.initializers.Initializer;
 
 import java.util.Random;
 

@@ -1,0 +1,43 @@
+package net.tvburger.jdl.adaline;
+
+import net.tvburger.jdl.common.utils.Floats;
+import net.tvburger.jdl.datasets.LinesAndCircles;
+import net.tvburger.jdl.model.DataSet;
+import net.tvburger.jdl.model.learning.EpochTrainer;
+import net.tvburger.jdl.model.nn.DefaultNeuralNetwork;
+import net.tvburger.jdl.model.nn.InputNeuron;
+import net.tvburger.jdl.model.nn.Neuron;
+import net.tvburger.jdl.model.nn.activations.Activations;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class Adaline extends DefaultNeuralNetwork {
+
+    public static Adaline create(int inputs, int outputs) {
+        List<InputNeuron> inputNodes = new ArrayList<>();
+        for (int i = 0; i < inputs; i++) {
+            inputNodes.add(new InputNeuron("Input(" + i + ")"));
+        }
+        List<Neuron> outputNodes = new ArrayList<>();
+        for (int i = 0; i < outputs; i++) {
+            outputNodes.add(new Neuron("Adaline(" + i + ")", inputNodes, Activations.linear()));
+        }
+        return new Adaline(List.of(inputNodes, outputNodes));
+    }
+
+    private Adaline(List<List<? extends Neuron>> layers) {
+        super(layers);
+    }
+
+    public boolean[] classify(float[] inputs) {
+        float[] estimate = estimate(inputs);
+        boolean[] classifications = new boolean[estimate.length];
+        for (int i = 0; i < estimate.length; i++) {
+            classifications[i] = Floats.greaterThan(estimate[i], 0.0f);
+        }
+        return classifications;
+    }
+
+}

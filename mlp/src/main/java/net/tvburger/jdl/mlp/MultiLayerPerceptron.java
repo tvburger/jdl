@@ -1,7 +1,7 @@
 package net.tvburger.jdl.mlp;
 
 import net.tvburger.jdl.nn.DefaultNeuralNetwork;
-import net.tvburger.jdl.nn.ActivationFunction;
+import net.tvburger.jdl.nn.activations.ActivationFunction;
 import net.tvburger.jdl.nn.InputNeuron;
 import net.tvburger.jdl.nn.Neuron;
 import net.tvburger.jdl.nn.activations.Activations;

@@ -9,12 +9,13 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>common</module>
         <module>model</module>
+        <module>datasets</module>
+        <module>knn</module>
         <module>perceptron</module>
-        <module>mlp</module>
-        <module>functions/add</module>
-        <module>functions/multiplication</module>
-        <module>functions/xor</module>
+        <module>adaline</module>
+        <module>wip</module>
     </modules>
 
     <properties>
