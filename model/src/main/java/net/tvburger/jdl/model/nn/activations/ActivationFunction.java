@@ -32,7 +32,7 @@ public interface ActivationFunction {
      * @return the gradient
      * @throws UnsupportedOperationException when the gradient is not supported by this function
      */
-    default float determineGradient(float output) {
+    default float determineGradientForOutput(float output) {
         throw new UnsupportedOperationException();
     }
 

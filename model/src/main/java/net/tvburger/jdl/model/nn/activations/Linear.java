@@ -20,7 +20,7 @@ public class Linear implements ActivationFunction {
      * {@inheritDoc}
      */
     @Override
-    public float determineGradient(float output) {
+    public float determineGradientForOutput(float output) {
         return 1;
     }
 

@@ -37,12 +37,12 @@ public class Sigmoid implements ActivationFunction {
      * @throws IllegalArgumentException if {@code output} is NaN or infinite
      */
     @Override
-    public float determineGradient(float output) {
+    public float determineGradientForOutput(float output) {
         if (!Float.isFinite(output)) {
             throw new IllegalArgumentException("Output must be a finite number.");
         }
         // Clamp to [0,1] if callers might pass slightly out-of-range values due to numeric drift.
         float properOutput = Math.min(1.0f, Math.max(0.0f, output));
-        return output * (1.0f - properOutput);
+        return properOutput * (1.0f - properOutput);
     }
 }

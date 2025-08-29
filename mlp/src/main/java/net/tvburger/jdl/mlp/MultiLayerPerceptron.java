@@ -1,18 +1,18 @@
 package net.tvburger.jdl.mlp;
 
-import net.tvburger.jdl.nn.DefaultNeuralNetwork;
-import net.tvburger.jdl.nn.activations.ActivationFunction;
-import net.tvburger.jdl.nn.InputNeuron;
-import net.tvburger.jdl.nn.Neuron;
-import net.tvburger.jdl.nn.activations.Activations;
+import net.tvburger.jdl.model.nn.ActivationsCachedNeuron;
+import net.tvburger.jdl.model.nn.DefaultNeuralNetwork;
+import net.tvburger.jdl.model.nn.InputNeuron;
+import net.tvburger.jdl.model.nn.Neuron;
+import net.tvburger.jdl.model.nn.activations.ActivationFunction;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MultiLayerPerceptron extends DefaultNeuralNetwork {
 
-    public static MultiLayerPerceptron create(ActivationFunction outputActivationFunction, int... depth) {
-        List<List<Neuron>> layers = new ArrayList<>();
+    public static MultiLayerPerceptron create(ActivationFunction outputActivationFunction, ActivationFunction hiddenActivationFunction, int... depth) {
+        List<List<? extends Neuron>> layers = new ArrayList<>();
         for (int d = 0; d < depth.length; d++) {
             if (d == 0) {
                 List<Neuron> inputNeurons = new ArrayList<>();
@@ -22,7 +22,7 @@ public class MultiLayerPerceptron extends DefaultNeuralNetwork {
                 layers.add(inputNeurons);
             } else {
                 List<Neuron> layerNeurons = new ArrayList<>();
-                List<Neuron> previousLayer = layers.getLast();
+                List<? extends Neuron> previousLayer = layers.getLast();
                 for (int i = 0; i < depth[d]; i++) {
                     String name;
                     ActivationFunction activationFunction;
@@ -31,9 +31,9 @@ public class MultiLayerPerceptron extends DefaultNeuralNetwork {
                         activationFunction = outputActivationFunction;
                     } else {
                         name = "Hidden";
-                        activationFunction = Activations.reLU();
+                        activationFunction = hiddenActivationFunction;
                     }
-                    layerNeurons.add(new Neuron(name + "(" + layers.size() + "," + i + ")", previousLayer, activationFunction));
+                    layerNeurons.add(new ActivationsCachedNeuron(name + "(" + layers.size() + "," + i + ")", previousLayer, activationFunction));
                 }
                 layers.add(layerNeurons);
             }
@@ -41,7 +41,7 @@ public class MultiLayerPerceptron extends DefaultNeuralNetwork {
         return new MultiLayerPerceptron(layers);
     }
 
-    private MultiLayerPerceptron(List<List<Neuron>> layers) {
+    private MultiLayerPerceptron(List<List<? extends Neuron>> layers) {
         super(layers);
     }
 

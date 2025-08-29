@@ -22,7 +22,7 @@ public class ReLU implements ActivationFunction {
     /**
      * {@inheritDoc}
      */
-    public float determineGradient(float output) {
-        return output >= 0.0f ? 1.0f : 0.0f;
+    public float determineGradientForOutput(float output) {
+        return output > 0.0f ? 1.0f : 0.0f;
     }
 }

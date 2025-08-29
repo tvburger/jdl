@@ -15,7 +15,7 @@
         <module>knn</module>
         <module>perceptron</module>
         <module>adaline</module>
-        <module>wip</module>
+        <module>mlp</module>
     </modules>
 
     <properties>
