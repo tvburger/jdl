@@ -2,7 +2,7 @@ package net.tvburger.jdl.model.nn;
 
 import net.tvburger.jdl.common.patterns.DomainObject;
 import net.tvburger.jdl.model.EstimationFunction;
-import net.tvburger.jdl.model.nn.initializers.Initializer;
+import net.tvburger.jdl.model.nn.initializers.NeuralNetworkInitializer;
 
 import java.util.Map;
 import java.util.Set;
@@ -22,7 +22,7 @@ import java.util.Set;
  *   <li>Expose the <b>topology</b> of the network in terms of layers and neurons.</li>
  *   <li>Provide access to <b>parameters</b> (weights, biases) for training
  *       and persistence.</li>
- *   <li>Support <b>initialization</b> of parameters through an {@link Initializer}.</li>
+ *   <li>Support <b>initialization</b> of parameters through an {@link NeuralNetworkInitializer}.</li>
  *   <li>Inherit evaluation capabilities from {@link EstimationFunction},
  *       such as mapping inputs to outputs.</li>
  * </ul>
@@ -106,17 +106,6 @@ public interface NeuralNetwork extends EstimationFunction {
      * @return a flat array of parameters
      */
     float[] getParameters();
-
-    /**
-     * Initializes the network parameters using the provided {@link Initializer}.
-     * <p>
-     * Typical strategies include zero initialization, random uniform,
-     * Xavier/Glorot, He initialization, etc.
-     * </p>
-     *
-     * @param initializer the initializer to apply
-     */
-    void init(Initializer initializer);
 
     /**
      * Accepts a {@link net.tvburger.jdl.model.nn.NeuronVisitor} to traverse

@@ -1,11 +1,11 @@
 package net.tvburger.jdl.adaline;
 
 import net.tvburger.jdl.model.nn.Neuron;
-import net.tvburger.jdl.model.nn.initializers.Initializer;
+import net.tvburger.jdl.model.nn.initializers.NeuralNetworkInitializer;
 
 import java.util.Random;
 
-public class AdalineInitializer implements Initializer {
+public class AdalineInitializer implements NeuralNetworkInitializer {
 
     @Override
     public void initialize(Neuron neuron) {

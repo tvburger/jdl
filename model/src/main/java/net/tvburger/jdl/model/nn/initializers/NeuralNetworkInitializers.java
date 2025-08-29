@@ -6,13 +6,13 @@ import net.tvburger.jdl.common.patterns.StaticUtility;
  * Utility for obtaining (singleton) instances of initializers.
  */
 @StaticUtility
-public final class Initializers {
+public final class NeuralNetworkInitializers {
 
     private static final RandomNormalizedWeightInitializer random = new RandomNormalizedWeightInitializer();
     private static final HeInitializer he = new HeInitializer();
     private static final XavierInitializer xavier = new XavierInitializer();
 
-    private Initializers() {
+    private NeuralNetworkInitializers() {
     }
 
     /**

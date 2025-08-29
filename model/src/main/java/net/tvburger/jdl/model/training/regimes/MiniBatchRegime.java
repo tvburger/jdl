@@ -1,11 +1,14 @@
-package net.tvburger.jdl.model.learning;
+package net.tvburger.jdl.model.training.regimes;
 
 import net.tvburger.jdl.common.patterns.Strategy;
 import net.tvburger.jdl.model.DataSet;
 import net.tvburger.jdl.model.EstimationFunction;
+import net.tvburger.jdl.model.training.ObjectiveFunction;
+import net.tvburger.jdl.model.training.Optimizer;
+import net.tvburger.jdl.model.training.Regime;
 
 /**
- * A {@link Trainer} implementation that performs <em>mini-batch training</em>,
+ * A {@link TrainingRegime} implementation that performs <em>mini-batch training</em>,
  * where the training dataset is divided into smaller batches of a fixed size,
  * and the wrapped trainer is invoked once per batch.
  * <p>
@@ -28,7 +31,7 @@ import net.tvburger.jdl.model.EstimationFunction;
  *       descent variants that rely on mini-batch updates.</li>
  *   <li>Balancing convergence stability (batch training) with computational
  *       efficiency and generalization (online training).</li>
- *   <li>Reusing existing {@link Trainer} implementations by delegating
+ *   <li>Reusing existing {@link TrainingRegime} implementations by delegating
  *       batch-wise work to them.</li>
  * </ul>
  *
@@ -41,23 +44,28 @@ import net.tvburger.jdl.model.EstimationFunction;
  *
  * miniBatchTrainer.train(network, trainingData);
  * }</pre>
- *
- * @param <E> the type of estimation function being trained
  */
 @Strategy(role = Strategy.Role.CONCRETE)
-public final class MiniBatchTrainer<E extends EstimationFunction> implements Trainer<E> {
+public final class MiniBatchRegime extends DelegatedRegime {
 
-    private final Trainer<E> trainer;
     private int samplesPerLearning;
 
     /**
      * Creates a new mini-batch trainer with the given mini-batch size.
      *
-     * @param trainer            the trainer to use for the mini-batches
      * @param samplesPerLearning the number of samples per mini-batch (must be > 0)
      */
-    public MiniBatchTrainer(Trainer<E> trainer, int samplesPerLearning) {
-        this.trainer = trainer;
+    public MiniBatchRegime(int samplesPerLearning) {
+        this(null, samplesPerLearning);
+    }
+
+    /**
+     * Creates a new mini-batch trainer with the given mini-batch size.
+     *
+     * @param samplesPerLearning the number of samples per mini-batch (must be > 0)
+     */
+    public MiniBatchRegime(Regime regime, int samplesPerLearning) {
+        super(regime);
         this.samplesPerLearning = samplesPerLearning;
     }
 
@@ -79,28 +87,14 @@ public final class MiniBatchTrainer<E extends EstimationFunction> implements Tra
         this.samplesPerLearning = samplesPerLearning;
     }
 
-    /**
-     * {@inheritDoc}
-     * </p>
-     * Splits the training set into mini-batches and invokes the wrapped
-     * {@link Trainer} once per batch.
-     *
-     * @param estimationFunction the model to train
-     * @param trainingSet        the dataset to train on
-     * @throws IllegalArgumentException if the dataset is incompatible with the model
-     */
     @Override
-    public void train(E estimationFunction, DataSet trainingSet) {
-        if (!trainingSet.isCompatibleWith(estimationFunction)) {
-            throw new IllegalArgumentException("Incompatible data set!");
-        }
+    public <E extends EstimationFunction> void train(E estimationFunction, DataSet trainingSet, ObjectiveFunction objective, Optimizer<? super E> optimizer) {
         int offset = 0;
         int trainingSetSize = trainingSet.samples().size();
         do {
             int newOffset = Math.min(trainingSetSize, offset + samplesPerLearning);
-            trainer.train(estimationFunction, trainingSet.subset(offset, newOffset));
+            regime.train(estimationFunction, trainingSet.subset(offset, newOffset), objective, optimizer);
             offset = newOffset;
         } while (offset >= trainingSet.samples().size());
     }
-
 }

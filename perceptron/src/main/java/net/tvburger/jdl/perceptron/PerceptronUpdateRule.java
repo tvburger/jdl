@@ -2,14 +2,16 @@ package net.tvburger.jdl.perceptron;
 
 import net.tvburger.jdl.common.utils.Floats;
 import net.tvburger.jdl.model.DataSet;
-import net.tvburger.jdl.model.learning.OnlineTrainer;
+import net.tvburger.jdl.model.training.ObjectiveFunction;
 import net.tvburger.jdl.model.nn.LastInputStoredNeuron;
+import net.tvburger.jdl.model.training.Optimizer;
 
 import java.util.Arrays;
 
-public class PerceptronTrainingFunction implements OnlineTrainer.Function<Perceptron> {
+public class PerceptronUpdateRule implements Optimizer.OnlineOnly<Perceptron> {
 
-    public void train(Perceptron perceptron, DataSet.Sample sample) {
+    @Override
+    public void optimize(Perceptron perceptron, DataSet.Sample sample, ObjectiveFunction objective) {
         float[] estimate = perceptron.estimate(sample.features());
         for (int i = 0; i < estimate.length; i++) {
             int sign = Floats.greaterThan(sample.targetOutputs()[i], 0.0f) ? +1 : -1;

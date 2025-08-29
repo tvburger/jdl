@@ -15,7 +15,7 @@ import java.util.Random;
  * The bias is left unchanged (as is common practice).
  */
 @Strategy(role = Strategy.Role.CONCRETE)
-public class HeInitializer implements Initializer {
+public class HeInitializer implements NeuralNetworkInitializer {
 
     private final Random random = new Random();
 

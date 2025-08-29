@@ -1,12 +1,12 @@
-package net.tvburger.jdl.model.nn.optimizer;
+package net.tvburger.jdl.model.nn.optimizers;
 
 import net.tvburger.jdl.common.patterns.Strategy;
 import net.tvburger.jdl.model.DataSet;
-import net.tvburger.jdl.model.learning.Trainer;
-import net.tvburger.jdl.model.loss.LossFunction;
 import net.tvburger.jdl.model.nn.ActivationsCachedNeuron;
 import net.tvburger.jdl.model.nn.NeuralNetwork;
 import net.tvburger.jdl.model.nn.Neuron;
+import net.tvburger.jdl.model.training.ObjectiveFunction;
+import net.tvburger.jdl.model.training.Optimizer;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -17,14 +17,12 @@ import java.util.Map;
  * then apply Adam updates with bias correction.
  */
 @Strategy(role = Strategy.Role.CONCRETE)
-public class AdamOptimizer<N extends NeuralNetwork> implements Trainer<N> {
+public class AdamOptimizer<N extends NeuralNetwork> implements Optimizer<N> {
 
     public static final float DEFAULT_LEARNING_RATE = 1e-3f;   // alpha
     public static final float DEFAULT_BETA1 = 0.9f;
     public static final float DEFAULT_BETA2 = 0.999f;
     public static final float DEFAULT_EPSILON = 1e-8f;
-
-    private final LossFunction lossFunction;
 
     private float learningRate = DEFAULT_LEARNING_RATE;
     private float beta1 = DEFAULT_BETA1;
@@ -39,14 +37,6 @@ public class AdamOptimizer<N extends NeuralNetwork> implements Trainer<N> {
 
     // Global step for bias correction
     private long t = 0L;
-
-    public AdamOptimizer(LossFunction lossFunction) {
-        this.lossFunction = lossFunction;
-    }
-
-    public LossFunction getLossFunction() {
-        return lossFunction;
-    }
 
     public float getLearningRate() {
         return learningRate;
@@ -81,10 +71,7 @@ public class AdamOptimizer<N extends NeuralNetwork> implements Trainer<N> {
     }
 
     @Override
-    public void train(N neuralNetwork, DataSet trainingSet) {
-        if (!trainingSet.isCompatibleWith(neuralNetwork)) {
-            throw new IllegalArgumentException("Incompatible data set!");
-        }
+    public void optimize(N neuralNetwork, DataSet trainingSet, ObjectiveFunction objective) {
         final int sampleCount = trainingSet.samples().size();
         if (sampleCount == 0) return;
 
@@ -99,8 +86,9 @@ public class AdamOptimizer<N extends NeuralNetwork> implements Trainer<N> {
 
             // Output layer deltas
             int outWidth = neuralNetwork.coArity();
-            float[] lossGradients = lossFunction.determineGradients(
-                    DataSet.of(trainingSet.samples().get(n)), neuralNetwork);
+            DataSet.Sample sample = trainingSet.samples().get(n);
+            float[] estimated = neuralNetwork.estimate(sample.features());
+            float[] lossGradients = objective.determineGradients(estimated, sample.targetOutputs());
 
             for (int j = 0; j < outWidth; j++) {
                 ActivationsCachedNeuron out = neuralNetwork.getNeuron(depth, j, ActivationsCachedNeuron.class);

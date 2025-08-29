@@ -2,11 +2,11 @@ package net.tvburger.jdl.perceptron;
 
 import net.tvburger.jdl.model.nn.InputNeuron;
 import net.tvburger.jdl.model.nn.Neuron;
-import net.tvburger.jdl.model.nn.initializers.Initializer;
+import net.tvburger.jdl.model.nn.initializers.NeuralNetworkInitializer;
 
 import java.util.Random;
 
-public class PerceptronInitializer implements Initializer {
+public class PerceptronInitializer implements NeuralNetworkInitializer {
 
     private final Random random = new Random();
 

@@ -1,16 +1,15 @@
 package net.tvburger.jdl.adaline;
 
 import net.tvburger.jdl.model.DataSet;
-import net.tvburger.jdl.model.learning.OnlineTrainer;
 import net.tvburger.jdl.model.nn.Neuron;
+import net.tvburger.jdl.model.training.ObjectiveFunction;
+import net.tvburger.jdl.model.training.Optimizer;
 
-import java.util.Arrays;
-
-public class AdalineTrainingFunction implements OnlineTrainer.Function<Adaline> {
+public class LeastMeanSquares implements Optimizer.OnlineOnly<Adaline> {
 
     private float learningRate;
 
-    public AdalineTrainingFunction(float learningRate) {
+    public LeastMeanSquares(float learningRate) {
         this.learningRate = learningRate;
     }
 
@@ -22,17 +21,16 @@ public class AdalineTrainingFunction implements OnlineTrainer.Function<Adaline> 
         this.learningRate = learningRate;
     }
 
-    @Override
-    public void train(Adaline adaline, DataSet.Sample sample) {
+    public void optimize(Adaline adaline, DataSet.Sample sample, ObjectiveFunction objective) {
         float[] estimated = adaline.estimate(sample.features());
+        float[] gradients = objective.determineGradients(estimated, sample.targetOutputs());
         for (int i = 0; i < estimated.length; i++) {
             Neuron node = adaline.getNeuron(adaline.getDepth(), i, Neuron.class);
-            float error = sample.targetOutputs()[i] - estimated[i];
+            float errorSignal = gradients[i];
             for (int w = 0; w < sample.featureCount(); w++) {
-                node.getWeights()[w] += learningRate * error * sample.features()[w];
+                node.getWeights()[w] += learningRate * errorSignal * sample.features()[w];
             }
-            node.setBias(node.getBias() + learningRate * error);
+            node.setBias(node.getBias() + learningRate * errorSignal);
         }
     }
-
 }

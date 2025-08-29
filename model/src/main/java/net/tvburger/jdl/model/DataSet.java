@@ -259,4 +259,34 @@ public record DataSet(List<Sample> samples) implements Iterable<DataSet.Sample> 
     public boolean isCompatibleWith(EstimationFunction estimationFunction) {
         return samples.isEmpty() || samples.getFirst().isCompatibleWith(estimationFunction);
     }
+
+    /**
+     * Ensures that this {@link DataSet} is compatible with the given
+     * {@link EstimationFunction}.
+     *
+     * <p>
+     * Compatibility typically means that the structure of the dataset
+     * (e.g., feature dimensionality, output dimensionality) matches
+     * the requirements of the estimation function. This method is a
+     * guard to prevent training or evaluation with mismatched models
+     * and datasets.
+     * </p>
+     *
+     * <p>
+     * If the dataset is compatible, this method returns the current
+     * instance for fluent chaining. If it is not compatible, an
+     * {@link IllegalArgumentException} is thrown.
+     * </p>
+     *
+     * @param estimationFunction the estimation function to check against
+     * @return this dataset, if compatible
+     * @throws IllegalArgumentException if the dataset is not compatible
+     *                                  with the given estimation function
+     */
+    public DataSet compatible(EstimationFunction estimationFunction) {
+        if (!isCompatibleWith(estimationFunction)) {
+            throw new IllegalArgumentException("Incompatible estimation function!");
+        }
+        return this;
+    }
 }

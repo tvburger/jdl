@@ -12,7 +12,7 @@ import java.util.Random;
  * The bias is left unchanged.
  */
 @Strategy(role = Strategy.Role.CONCRETE)
-public class RandomNormalizedWeightInitializer implements Initializer {
+public class RandomNormalizedWeightInitializer implements NeuralNetworkInitializer {
 
     private final Random random = new Random();
 

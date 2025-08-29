@@ -2,7 +2,6 @@ package net.tvburger.jdl.model.nn;
 
 import net.tvburger.jdl.common.patterns.Mediator;
 import net.tvburger.jdl.common.utils.Pair;
-import net.tvburger.jdl.model.nn.initializers.Initializer;
 
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -164,14 +163,6 @@ public class DefaultNeuralNetwork implements NeuralNetwork {
     @Override
     public int coArity() {
         return layers.get(layers.size() - 1).size();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void init(Initializer initializer) {
-        accept(initializer);
     }
 
     /**

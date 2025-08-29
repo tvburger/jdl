@@ -2,33 +2,37 @@ package net.tvburger.jdl.mlp;
 
 import net.tvburger.jdl.datasets.LogicalDataSets;
 import net.tvburger.jdl.model.DataSet;
-import net.tvburger.jdl.model.learning.BatchTrainer;
-import net.tvburger.jdl.model.learning.EpochTrainer;
-import net.tvburger.jdl.model.loss.Losses;
 import net.tvburger.jdl.model.nn.NeuralNetworks;
 import net.tvburger.jdl.model.nn.activations.Activations;
+import net.tvburger.jdl.model.nn.initializers.NeuralNetworkInitializer;
 import net.tvburger.jdl.model.nn.initializers.XavierInitializer;
-import net.tvburger.jdl.model.nn.optimizer.GradientDescent;
+import net.tvburger.jdl.model.nn.optimizers.StochasticGradientDescent;
+import net.tvburger.jdl.model.training.ObjectiveFunction;
+import net.tvburger.jdl.model.training.Trainer;
+import net.tvburger.jdl.model.training.loss.Losses;
+import net.tvburger.jdl.model.training.regimes.EpochRegime;
+import net.tvburger.jdl.model.training.regimes.ObjectiveReportingRegime;
+import net.tvburger.jdl.model.training.regimes.Regimes;
 
 import java.util.Arrays;
 
 public class MLPMain {
 
     public static void main(String[] args) {
-        DataSet dataSet = LogicalDataSets.xor().load();
-        MultiLayerPerceptron mlp = MultiLayerPerceptron.create(Activations.sigmoid(), Activations.sigmoid(), 2, 2, 1);
-        mlp.init(new XavierInitializer());
-
+        DataSet dataSet = LogicalDataSets.or().load();
         DataSet trainingSet = dataSet;
         DataSet testSet = dataSet;
 
-        GradientDescent<MultiLayerPerceptron> gradientDescent = new GradientDescent<>(Losses.bCE());
-        gradientDescent.setLearningRate(0.1f);
+        MultiLayerPerceptron mlp = MultiLayerPerceptron.create(Activations.sigmoid(), Activations.sigmoid(), 2, 1);
 
-        EpochTrainer<MultiLayerPerceptron> trainer = new EpochTrainer<>(new BatchTrainer<>(gradientDescent));
-        trainer.setEpochs(1000000);
-        NeuralNetworks.dump(mlp);
-        trainer.train(mlp, trainingSet);
+        NeuralNetworkInitializer initializer = new XavierInitializer();
+        ObjectiveFunction objective = Losses.bCE();
+        StochasticGradientDescent<MultiLayerPerceptron> gradientDescent = new StochasticGradientDescent<>();
+        gradientDescent.setLearningRate(0.2f);
+        EpochRegime epochRegime = new ObjectiveReportingRegime(Regimes.online()).epoch(1000);
+        Trainer<MultiLayerPerceptron> mlpTrainer = Trainer.of(initializer, objective, gradientDescent, epochRegime);
+        mlpTrainer.train(mlp, trainingSet);
+
         NeuralNetworks.dump(mlp);
 
         for (DataSet.Sample sample : testSet) {

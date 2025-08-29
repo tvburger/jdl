@@ -1,27 +1,22 @@
-package net.tvburger.jdl.model.nn.optimizer;
+package net.tvburger.jdl.model.nn.optimizers;
 
 import net.tvburger.jdl.common.patterns.Strategy;
 import net.tvburger.jdl.model.DataSet;
-import net.tvburger.jdl.model.learning.Trainer;
-import net.tvburger.jdl.model.loss.LossFunction;
 import net.tvburger.jdl.model.nn.ActivationsCachedNeuron;
 import net.tvburger.jdl.model.nn.NeuralNetwork;
 import net.tvburger.jdl.model.nn.Neuron;
+import net.tvburger.jdl.model.training.ObjectiveFunction;
+import net.tvburger.jdl.model.training.Optimizer;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
 
 @Strategy(role = Strategy.Role.CONCRETE)
-public class GradientDescent<N extends NeuralNetwork> implements Trainer<N> {
+public class StochasticGradientDescent<N extends NeuralNetwork> implements Optimizer<N> {
 
     public static final float DEFAULT_LEARNING_RATE = 0.1f;
 
-    private final LossFunction lossFunction;
     private float learningRate = DEFAULT_LEARNING_RATE;
-
-    public GradientDescent(LossFunction lossFunction) {
-        this.lossFunction = lossFunction;
-    }
 
     public void setLearningRate(float learningRate) {
         this.learningRate = learningRate;
@@ -31,15 +26,8 @@ public class GradientDescent<N extends NeuralNetwork> implements Trainer<N> {
         return learningRate;
     }
 
-    public LossFunction getLossFunction() {
-        return lossFunction;
-    }
-
     @Override
-    public void train(N neuralNetwork, DataSet trainingSet) {
-        if (!trainingSet.isCompatibleWith(neuralNetwork)) {
-            throw new IllegalArgumentException("Incompatible data set!");
-        }
+    public void optimize(N neuralNetwork, DataSet trainingSet, ObjectiveFunction objective) {
         int sampleCount = trainingSet.samples().size();
         if (sampleCount == 0) {
             return;
@@ -58,7 +46,9 @@ public class GradientDescent<N extends NeuralNetwork> implements Trainer<N> {
 
             // 3b) OUTPUT LAYER δ
             int outWidth = neuralNetwork.coArity();
-            float[] lossGradients = lossFunction.determineGradients(DataSet.of(trainingSet.samples().get(n)), neuralNetwork);
+            DataSet.Sample sample = trainingSet.samples().get(n);
+            float[] estimated = neuralNetwork.estimate(sample.features());
+            float[] lossGradients = objective.determineGradients(estimated, sample.targetOutputs());
 
             // we calculate the δ for each output node
             for (int j = 0; j < outWidth; j++) {
@@ -130,5 +120,4 @@ public class GradientDescent<N extends NeuralNetwork> implements Trainer<N> {
             }
         }
     }
-
 }
