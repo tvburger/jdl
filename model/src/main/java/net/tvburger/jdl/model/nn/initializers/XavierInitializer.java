@@ -1,0 +1,47 @@
+package net.tvburger.jdl.model.nn.initializers;
+
+import net.tvburger.jdl.common.patterns.Strategy;
+import net.tvburger.jdl.model.nn.NeuralNetwork;
+import net.tvburger.jdl.model.nn.Neuron;
+
+import java.util.Random;
+
+/**
+ * Xavier (Glorot) weight initializer.
+ * <p>
+ * For sigmoid/tanh activations, initializes weights from a uniform
+ * distribution in the range [-limit, limit], where:
+ * <p>
+ * limit = sqrt(6 / (fanIn + fanOut))
+ * <p>
+ * fanIn  = number of input connections (weights)
+ * fanOut = number of output connections (neurons this neuron connects to)
+ * <p>
+ * Bias is left unchanged (usually set separately).
+ */
+@Strategy(role = Strategy.Role.CONCRETE)
+public class XavierInitializer implements Initializer {
+
+    private final Random random = new Random();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void initialize(NeuralNetwork neuralNetwork, Neuron neuron) {
+        float[] weights = neuron.getWeights();
+        int fanIn = weights.length;
+        int fanOut = neuralNetwork.getTargetNeurons(neuron).size();
+
+        double limit = Math.sqrt(6.0 / (fanIn + fanOut));
+
+        for (int i = 0; i < weights.length; i++) {
+            weights[i] = (float) uniform(-limit, limit);
+        }
+        // Bias left unchanged
+    }
+
+    private double uniform(double min, double max) {
+        return min + (max - min) * random.nextDouble();
+    }
+}

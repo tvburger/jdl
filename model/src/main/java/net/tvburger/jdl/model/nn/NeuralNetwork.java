@@ -5,6 +5,7 @@ import net.tvburger.jdl.model.EstimationFunction;
 import net.tvburger.jdl.model.nn.initializers.Initializer;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Represents a neural network as a specific kind of {@link EstimationFunction}.
@@ -80,6 +81,14 @@ public interface NeuralNetwork extends EstimationFunction {
     Map<Neuron, Float> getOutputConnections(int layer, int index);
 
     /**
+     * Returns the target neurons of the given neuron (thus the downstream nodeds).
+     *
+     * @param neuron the neuron for which the targets are returned
+     * @return the target neurons
+     */
+    Set<Neuron> getTargetNeurons(Neuron neuron);
+
+    /**
      * Returns the total number of trainable parameters in the network
      * (typically weights + biases).
      *
@@ -108,5 +117,15 @@ public interface NeuralNetwork extends EstimationFunction {
      * @param initializer the initializer to apply
      */
     void init(Initializer initializer);
+
+    /**
+     * Accepts a {@link net.tvburger.jdl.model.nn.NeuronVisitor} to traverse
+     * the structure of this neural network.
+     * This allows external visitors to analyze, transform, or export the
+     * network structure without coupling to its internal implementation.
+     *
+     * @param visitor the visitor to apply to this network
+     */
+    void accept(NeuronVisitor visitor);
 
 }

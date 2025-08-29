@@ -6,11 +6,13 @@ import net.tvburger.jdl.model.nn.Neuron;
 import java.util.Random;
 
 /**
- * Implements a random initializer. It sets every weight parameter of the model to a random value between [-1.0, 1.0].
+ * Implements a random initializer. It sets every weight parameter of the model to a random value between [-1/#w, 1/#w]
+ * where #w is the number of weights.
+ * <p>
  * The bias is left unchanged.
  */
 @Strategy(role = Strategy.Role.CONCRETE)
-public class RandomWeightInitializer implements Initializer {
+public class RandomNormalizedWeightInitializer implements Initializer {
 
     private final Random random = new Random();
 
@@ -21,7 +23,7 @@ public class RandomWeightInitializer implements Initializer {
     public void initialize(Neuron neuron) {
         float[] weights = neuron.getWeights();
         for (int i = 0; i < weights.length; i++) {
-            weights[i] = random() / weights.length - 0.1f;
+            weights[i] = random() / weights.length;
         }
     }
 

@@ -1,11 +1,14 @@
 package net.tvburger.jdl.model.nn;
 
 import net.tvburger.jdl.common.patterns.Mediator;
+import net.tvburger.jdl.common.utils.Pair;
 import net.tvburger.jdl.model.nn.initializers.Initializer;
 
-import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Provides a standard implementation for a neural network.
@@ -19,6 +22,8 @@ import java.util.Map;
 public class DefaultNeuralNetwork implements NeuralNetwork {
 
     private final List<List<? extends Neuron>> layers;
+    private final Map<Neuron, Pair<Integer, Integer>> positions;
+    private final Map<Neuron, List<Pair<Neuron, Float>>> connections;
 
     /**
      * Constructs a neural network for the provided layers.
@@ -27,6 +32,8 @@ public class DefaultNeuralNetwork implements NeuralNetwork {
      */
     public DefaultNeuralNetwork(List<List<? extends Neuron>> layers) {
         this.layers = layers;
+        this.positions = NeuralNetworks.getNeuronPositions(layers);
+        this.connections = NeuralNetworks.getNeuronConnections(layers);
     }
 
     /**
@@ -66,17 +73,21 @@ public class DefaultNeuralNetwork implements NeuralNetwork {
      */
     @Override
     public Map<Neuron, Float> getOutputConnections(int layer, int index) {
-        Map<Neuron, Float> connections = new HashMap<>();
-        Neuron source = layers.get(layer).get(index);
-        if (layer < layers.size() - 1) {
-            for (Neuron target : layers.get(layer + 1)) {
-                Float weight = target.findWeight(source);
-                if (weight != null) {
-                    connections.put(target, weight);
-                }
+        Neuron neuron = getNeuron(layer, index);
+        List<Pair<Neuron, Float>> pairs = connections.get(neuron);
+        Map<Neuron, Float> outputConnections = new IdentityHashMap<>();
+        if (pairs != null) {
+            for (Pair<Neuron, Float> pair : pairs) {
+                outputConnections.put(pair.left(), pair.right());
             }
         }
-        return connections;
+        return outputConnections;
+    }
+
+    @Override
+    public Set<Neuron> getTargetNeurons(Neuron neuron) {
+        List<Pair<Neuron, Float>> pairs = connections.get(neuron);
+        return pairs == null ? Set.of() : pairs.stream().map(Pair::left).collect(Collectors.toSet());
     }
 
     /**
@@ -160,9 +171,44 @@ public class DefaultNeuralNetwork implements NeuralNetwork {
      */
     @Override
     public void init(Initializer initializer) {
-        for (List<? extends Neuron> layer : layers) {
-            layer.forEach(initializer::initialize);
-        }
+        accept(initializer);
     }
 
+    /**
+     * Accepts a visitor to inspect the complete neural network
+     *
+     * @param visitor the visitor to apply to this network
+     */
+    @Override
+    public void accept(NeuronVisitor visitor) {
+        if (visitor == null) {
+            return;
+        }
+        visitor.enterNetwork(this);
+
+        int depth = getDepth();
+        for (int layer = 1; layer <= depth; layer++) {
+            visitor.enterLayer(this, layer);
+
+            int width = getWidth(layer);
+            for (int j = 0; j < width; j++) {
+                Neuron neuron = getNeuron(layer, j, Neuron.class);
+                visitor.visitNeuron(this, neuron, layer, j);
+
+                Map<Neuron, Float> outs = getOutputConnections(layer, j);
+                if (outs != null) {
+                    for (Map.Entry<Neuron, Float> connection : outs.entrySet()) {
+                        Neuron target = connection.getKey();
+                        Pair<Integer, Integer> targetPosition = positions.get(target);
+                        visitor.visitConnection(this, neuron, layer, j,
+                                target, targetPosition.left(), targetPosition.right(), connection.getValue());
+                    }
+                }
+            }
+
+            visitor.exitLayer(this, layer);
+        }
+
+        visitor.exitNetwork(this);
+    }
 }

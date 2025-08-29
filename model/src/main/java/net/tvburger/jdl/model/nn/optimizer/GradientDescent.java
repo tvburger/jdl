@@ -1,4 +1,4 @@
-package net.tvburger.jdl.model.nn.learning;
+package net.tvburger.jdl.model.nn.optimizer;
 
 import net.tvburger.jdl.common.patterns.Strategy;
 import net.tvburger.jdl.model.DataSet;

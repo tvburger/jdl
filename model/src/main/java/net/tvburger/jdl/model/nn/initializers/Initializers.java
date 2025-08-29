@@ -8,7 +8,9 @@ import net.tvburger.jdl.common.patterns.StaticUtility;
 @StaticUtility
 public final class Initializers {
 
-    private static final RandomWeightInitializer random = new RandomWeightInitializer();
+    private static final RandomNormalizedWeightInitializer random = new RandomNormalizedWeightInitializer();
+    private static final HeInitializer he = new HeInitializer();
+    private static final XavierInitializer xavier = new XavierInitializer();
 
     private Initializers() {
     }
@@ -18,8 +20,35 @@ public final class Initializers {
      *
      * @return the random weight initializer
      */
-    public static RandomWeightInitializer randomWeight() {
+    public static RandomNormalizedWeightInitializer randomWeight() {
         return random;
     }
 
+    /**
+     * Returns the Xavier initializer
+     *
+     * @return the Xavier initializer
+     */
+    public static XavierInitializer xavier() {
+        return xavier;
+    }
+
+    /**
+     * Returns the He initializer
+     *
+     * @return the He initializer
+     */
+    public static HeInitializer he() {
+        return he;
+    }
+
+    /**
+     * Returns a constant initializer
+     *
+     * @param constant the constant used for initialization
+     * @return a constant initializer
+     */
+    public static ConstantInitializer constant(float constant) {
+        return new ConstantInitializer(constant);
+    }
 }
