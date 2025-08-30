@@ -6,31 +6,31 @@ import net.tvburger.jdl.model.nn.NeuralNetworks;
 import net.tvburger.jdl.model.nn.activations.Activations;
 import net.tvburger.jdl.model.nn.initializers.NeuralNetworkInitializer;
 import net.tvburger.jdl.model.nn.initializers.XavierInitializer;
+import net.tvburger.jdl.model.nn.optimizers.AdamOptimizer;
 import net.tvburger.jdl.model.nn.optimizers.StochasticGradientDescent;
 import net.tvburger.jdl.model.training.ObjectiveFunction;
 import net.tvburger.jdl.model.training.Trainer;
 import net.tvburger.jdl.model.training.loss.Losses;
-import net.tvburger.jdl.model.training.regimes.EpochRegime;
-import net.tvburger.jdl.model.training.regimes.ObjectiveReportingRegime;
-import net.tvburger.jdl.model.training.regimes.Regimes;
+import net.tvburger.jdl.model.training.regimes.*;
 
 import java.util.Arrays;
 
 public class MLPMain {
 
     public static void main(String[] args) {
-        DataSet dataSet = LogicalDataSets.or().load();
+        DataSet dataSet = LogicalDataSets.xor().load();
         DataSet trainingSet = dataSet;
         DataSet testSet = dataSet;
 
-        MultiLayerPerceptron mlp = MultiLayerPerceptron.create(Activations.sigmoid(), Activations.sigmoid(), 2, 1);
+        MultiLayerPerceptron mlp = MultiLayerPerceptron.create(Activations.sigmoid(), Activations.sigmoid(), 2, 2, 1);
 
         NeuralNetworkInitializer initializer = new XavierInitializer();
-        ObjectiveFunction objective = Losses.bCE();
+        ObjectiveFunction objective = Losses.mSE();
         StochasticGradientDescent<MultiLayerPerceptron> gradientDescent = new StochasticGradientDescent<>();
-        gradientDescent.setLearningRate(0.2f);
-        EpochRegime epochRegime = new ObjectiveReportingRegime(Regimes.online()).epoch(1000);
-        Trainer<MultiLayerPerceptron> mlpTrainer = Trainer.of(initializer, objective, gradientDescent, epochRegime);
+        AdamOptimizer<MultiLayerPerceptron> adamOptimizer = new AdamOptimizer<>();
+        gradientDescent.setLearningRate(0.01f);
+        EpochRegime epochRegime = new StopIfNoImprovementRegime(3, new ObjectiveReportingRegime(new DumpNodesRegime(Regimes.batch()))).epoch(10_000);
+        Trainer<MultiLayerPerceptron> mlpTrainer = Trainer.of(initializer, objective, adamOptimizer, epochRegime);
         mlpTrainer.train(mlp, trainingSet);
 
         NeuralNetworks.dump(mlp);

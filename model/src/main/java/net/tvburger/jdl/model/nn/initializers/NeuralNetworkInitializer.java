@@ -20,7 +20,7 @@ public interface NeuralNetworkInitializer extends NeuronVisitor, Initializer<Neu
     @Override
     default void visitNeuron(NeuralNetwork neuralNetwork, Neuron neuron, int layerIndex, int neuronIndex) {
         if (layerIndex != 0) {
-            initialize(neuron);
+            initialize(neuralNetwork, neuron);
         }
     }
 

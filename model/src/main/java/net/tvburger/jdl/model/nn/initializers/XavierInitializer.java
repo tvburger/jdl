@@ -33,15 +33,15 @@ public class XavierInitializer implements NeuralNetworkInitializer {
         int fanIn = weights.length;
         int fanOut = neuralNetwork.getTargetNeurons(neuron).size();
 
-        double limit = Math.sqrt(6.0 / (fanIn + fanOut));
+        float limit = (float) Math.sqrt(6.0f / (fanIn + fanOut));
 
         for (int i = 0; i < weights.length; i++) {
-            weights[i] = (float) uniform(-limit, limit);
+            weights[i] = uniform(-limit, limit);
         }
         // Bias left unchanged
     }
 
-    private double uniform(double min, double max) {
-        return min + (max - min) * random.nextDouble();
+    private float uniform(float min, float max) {
+        return min + (max - min) * random.nextFloat();
     }
 }
