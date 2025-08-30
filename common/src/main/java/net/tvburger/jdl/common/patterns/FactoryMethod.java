@@ -1,9 +1,6 @@
 package net.tvburger.jdl.common.patterns;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Marks a class or method as participating in the
@@ -16,7 +13,8 @@ import java.lang.annotation.Target;
  * creation to subclasses without being tightly coupled to
  * specific implementations.
  */
-@DesignPattern(category = DesignPattern.Category.OBJECT_GRAPH)
+@Documented
+@DesignPattern(DesignPattern.Category.OBJECT_GRAPH)
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.TYPE, ElementType.METHOD})
 public @interface FactoryMethod {

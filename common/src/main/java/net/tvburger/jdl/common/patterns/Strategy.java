@@ -1,9 +1,6 @@
 package net.tvburger.jdl.common.patterns;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Marks a class or interface as part of the Strategy Pattern.
@@ -12,7 +9,8 @@ import java.lang.annotation.Target;
  * - The Strategy interface (defines the contract)
  * - Concrete Strategy implementations (different algorithms)
  */
-@DesignPattern(category = DesignPattern.Category.BEHAVIORAL)
+@Documented
+@DesignPattern(DesignPattern.Category.BEHAVIORAL)
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
 public @interface Strategy {

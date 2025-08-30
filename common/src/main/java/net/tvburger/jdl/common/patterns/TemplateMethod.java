@@ -1,9 +1,6 @@
 package net.tvburger.jdl.common.patterns;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Marks a class or method as participating in the
@@ -14,7 +11,8 @@ import java.lang.annotation.Target;
  * allowing subclasses to redefine specific steps without changing the
  * overall algorithm structure.
  */
-@DesignPattern(category = DesignPattern.Category.EXTENSIBILITY)
+@Documented
+@DesignPattern(DesignPattern.Category.EXTENSIBILITY)
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.TYPE, ElementType.METHOD})
 public @interface TemplateMethod {

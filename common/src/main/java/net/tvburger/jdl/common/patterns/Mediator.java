@@ -1,9 +1,6 @@
 package net.tvburger.jdl.common.patterns;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Marks a class or interface as part of the
@@ -14,7 +11,8 @@ import java.lang.annotation.Target;
  * colleagues referencing each other directly, they interact only
  * through the mediator, which coordinates and routes their interactions.
  */
-@DesignPattern(category = DesignPattern.Category.BEHAVIORAL)
+@Documented
+@DesignPattern(DesignPattern.Category.BEHAVIORAL)
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
 public @interface Mediator {

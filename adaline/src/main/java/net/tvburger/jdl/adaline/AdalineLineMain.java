@@ -6,8 +6,7 @@ import net.tvburger.jdl.model.nn.NeuralNetworks;
 import net.tvburger.jdl.model.training.ObjectiveFunction;
 import net.tvburger.jdl.model.training.Trainer;
 import net.tvburger.jdl.model.training.loss.Losses;
-import net.tvburger.jdl.model.training.regimes.EpochRegime;
-import net.tvburger.jdl.model.training.regimes.ObjectiveReportingRegime;
+import net.tvburger.jdl.model.training.regimes.ChainedRegime;
 import net.tvburger.jdl.model.training.regimes.Regimes;
 
 import java.util.Arrays;
@@ -22,8 +21,8 @@ public class AdalineLineMain {
         Adaline adaline = Adaline.create(1, 1);
         ObjectiveFunction objective = Losses.mSE();
         LeastMeanSquares leastMeanSquares = new LeastMeanSquares(0.00001f);
-        EpochRegime epochRegime = new ObjectiveReportingRegime(Regimes.online()).epoch(200);
-        Trainer<Adaline> adalineTrainer = Trainer.of(new AdalineInitializer(), objective, leastMeanSquares, epochRegime);
+        ChainedRegime regime = Regimes.chainTop().epochs(200).reportObjective().online().bottomChain();
+        Trainer<Adaline> adalineTrainer = Trainer.of(new AdalineInitializer(), objective, leastMeanSquares, regime);
         adalineTrainer.train(adaline, trainingSet);
         NeuralNetworks.dump(adaline);
 

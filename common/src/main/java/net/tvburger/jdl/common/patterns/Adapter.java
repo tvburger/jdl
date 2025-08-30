@@ -1,9 +1,6 @@
 package net.tvburger.jdl.common.patterns;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Marks a type or member as part of the
@@ -45,7 +42,8 @@ import java.lang.annotation.Target;
  *
  * @see DesignPattern
  */
-@DesignPattern(category = DesignPattern.Category.STRUCTURAL)
+@Documented
+@DesignPattern(DesignPattern.Category.STRUCTURAL)
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR})
 public @interface Adapter {

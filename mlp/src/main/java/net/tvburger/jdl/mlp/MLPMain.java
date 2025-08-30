@@ -11,7 +11,8 @@ import net.tvburger.jdl.model.nn.optimizers.StochasticGradientDescent;
 import net.tvburger.jdl.model.training.ObjectiveFunction;
 import net.tvburger.jdl.model.training.Trainer;
 import net.tvburger.jdl.model.training.loss.Losses;
-import net.tvburger.jdl.model.training.regimes.*;
+import net.tvburger.jdl.model.training.regimes.ChainedRegime;
+import net.tvburger.jdl.model.training.regimes.Regimes;
 
 import java.util.Arrays;
 
@@ -29,8 +30,8 @@ public class MLPMain {
         StochasticGradientDescent<MultiLayerPerceptron> gradientDescent = new StochasticGradientDescent<>();
         AdamOptimizer<MultiLayerPerceptron> adamOptimizer = new AdamOptimizer<>();
         gradientDescent.setLearningRate(0.01f);
-        EpochRegime epochRegime = new StopIfNoImprovementRegime(3, new ObjectiveReportingRegime(new DumpNodesRegime(Regimes.batch()))).epoch(10_000);
-        Trainer<MultiLayerPerceptron> mlpTrainer = Trainer.of(initializer, objective, adamOptimizer, epochRegime);
+        ChainedRegime regime = Regimes.chainTop().epochs(10_000).stopIfNoImprovements(true).dumpNodes().batch().bottomChain();
+        Trainer<MultiLayerPerceptron> mlpTrainer = Trainer.of(initializer, objective, adamOptimizer, regime);
         mlpTrainer.train(mlp, trainingSet);
 
         NeuralNetworks.dump(mlp);

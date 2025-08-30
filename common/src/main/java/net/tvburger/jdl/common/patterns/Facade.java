@@ -1,9 +1,6 @@
 package net.tvburger.jdl.common.patterns;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Marks a class or interface as a <b>Facade</b> in the
@@ -24,7 +21,8 @@ import java.lang.annotation.Target;
  *   <li><b>Client</b> – interacts only with the facade, not with subsystem classes directly.</li>
  * </ul>
  */
-@DesignPattern(category = DesignPattern.Category.STRUCTURAL)
+@Documented
+@DesignPattern(DesignPattern.Category.STRUCTURAL)
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
 public @interface Facade {

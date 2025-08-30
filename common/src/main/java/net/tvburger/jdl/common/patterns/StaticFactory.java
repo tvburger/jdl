@@ -1,9 +1,6 @@
 package net.tvburger.jdl.common.patterns;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Marks a class, method, or constructor as implementing the
@@ -14,7 +11,8 @@ import java.lang.annotation.Target;
  * by exposing named factory methods/constructors. They are static and can be
  * used from any context.
  */
-@DesignPattern(category = DesignPattern.Category.OBJECT_GRAPH)
+@Documented
+@DesignPattern(DesignPattern.Category.OBJECT_GRAPH)
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR})
 public @interface StaticFactory {

@@ -1,9 +1,6 @@
 package net.tvburger.jdl.common.patterns;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Marks a class as a <b>Domain Object</b>.
@@ -14,7 +11,8 @@ import java.lang.annotation.Target;
  * model real-world entities inside the system.
  * </p>
  */
-@DesignPattern(category = DesignPattern.Category.DOMAIN_LANGUAGE)
+@Documented
+@DesignPattern(DesignPattern.Category.DOMAIN_LANGUAGE)
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
 public @interface DomainObject {

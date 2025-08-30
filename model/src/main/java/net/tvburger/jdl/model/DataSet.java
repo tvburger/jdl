@@ -148,8 +148,8 @@ public record DataSet(List<Sample> samples) implements Iterable<DataSet.Sample> 
      * Creates a new empty data set
      */
     @StaticFactory
-    public DataSet() {
-        this(new ArrayList<>());
+    public static DataSet create() {
+        return new DataSet(new ArrayList<>());
     }
 
     /**

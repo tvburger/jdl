@@ -20,4 +20,11 @@ public final class Regimes {
         return new OnlineRegime();
     }
 
+    public static ChainedRegime.BottomUpChainer chainBottom() {
+        return new ChainedRegime.BottomUpChainer();
+    }
+
+    public static ChainedRegime.TopDownChainer chainTop() {
+        return new ChainedRegime.TopDownChainer();
+    }
 }

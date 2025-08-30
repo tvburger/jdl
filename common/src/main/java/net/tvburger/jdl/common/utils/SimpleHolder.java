@@ -27,8 +27,8 @@ public class SimpleHolder<K> implements Supplier<K> {
      * Creates a new holder initialized to {@code null}.
      */
     @StaticFactory
-    public SimpleHolder() {
-        this(null);
+    public static <K> SimpleHolder<K> create() {
+        return new SimpleHolder<>(null);
     }
 
     /**

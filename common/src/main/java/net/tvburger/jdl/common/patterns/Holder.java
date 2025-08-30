@@ -1,9 +1,6 @@
 package net.tvburger.jdl.common.patterns;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Marks a class or type as a <b>Holder</b> structure.
@@ -17,7 +14,8 @@ import java.lang.annotation.Target;
  *   <li>Providing a simple mechanism for wrapping, clearing, or lazily updating a value.</li>
  * </ul>
  */
-@DesignPattern(category = DesignPattern.Category.HELPER_STRUCTURES)
+@Documented
+@DesignPattern(DesignPattern.Category.HELPER_STRUCTURES)
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
 public @interface Holder {

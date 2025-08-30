@@ -23,8 +23,18 @@ public final class NeuralNetworks {
      * @param neuralNetwork neural network to dump
      */
     public static void dump(NeuralNetwork neuralNetwork) {
+        dump(neuralNetwork, false);
+    }
+
+    /**
+     * Dumps the neural network nodes to stdout
+     *
+     * @param neuralNetwork neural network to dump
+     * @param includeInputs to include input nodes in the dump
+     */
+    public static void dump(NeuralNetwork neuralNetwork, boolean includeInputs) {
         System.out.println("=[ Neural Network Node Dump ]=");
-        for (int l = 0; l < neuralNetwork.getDepth() + 1; l++) {
+        for (int l = includeInputs ? 0 : 1; l < neuralNetwork.getDepth() + 1; l++) {
             for (int i = 0; i < neuralNetwork.getWidth(l); i++) {
                 System.out.println(neuralNetwork.getNeuron(l, i));
             }

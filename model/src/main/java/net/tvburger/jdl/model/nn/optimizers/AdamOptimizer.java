@@ -12,7 +12,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 
 /**
- * Adam optimizer (Kingma & Ba, 2014).
+ * Adam optimizer (Kingma &amp; Ba, 2014).
  * Mirrors GradientDescent's training loop: we accumulate per-batch gradients,
  * then apply Adam updates with bias correction.
  */

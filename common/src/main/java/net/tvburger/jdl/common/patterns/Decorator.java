@@ -1,9 +1,6 @@
 package net.tvburger.jdl.common.patterns;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Marks a class as participating in the <b>Decorator</b> design pattern.
@@ -18,7 +15,8 @@ import java.lang.annotation.Target;
  *       extra responsibilities before or after delegation.</li>
  * </ul>
  */
-@DesignPattern(category = DesignPattern.Category.STRUCTURAL)
+@Documented
+@DesignPattern(DesignPattern.Category.STRUCTURAL)
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
 public @interface Decorator {

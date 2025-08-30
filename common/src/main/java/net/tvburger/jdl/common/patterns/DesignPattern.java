@@ -1,14 +1,12 @@
 package net.tvburger.jdl.common.patterns;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Marker for design pattern annotations.
  * Acts as a top-level grouping.
  */
+@Documented
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.ANNOTATION_TYPE)
 public @interface DesignPattern {
@@ -39,6 +37,6 @@ public @interface DesignPattern {
         }
     }
 
-    Category category();
+    Category value();
 
 }

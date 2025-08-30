@@ -8,42 +8,24 @@ import net.tvburger.jdl.model.training.Optimizer;
 import net.tvburger.jdl.model.training.Regime;
 
 /**
- * A {@link TrainingRegime} implementation that performs <em>mini-batch training</em>,
- * where the training dataset is divided into smaller batches of a fixed size,
- * and the wrapped trainer is invoked once per batch.
- * <p>
+ * A {@link Regime} decorator that performs training using <em>mini-batches</em>.
  *
- * <h2>Behavior</h2>
+ * <p>This regime splits the {@link DataSet} into smaller contiguous subsets
+ * (mini-batches) of a configurable size. It then delegates training to the
+ * wrapped regime once per mini-batch. This provides a compromise between
+ * full-batch training (using the entire dataset at once) and online (stochastic)
+ * training (using a single sample at a time).</p>
+ *
+ * <h3>Behavior</h3>
  * <ul>
- *   <li>The dataset is partitioned sequentially into contiguous mini-batches,
- *       each containing at most {@code samplesPerLearning} samples.</li>
- *   <li>The wrapped {@code trainer} is invoked on each mini-batch in order.</li>
- *   <li>If the dataset size is not divisible by the mini-batch size, the
- *       final batch will contain the remaining samples.</li>
- *   <li>A dataset compatibility check is performed before training starts;
- *       an {@link IllegalArgumentException} is thrown if the dataset is
- *       not compatible with the estimation function.</li>
+ *   <li>The dataset is divided into sequential chunks of size
+ *   {@link #getSamplesPerLearning()}.</li>
+ *   <li>For each chunk, the delegate {@link Regime} is invoked with that subset.</li>
+ *   <li>If the dataset size is not divisible by the batch size, the last
+ *   mini-batch will contain the remaining samples.</li>
  * </ul>
  *
- * <h2>Use cases</h2>
- * <ul>
- *   <li>Training neural networks or other models with stochastic gradient
- *       descent variants that rely on mini-batch updates.</li>
- *   <li>Balancing convergence stability (batch training) with computational
- *       efficiency and generalization (online training).</li>
- *   <li>Reusing existing {@link TrainingRegime} implementations by delegating
- *       batch-wise work to them.</li>
- * </ul>
- *
- * <h2>Example</h2>
- * <pre>{@code
- * // Wrap an existing batch trainer in a mini-batch strategy
- * Trainer<NeuralNetwork> backpropTrainer = new BackpropTrainer();
- * Trainer<NeuralNetwork> miniBatchTrainer =
- *         new MiniBatchTrainer<>(backpropTrainer, 32) { };
- *
- * miniBatchTrainer.train(network, trainingData);
- * }</pre>
+ * @see DelegatedRegime
  */
 @Strategy(role = Strategy.Role.CONCRETE)
 public final class MiniBatchRegime extends DelegatedRegime {
@@ -87,6 +69,16 @@ public final class MiniBatchRegime extends DelegatedRegime {
         this.samplesPerLearning = samplesPerLearning;
     }
 
+    /**
+     * Trains the given estimation function by dividing the dataset into
+     * mini-batches and delegating training to the wrapped regime for each batch.
+     *
+     * @param estimationFunction the model to train
+     * @param trainingSet        the dataset to split into mini-batches
+     * @param objective          the objective (loss) function
+     * @param optimizer          the optimizer to apply updates
+     * @param <E>                the type of estimation function
+     */
     @Override
     public <E extends EstimationFunction> void train(E estimationFunction, DataSet trainingSet, ObjectiveFunction objective, Optimizer<? super E> optimizer) {
         int offset = 0;
