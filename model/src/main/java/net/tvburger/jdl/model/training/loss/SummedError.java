@@ -27,7 +27,7 @@ import java.util.List;
  * Typical usage includes situations where cumulative loss across all
  * outputs or samples is desired, rather than a normalized mean value.
  */
-@Strategy(role = Strategy.Role.CONCRETE)
+@Strategy(Strategy.Role.CONCRETE)
 public class SummedError implements SampleLossFunction, BatchLossFunction {
 
     /**

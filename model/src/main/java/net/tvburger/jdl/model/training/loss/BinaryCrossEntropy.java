@@ -46,7 +46,7 @@ import net.tvburger.jdl.common.utils.Floats;
  * To avoid {@code log(0)} or division by zero, a small epsilon (e.g. 1e-7)
  * should be added when clamping predicted probabilities {@code a} into (0,1).
  */
-@Strategy(role = Strategy.Role.CONCRETE)
+@Strategy(Strategy.Role.CONCRETE)
 public class BinaryCrossEntropy implements DimensionLossFunction {
 
     /**

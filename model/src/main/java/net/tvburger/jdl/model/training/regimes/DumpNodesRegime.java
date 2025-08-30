@@ -30,7 +30,7 @@ import net.tvburger.jdl.model.training.Regime;
  * @see NeuralNetworks#dump(NeuralNetwork, boolean)
  * @see DelegatedRegime
  */
-@Strategy(role = Strategy.Role.CONCRETE)
+@Strategy(Strategy.Role.CONCRETE)
 public class DumpNodesRegime extends DelegatedRegime {
 
     private boolean firstTime;

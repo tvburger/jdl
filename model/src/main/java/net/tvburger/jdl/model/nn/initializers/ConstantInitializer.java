@@ -8,7 +8,7 @@ import java.util.Arrays;
 /**
  * Implements an initializer that sets all parameters (weights and bias) to a given constant.
  */
-@Strategy(role = Strategy.Role.CONCRETE)
+@Strategy(Strategy.Role.CONCRETE)
 public class ConstantInitializer implements NeuralNetworkInitializer {
 
     private final float constant;

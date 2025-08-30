@@ -26,7 +26,7 @@ import net.tvburger.jdl.common.patterns.Strategy;
  * MSE = 0.5 * (estimated - target)^2
  * </pre>
  */
-@Strategy(role = Strategy.Role.CONCRETE)
+@Strategy(Strategy.Role.CONCRETE)
 public class SquaredError implements DimensionLossFunction {
 
     /**

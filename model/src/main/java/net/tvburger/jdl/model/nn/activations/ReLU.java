@@ -5,7 +5,7 @@ import net.tvburger.jdl.common.patterns.Strategy;
 /**
  * Implements the Rectified Linear Unit (ReLU).
  */
-@Strategy(role = Strategy.Role.CONCRETE)
+@Strategy(Strategy.Role.CONCRETE)
 public class ReLU implements ActivationFunction {
 
     /**

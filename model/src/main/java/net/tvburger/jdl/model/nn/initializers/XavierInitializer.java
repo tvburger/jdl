@@ -19,7 +19,7 @@ import java.util.Random;
  * <p>
  * Bias is left unchanged (usually set separately).
  */
-@Strategy(role = Strategy.Role.CONCRETE)
+@Strategy(Strategy.Role.CONCRETE)
 public class XavierInitializer implements NeuralNetworkInitializer {
 
     private final Random random = new Random();

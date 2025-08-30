@@ -27,7 +27,7 @@ import net.tvburger.jdl.model.training.Regime;
  *
  * @see DelegatedRegime
  */
-@Strategy(role = Strategy.Role.CONCRETE)
+@Strategy(Strategy.Role.CONCRETE)
 public final class MiniBatchRegime extends DelegatedRegime {
 
     private int samplesPerLearning;

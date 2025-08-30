@@ -37,7 +37,7 @@ import net.tvburger.jdl.model.training.Regime;
  * @see ObjectiveReportingRegime
  * @see DelegatedRegime
  */
-@Strategy(role = Strategy.Role.CONCRETE)
+@Strategy(Strategy.Role.CONCRETE)
 public class StopIfNoImprovementRegime extends DelegatedRegime {
 
     private int maxStalledEpochs;

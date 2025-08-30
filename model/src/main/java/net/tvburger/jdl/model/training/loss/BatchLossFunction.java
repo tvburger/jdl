@@ -18,7 +18,7 @@ import java.util.List;
  * the overall loss for an entire batch of samples.
  */
 @DomainObject
-@Strategy(role = Strategy.Role.INTERFACE)
+@Strategy(Strategy.Role.INTERFACE)
 public interface BatchLossFunction extends LossFunction {
 
     /**

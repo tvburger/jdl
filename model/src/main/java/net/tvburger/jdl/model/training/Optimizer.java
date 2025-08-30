@@ -26,7 +26,7 @@ import net.tvburger.jdl.model.EstimationFunction;
  * @see DataSet
  */
 @DomainObject
-@Strategy(role = Strategy.Role.INTERFACE)
+@Strategy(Strategy.Role.INTERFACE)
 public interface Optimizer<E extends EstimationFunction> {
 
     /**
@@ -48,7 +48,7 @@ public interface Optimizer<E extends EstimationFunction> {
      *
      * @param <E> the type of estimation function being optimized
      */
-    @Strategy(role = Strategy.Role.CONCRETE)
+    @Strategy(Strategy.Role.CONCRETE)
     interface OnlineOnly<E extends EstimationFunction> extends Optimizer<E> {
 
         /**

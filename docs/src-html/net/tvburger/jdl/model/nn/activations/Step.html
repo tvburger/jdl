@@ -22,7 +22,7 @@
 <span class="source-line-no">009</span><span id="line-9"> * Note: this function is non-differentiable at the threshold, and otherwise 0. Therefor we don't support</span>
 <span class="source-line-no">010</span><span id="line-10"> * to determine a gradient as it can't be used for detecting any optimization.</span>
 <span class="source-line-no">011</span><span id="line-11"> */</span>
-<span class="source-line-no">012</span><span id="line-12">@Strategy(role = Strategy.Role.CONCRETE)</span>
+<span class="source-line-no">012</span><span id="line-12">@Strategy(Strategy.Role.CONCRETE)</span>
 <span class="source-line-no">013</span><span id="line-13">public class Step implements ActivationFunction {</span>
 <span class="source-line-no">014</span><span id="line-14"></span>
 <span class="source-line-no">015</span><span id="line-15">    private float lowValue = 0.0f;</span>

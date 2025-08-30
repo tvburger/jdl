@@ -34,7 +34,7 @@ import java.util.function.Predicate;
  *   <li><strong>Iteration:</strong> Implements {@link Iterable} to expose the chain order (top to bottom).</li>
  * </ul>
  */
-@Strategy(role = Strategy.Role.CONCRETE)
+@Strategy(Strategy.Role.CONCRETE)
 public class ChainedRegime implements Regime, Iterable<Regime> {
 
     /**

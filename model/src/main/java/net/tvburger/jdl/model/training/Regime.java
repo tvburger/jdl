@@ -29,7 +29,7 @@ import net.tvburger.jdl.model.EstimationFunction;
  * @see Optimizer
  */
 @DomainObject
-@Strategy(role = Strategy.Role.INTERFACE)
+@Strategy(Strategy.Role.INTERFACE)
 public interface Regime {
 
     /**

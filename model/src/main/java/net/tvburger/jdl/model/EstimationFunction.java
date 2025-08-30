@@ -9,7 +9,7 @@ import net.tvburger.jdl.common.patterns.Strategy;
  * Different implementations may use linear, non-linear, or domain-specific (symbolic AI) logic.
  */
 @DomainObject
-@Strategy(role = Strategy.Role.INTERFACE)
+@Strategy(Strategy.Role.INTERFACE)
 public interface EstimationFunction {
 
     /**

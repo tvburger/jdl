@@ -7,7 +7,7 @@ import net.tvburger.jdl.common.patterns.Strategy;
  * This class represents a specific distance metrics to calculate the distances.
  */
 @DomainObject
-@Strategy(role = Strategy.Role.INTERFACE)
+@Strategy(Strategy.Role.INTERFACE)
 public interface DistanceMetric {
 
     /**

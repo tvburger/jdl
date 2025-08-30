@@ -15,10 +15,23 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 public @interface Strategy {
 
+    /**
+     * Represents the role of a class or interface within the Strategy design pattern.
+     *
+     * <p>The Strategy pattern defines a family of algorithms, encapsulates each one,
+     * and makes them interchangeable. Roles help clarify whether a type is the
+     * abstract strategy interface or a concrete implementation of an algorithm.
+     */
     enum Role {
+        /**
+         * Represents the abstract strategy interface in the pattern.
+         */
         INTERFACE,
+        /**
+         * Represents a concrete implementation of the strategy.
+         */
         CONCRETE
     }
 
-    Role role();
+    Role value();
 }

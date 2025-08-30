@@ -16,7 +16,7 @@ import java.util.Map;
  * Mirrors GradientDescent's training loop: we accumulate per-batch gradients,
  * then apply Adam updates with bias correction.
  */
-@Strategy(role = Strategy.Role.CONCRETE)
+@Strategy(Strategy.Role.CONCRETE)
 public class AdamOptimizer<N extends NeuralNetwork> implements Optimizer<N> {
 
     public static final float DEFAULT_LEARNING_RATE = 1e-3f;   // alpha

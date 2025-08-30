@@ -11,6 +11,13 @@ import java.lang.annotation.*;
 @Target(ElementType.ANNOTATION_TYPE)
 public @interface DesignPattern {
 
+    /**
+     * Represents high-level categories of software design patterns.
+     *
+     * <p>Each category groups patterns with similar purposes and responsibilities.
+     * These categories can help developers understand, organize, and communicate
+     * design decisions more effectively.
+     */
     enum Category {
 
         DOMAIN_LANGUAGE("Patterns that create a shared vocabulary and boundaries so requirements read like code and code reads like requirements.\n" +
@@ -28,10 +35,20 @@ public @interface DesignPattern {
 
         private final String explanation;
 
+        /**
+         * Constructs a Category with a detailed explanation.
+         *
+         * @param explanation a description of the category and the patterns it contains
+         */
         Category(String explanation) {
             this.explanation = explanation;
         }
 
+        /**
+         * Returns the detailed explanation of this category.
+         *
+         * @return the explanation describing this category
+         */
         public String getExplanation() {
             return explanation;
         }

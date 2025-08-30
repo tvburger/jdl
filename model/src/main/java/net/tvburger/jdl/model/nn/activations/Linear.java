@@ -5,7 +5,7 @@ import net.tvburger.jdl.common.patterns.Strategy;
 /**
  * This activation function, also known as Identity or "no-activation" just returns the logit as output.
  */
-@Strategy(role = Strategy.Role.CONCRETE)
+@Strategy(Strategy.Role.CONCRETE)
 public class Linear implements ActivationFunction {
 
     /**

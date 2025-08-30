@@ -26,7 +26,7 @@ import java.util.List;
  * </pre>
  */
 @Decorator
-@Strategy(role = Strategy.Role.CONCRETE)
+@Strategy(Strategy.Role.CONCRETE)
 public class ScaledError implements DimensionLossFunction, SampleLossFunction, BatchLossFunction {
 
     private final float scale;

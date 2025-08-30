@@ -35,7 +35,7 @@ import java.util.List;
  * @see BatchLossFunction
  * @see DimensionLossFunction
  */
-@Strategy(role = Strategy.Role.CONCRETE)
+@Strategy(Strategy.Role.CONCRETE)
 public class MeanError implements SampleLossFunction, BatchLossFunction {
 
     /**

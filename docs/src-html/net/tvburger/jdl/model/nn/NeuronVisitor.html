@@ -13,28 +13,88 @@
 <div class="source-container">
 <pre><span class="source-line-no">001</span><span id="line-1">package net.tvburger.jdl.model.nn;</span>
 <span class="source-line-no">002</span><span id="line-2"></span>
-<span class="source-line-no">003</span><span id="line-3">public interface NeuronVisitor {</span>
+<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.patterns.Visitor;</span>
 <span class="source-line-no">004</span><span id="line-4"></span>
-<span class="source-line-no">005</span><span id="line-5">    default void enterNetwork(NeuralNetwork neuralNetwork) {</span>
-<span class="source-line-no">006</span><span id="line-6">    }</span>
-<span class="source-line-no">007</span><span id="line-7"></span>
-<span class="source-line-no">008</span><span id="line-8">    default void exitNetwork(NeuralNetwork neuralNetwork) {</span>
-<span class="source-line-no">009</span><span id="line-9">    }</span>
-<span class="source-line-no">010</span><span id="line-10"></span>
-<span class="source-line-no">011</span><span id="line-11">    default void enterLayer(NeuralNetwork neuralNetwork, int layerIndex) {</span>
-<span class="source-line-no">012</span><span id="line-12">    }</span>
-<span class="source-line-no">013</span><span id="line-13"></span>
-<span class="source-line-no">014</span><span id="line-14">    default void exitLayer(NeuralNetwork neuralNetwork, int layerIndex) {</span>
-<span class="source-line-no">015</span><span id="line-15">    }</span>
-<span class="source-line-no">016</span><span id="line-16"></span>
-<span class="source-line-no">017</span><span id="line-17">    default void visitNeuron(NeuralNetwork neuralNetwork, Neuron neuron, int layerIndex, int neuronIndex) {</span>
-<span class="source-line-no">018</span><span id="line-18">    }</span>
-<span class="source-line-no">019</span><span id="line-19"></span>
-<span class="source-line-no">020</span><span id="line-20">    default void visitConnection(NeuralNetwork neuralNetwork, Neuron source, int fromLayer, int fromIndex,</span>
-<span class="source-line-no">021</span><span id="line-21">                                 Neuron target, int toLayer, int toIndex, float weight) {</span>
-<span class="source-line-no">022</span><span id="line-22">    }</span>
-<span class="source-line-no">023</span><span id="line-23"></span>
-<span class="source-line-no">024</span><span id="line-24">}</span>
+<span class="source-line-no">005</span><span id="line-5">/**</span>
+<span class="source-line-no">006</span><span id="line-6"> * A visitor interface for traversing a {@link NeuralNetwork}.</span>
+<span class="source-line-no">007</span><span id="line-7"> *</span>
+<span class="source-line-no">008</span><span id="line-8"> * &lt;p&gt;This interface follows the &lt;em&gt;Visitor Pattern&lt;/em&gt;, allowing clients to</span>
+<span class="source-line-no">009</span><span id="line-9"> * perform operations on neurons, layers, and connections without modifying the</span>
+<span class="source-line-no">010</span><span id="line-10"> * network structure. Implementations can override any of the default methods</span>
+<span class="source-line-no">011</span><span id="line-11"> * to handle specific events during traversal.</span>
+<span class="source-line-no">012</span><span id="line-12"> *</span>
+<span class="source-line-no">013</span><span id="line-13"> * &lt;p&gt;All methods have default empty implementations, so you can override only</span>
+<span class="source-line-no">014</span><span id="line-14"> * the methods you need.</span>
+<span class="source-line-no">015</span><span id="line-15"> *</span>
+<span class="source-line-no">016</span><span id="line-16"> * @see NeuralNetwork</span>
+<span class="source-line-no">017</span><span id="line-17"> * @see Neuron</span>
+<span class="source-line-no">018</span><span id="line-18"> */</span>
+<span class="source-line-no">019</span><span id="line-19">@Visitor</span>
+<span class="source-line-no">020</span><span id="line-20">public interface NeuronVisitor {</span>
+<span class="source-line-no">021</span><span id="line-21"></span>
+<span class="source-line-no">022</span><span id="line-22">    /**</span>
+<span class="source-line-no">023</span><span id="line-23">     * Called when entering the entire network before any layers or neurons</span>
+<span class="source-line-no">024</span><span id="line-24">     * are visited.</span>
+<span class="source-line-no">025</span><span id="line-25">     *</span>
+<span class="source-line-no">026</span><span id="line-26">     * @param neuralNetwork the neural network being traversed</span>
+<span class="source-line-no">027</span><span id="line-27">     */</span>
+<span class="source-line-no">028</span><span id="line-28">    default void enterNetwork(NeuralNetwork neuralNetwork) {</span>
+<span class="source-line-no">029</span><span id="line-29">    }</span>
+<span class="source-line-no">030</span><span id="line-30"></span>
+<span class="source-line-no">031</span><span id="line-31">    /**</span>
+<span class="source-line-no">032</span><span id="line-32">     * Called after all layers and neurons have been visited in the network.</span>
+<span class="source-line-no">033</span><span id="line-33">     *</span>
+<span class="source-line-no">034</span><span id="line-34">     * @param neuralNetwork the neural network that was traversed</span>
+<span class="source-line-no">035</span><span id="line-35">     */</span>
+<span class="source-line-no">036</span><span id="line-36">    default void exitNetwork(NeuralNetwork neuralNetwork) {</span>
+<span class="source-line-no">037</span><span id="line-37">    }</span>
+<span class="source-line-no">038</span><span id="line-38"></span>
+<span class="source-line-no">039</span><span id="line-39">    /**</span>
+<span class="source-line-no">040</span><span id="line-40">     * Called when entering a specific layer in the network.</span>
+<span class="source-line-no">041</span><span id="line-41">     *</span>
+<span class="source-line-no">042</span><span id="line-42">     * @param neuralNetwork the neural network being traversed</span>
+<span class="source-line-no">043</span><span id="line-43">     * @param layerIndex    the index of the layer being entered</span>
+<span class="source-line-no">044</span><span id="line-44">     */</span>
+<span class="source-line-no">045</span><span id="line-45">    default void enterLayer(NeuralNetwork neuralNetwork, int layerIndex) {</span>
+<span class="source-line-no">046</span><span id="line-46">    }</span>
+<span class="source-line-no">047</span><span id="line-47"></span>
+<span class="source-line-no">048</span><span id="line-48">    /**</span>
+<span class="source-line-no">049</span><span id="line-49">     * Called after all neurons in a specific layer have been visited.</span>
+<span class="source-line-no">050</span><span id="line-50">     *</span>
+<span class="source-line-no">051</span><span id="line-51">     * @param neuralNetwork the neural network being traversed</span>
+<span class="source-line-no">052</span><span id="line-52">     * @param layerIndex    the index of the layer being exited</span>
+<span class="source-line-no">053</span><span id="line-53">     */</span>
+<span class="source-line-no">054</span><span id="line-54">    default void exitLayer(NeuralNetwork neuralNetwork, int layerIndex) {</span>
+<span class="source-line-no">055</span><span id="line-55">    }</span>
+<span class="source-line-no">056</span><span id="line-56"></span>
+<span class="source-line-no">057</span><span id="line-57">    /**</span>
+<span class="source-line-no">058</span><span id="line-58">     * Called when visiting a single neuron in a specific layer.</span>
+<span class="source-line-no">059</span><span id="line-59">     *</span>
+<span class="source-line-no">060</span><span id="line-60">     * @param neuralNetwork the neural network being traversed</span>
+<span class="source-line-no">061</span><span id="line-61">     * @param neuron        the neuron being visited</span>
+<span class="source-line-no">062</span><span id="line-62">     * @param layerIndex    the index of the layer containing the neuron</span>
+<span class="source-line-no">063</span><span id="line-63">     * @param neuronIndex   the index of the neuron within its layer</span>
+<span class="source-line-no">064</span><span id="line-64">     */</span>
+<span class="source-line-no">065</span><span id="line-65">    default void visitNeuron(NeuralNetwork neuralNetwork, Neuron neuron, int layerIndex, int neuronIndex) {</span>
+<span class="source-line-no">066</span><span id="line-66">    }</span>
+<span class="source-line-no">067</span><span id="line-67"></span>
+<span class="source-line-no">068</span><span id="line-68">    /**</span>
+<span class="source-line-no">069</span><span id="line-69">     * Called when visiting a connection (synapse) between two neurons.</span>
+<span class="source-line-no">070</span><span id="line-70">     *</span>
+<span class="source-line-no">071</span><span id="line-71">     * @param neuralNetwork the neural network being traversed</span>
+<span class="source-line-no">072</span><span id="line-72">     * @param source        the source neuron of the connection</span>
+<span class="source-line-no">073</span><span id="line-73">     * @param fromLayer     the layer index of the source neuron</span>
+<span class="source-line-no">074</span><span id="line-74">     * @param fromIndex     the index of the source neuron within its layer</span>
+<span class="source-line-no">075</span><span id="line-75">     * @param target        the target neuron of the connection</span>
+<span class="source-line-no">076</span><span id="line-76">     * @param toLayer       the layer index of the target neuron</span>
+<span class="source-line-no">077</span><span id="line-77">     * @param toIndex       the index of the target neuron within its layer</span>
+<span class="source-line-no">078</span><span id="line-78">     * @param weight        the weight of the connection</span>
+<span class="source-line-no">079</span><span id="line-79">     */</span>
+<span class="source-line-no">080</span><span id="line-80">    default void visitConnection(NeuralNetwork neuralNetwork, Neuron source, int fromLayer, int fromIndex,</span>
+<span class="source-line-no">081</span><span id="line-81">                                 Neuron target, int toLayer, int toIndex, float weight) {</span>
+<span class="source-line-no">082</span><span id="line-82">    }</span>
+<span class="source-line-no">083</span><span id="line-83"></span>
+<span class="source-line-no">084</span><span id="line-84">}</span>
 
 
 

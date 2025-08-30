@@ -25,7 +25,7 @@ import net.tvburger.jdl.model.EstimationFunction;
  * @see EstimationFunction
  */
 @DomainObject
-@Strategy(role = Strategy.Role.INTERFACE)
+@Strategy(Strategy.Role.INTERFACE)
 public interface Initializer<E extends EstimationFunction> {
 
     /**

@@ -11,7 +11,7 @@ import net.tvburger.jdl.model.training.Optimizer;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-@Strategy(role = Strategy.Role.CONCRETE)
+@Strategy(Strategy.Role.CONCRETE)
 public class StochasticGradientDescent<N extends NeuralNetwork> implements Optimizer<N> {
 
     public static final float DEFAULT_LEARNING_RATE = 0.1f;

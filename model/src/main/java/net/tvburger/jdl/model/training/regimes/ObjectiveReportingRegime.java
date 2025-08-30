@@ -33,7 +33,7 @@ import java.util.List;
  *
  * @see DelegatedRegime
  */
-@Strategy(role = Strategy.Role.CONCRETE)
+@Strategy(Strategy.Role.CONCRETE)
 public class ObjectiveReportingRegime extends DelegatedRegime {
 
     private Float improvement;

@@ -14,7 +14,7 @@ import net.tvburger.jdl.common.patterns.Strategy;
  * d(p, q) = sqrt( (p₁ - q₁)² + (p₂ - q₂)² + ... + (pₙ - qₙ)² )
  * </pre>
  */
-@Strategy(role = Strategy.Role.CONCRETE)
+@Strategy(Strategy.Role.CONCRETE)
 public class EuclideanDistance implements DistanceMetric {
 
     /**

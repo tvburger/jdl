@@ -31,7 +31,7 @@ import java.util.List;
  * </p>
  */
 @DomainObject
-@Strategy(role = Strategy.Role.INTERFACE)
+@Strategy(Strategy.Role.INTERFACE)
 public interface ObjectiveFunction extends LossFunction {
 
     /**
@@ -122,7 +122,7 @@ public interface ObjectiveFunction extends LossFunction {
      * </p>
      */
     @Mediator
-    @Strategy(role = Strategy.Role.CONCRETE)
+    @Strategy(Strategy.Role.CONCRETE)
     class Impl implements ObjectiveFunction {
 
         private final Pair<SampleLossFunction, List<DimensionLossFunction>> sampleLossFunctions;

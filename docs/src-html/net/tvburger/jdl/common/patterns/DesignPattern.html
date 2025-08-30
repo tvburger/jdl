@@ -24,35 +24,52 @@
 <span class="source-line-no">011</span><span id="line-11">@Target(ElementType.ANNOTATION_TYPE)</span>
 <span class="source-line-no">012</span><span id="line-12">public @interface DesignPattern {</span>
 <span class="source-line-no">013</span><span id="line-13"></span>
-<span class="source-line-no">014</span><span id="line-14">    enum Category {</span>
-<span class="source-line-no">015</span><span id="line-15"></span>
-<span class="source-line-no">016</span><span id="line-16">        DOMAIN_LANGUAGE("Patterns that create a shared vocabulary and boundaries so requirements read like code and code reads like requirements.\n" +</span>
-<span class="source-line-no">017</span><span id="line-17">                "Covers entities, value objects, aggregates, domain services, and other domain-driven design concepts."),</span>
-<span class="source-line-no">018</span><span id="line-18">        STRUCTURAL("Organize objects into larger structures.\n" +</span>
-<span class="source-line-no">019</span><span id="line-19">                "Covers Composite, Decorator, Adapter, Bridge, Facade, Proxy, Flyweight, composition principle."),</span>
-<span class="source-line-no">020</span><span id="line-20">        OBJECT_GRAPH("Patterns that define how objects are created, located, wired, and assembled into working structures.\n" +</span>
-<span class="source-line-no">021</span><span id="line-21">                "Covers object construction, factories, dependency injection, and service lookup."),</span>
-<span class="source-line-no">022</span><span id="line-22">        EXTENSIBILITY("Patterns and architectural mechanisms that allow systems to be extended, customized, or configured without modifying existing code artifacts.\n" +</span>
-<span class="source-line-no">023</span><span id="line-23">                "Covers Plug-in/Microkernel (module) architecture, Service Provider Interface (SPI), and Module/Package boundaries."),</span>
-<span class="source-line-no">024</span><span id="line-24">        BEHAVIORAL("Patterns that define communication and control flow between objects, focusing on how responsibilities are distributed and interactions are structured.\n" +</span>
-<span class="source-line-no">025</span><span id="line-25">                "Covers Strategy, Template Method, Observer, Command, State, Iterator, Visitor, Mediator, Memento, Chain of Responsibility, Interpreter."),</span>
-<span class="source-line-no">026</span><span id="line-26">        HELPER_STRUCTURES("Lightweight idioms and helper patterns that provide convenience, readability, or reusability at the code level.\n" +</span>
-<span class="source-line-no">027</span><span id="line-27">                "Often language-specific rather than architectural.");</span>
-<span class="source-line-no">028</span><span id="line-28"></span>
-<span class="source-line-no">029</span><span id="line-29">        private final String explanation;</span>
-<span class="source-line-no">030</span><span id="line-30"></span>
-<span class="source-line-no">031</span><span id="line-31">        Category(String explanation) {</span>
-<span class="source-line-no">032</span><span id="line-32">            this.explanation = explanation;</span>
-<span class="source-line-no">033</span><span id="line-33">        }</span>
-<span class="source-line-no">034</span><span id="line-34"></span>
-<span class="source-line-no">035</span><span id="line-35">        public String getExplanation() {</span>
-<span class="source-line-no">036</span><span id="line-36">            return explanation;</span>
-<span class="source-line-no">037</span><span id="line-37">        }</span>
-<span class="source-line-no">038</span><span id="line-38">    }</span>
-<span class="source-line-no">039</span><span id="line-39"></span>
-<span class="source-line-no">040</span><span id="line-40">    Category value();</span>
-<span class="source-line-no">041</span><span id="line-41"></span>
-<span class="source-line-no">042</span><span id="line-42">}</span>
+<span class="source-line-no">014</span><span id="line-14">    /**</span>
+<span class="source-line-no">015</span><span id="line-15">     * Represents high-level categories of software design patterns.</span>
+<span class="source-line-no">016</span><span id="line-16">     *</span>
+<span class="source-line-no">017</span><span id="line-17">     * &lt;p&gt;Each category groups patterns with similar purposes and responsibilities.</span>
+<span class="source-line-no">018</span><span id="line-18">     * These categories can help developers understand, organize, and communicate</span>
+<span class="source-line-no">019</span><span id="line-19">     * design decisions more effectively.</span>
+<span class="source-line-no">020</span><span id="line-20">     */</span>
+<span class="source-line-no">021</span><span id="line-21">    enum Category {</span>
+<span class="source-line-no">022</span><span id="line-22"></span>
+<span class="source-line-no">023</span><span id="line-23">        DOMAIN_LANGUAGE("Patterns that create a shared vocabulary and boundaries so requirements read like code and code reads like requirements.\n" +</span>
+<span class="source-line-no">024</span><span id="line-24">                "Covers entities, value objects, aggregates, domain services, and other domain-driven design concepts."),</span>
+<span class="source-line-no">025</span><span id="line-25">        STRUCTURAL("Organize objects into larger structures.\n" +</span>
+<span class="source-line-no">026</span><span id="line-26">                "Covers Composite, Decorator, Adapter, Bridge, Facade, Proxy, Flyweight, composition principle."),</span>
+<span class="source-line-no">027</span><span id="line-27">        OBJECT_GRAPH("Patterns that define how objects are created, located, wired, and assembled into working structures.\n" +</span>
+<span class="source-line-no">028</span><span id="line-28">                "Covers object construction, factories, dependency injection, and service lookup."),</span>
+<span class="source-line-no">029</span><span id="line-29">        EXTENSIBILITY("Patterns and architectural mechanisms that allow systems to be extended, customized, or configured without modifying existing code artifacts.\n" +</span>
+<span class="source-line-no">030</span><span id="line-30">                "Covers Plug-in/Microkernel (module) architecture, Service Provider Interface (SPI), and Module/Package boundaries."),</span>
+<span class="source-line-no">031</span><span id="line-31">        BEHAVIORAL("Patterns that define communication and control flow between objects, focusing on how responsibilities are distributed and interactions are structured.\n" +</span>
+<span class="source-line-no">032</span><span id="line-32">                "Covers Strategy, Template Method, Observer, Command, State, Iterator, Visitor, Mediator, Memento, Chain of Responsibility, Interpreter."),</span>
+<span class="source-line-no">033</span><span id="line-33">        HELPER_STRUCTURES("Lightweight idioms and helper patterns that provide convenience, readability, or reusability at the code level.\n" +</span>
+<span class="source-line-no">034</span><span id="line-34">                "Often language-specific rather than architectural.");</span>
+<span class="source-line-no">035</span><span id="line-35"></span>
+<span class="source-line-no">036</span><span id="line-36">        private final String explanation;</span>
+<span class="source-line-no">037</span><span id="line-37"></span>
+<span class="source-line-no">038</span><span id="line-38">        /**</span>
+<span class="source-line-no">039</span><span id="line-39">         * Constructs a Category with a detailed explanation.</span>
+<span class="source-line-no">040</span><span id="line-40">         *</span>
+<span class="source-line-no">041</span><span id="line-41">         * @param explanation a description of the category and the patterns it contains</span>
+<span class="source-line-no">042</span><span id="line-42">         */</span>
+<span class="source-line-no">043</span><span id="line-43">        Category(String explanation) {</span>
+<span class="source-line-no">044</span><span id="line-44">            this.explanation = explanation;</span>
+<span class="source-line-no">045</span><span id="line-45">        }</span>
+<span class="source-line-no">046</span><span id="line-46"></span>
+<span class="source-line-no">047</span><span id="line-47">        /**</span>
+<span class="source-line-no">048</span><span id="line-48">         * Returns the detailed explanation of this category.</span>
+<span class="source-line-no">049</span><span id="line-49">         *</span>
+<span class="source-line-no">050</span><span id="line-50">         * @return the explanation describing this category</span>
+<span class="source-line-no">051</span><span id="line-51">         */</span>
+<span class="source-line-no">052</span><span id="line-52">        public String getExplanation() {</span>
+<span class="source-line-no">053</span><span id="line-53">            return explanation;</span>
+<span class="source-line-no">054</span><span id="line-54">        }</span>
+<span class="source-line-no">055</span><span id="line-55">    }</span>
+<span class="source-line-no">056</span><span id="line-56"></span>
+<span class="source-line-no">057</span><span id="line-57">    Category value();</span>
+<span class="source-line-no">058</span><span id="line-58"></span>
+<span class="source-line-no">059</span><span id="line-59">}</span>
 
 
 

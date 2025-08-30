@@ -12,7 +12,7 @@ import net.tvburger.jdl.common.patterns.Strategy;
  * <p>The sigmoid squashes any real-valued input into the (0, 1) interval and is
  * commonly used for binary classification logits and hidden-layer activations.</p>
  */
-@Strategy(role = Strategy.Role.CONCRETE)
+@Strategy(Strategy.Role.CONCRETE)
 public class Sigmoid implements ActivationFunction {
 
     /**

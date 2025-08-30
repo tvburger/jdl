@@ -19,7 +19,7 @@ import java.util.List;
  * or output dimensions.
  */
 @DomainObject
-@Strategy(role = Strategy.Role.INTERFACE)
+@Strategy(Strategy.Role.INTERFACE)
 public interface SampleLossFunction extends LossFunction {
 
     /**

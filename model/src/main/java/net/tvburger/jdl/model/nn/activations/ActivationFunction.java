@@ -5,7 +5,7 @@ import net.tvburger.jdl.common.patterns.Strategy;
 /**
  * An ActivationFunction maps a logit to an output.
  */
-@Strategy(role = Strategy.Role.INTERFACE)
+@Strategy(Strategy.Role.INTERFACE)
 public interface ActivationFunction {
 
     /**

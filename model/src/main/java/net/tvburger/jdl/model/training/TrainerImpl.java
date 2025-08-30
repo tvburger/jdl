@@ -41,7 +41,7 @@ import net.tvburger.jdl.model.EstimationFunction;
  * @see Regime
  */
 @Mediator
-@Strategy(role = Strategy.Role.CONCRETE)
+@Strategy(Strategy.Role.CONCRETE)
 public class TrainerImpl<E extends EstimationFunction> implements Trainer<E> {
 
     private Initializer<? super E> initializer;

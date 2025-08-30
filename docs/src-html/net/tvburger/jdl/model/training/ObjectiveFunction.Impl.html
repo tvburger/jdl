@@ -44,7 +44,7 @@
 <span class="source-line-no">031</span><span id="line-31"> * &lt;/p&gt;</span>
 <span class="source-line-no">032</span><span id="line-32"> */</span>
 <span class="source-line-no">033</span><span id="line-33">@DomainObject</span>
-<span class="source-line-no">034</span><span id="line-34">@Strategy(role = Strategy.Role.INTERFACE)</span>
+<span class="source-line-no">034</span><span id="line-34">@Strategy(Strategy.Role.INTERFACE)</span>
 <span class="source-line-no">035</span><span id="line-35">public interface ObjectiveFunction extends LossFunction {</span>
 <span class="source-line-no">036</span><span id="line-36"></span>
 <span class="source-line-no">037</span><span id="line-37">    /**</span>
@@ -135,7 +135,7 @@
 <span class="source-line-no">122</span><span id="line-122">     * &lt;/p&gt;</span>
 <span class="source-line-no">123</span><span id="line-123">     */</span>
 <span class="source-line-no">124</span><span id="line-124">    @Mediator</span>
-<span class="source-line-no">125</span><span id="line-125">    @Strategy(role = Strategy.Role.CONCRETE)</span>
+<span class="source-line-no">125</span><span id="line-125">    @Strategy(Strategy.Role.CONCRETE)</span>
 <span class="source-line-no">126</span><span id="line-126">    class Impl implements ObjectiveFunction {</span>
 <span class="source-line-no">127</span><span id="line-127"></span>
 <span class="source-line-no">128</span><span id="line-128">        private final Pair&lt;SampleLossFunction, List&lt;DimensionLossFunction&gt;&gt; sampleLossFunctions;</span>

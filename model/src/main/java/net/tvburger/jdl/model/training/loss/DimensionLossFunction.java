@@ -9,7 +9,7 @@ import net.tvburger.jdl.common.patterns.Strategy;
  * how the "dimension loss" and corresponding gradient are computed.
  */
 @DomainObject
-@Strategy(role = Strategy.Role.INTERFACE)
+@Strategy(Strategy.Role.INTERFACE)
 public interface DimensionLossFunction extends LossFunction {
 
     /**

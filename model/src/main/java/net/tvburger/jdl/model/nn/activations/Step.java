@@ -9,7 +9,7 @@ import net.tvburger.jdl.common.patterns.Strategy;
  * Note: this function is non-differentiable at the threshold, and otherwise 0. Therefor we don't support
  * to determine a gradient as it can't be used for detecting any optimization.
  */
-@Strategy(role = Strategy.Role.CONCRETE)
+@Strategy(Strategy.Role.CONCRETE)
 public class Step implements ActivationFunction {
 
     private float lowValue = 0.0f;
