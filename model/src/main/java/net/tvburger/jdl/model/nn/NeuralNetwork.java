@@ -1,6 +1,7 @@
 package net.tvburger.jdl.model.nn;
 
 import net.tvburger.jdl.common.patterns.DomainObject;
+import net.tvburger.jdl.common.patterns.Entity;
 import net.tvburger.jdl.model.EstimationFunction;
 import net.tvburger.jdl.model.nn.initializers.NeuralNetworkInitializer;
 
@@ -28,6 +29,7 @@ import java.util.Set;
  * </ul>
  */
 @DomainObject
+@Entity
 public interface NeuralNetwork extends EstimationFunction {
 
     /**

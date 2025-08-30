@@ -1,6 +1,7 @@
 package net.tvburger.jdl.model.nn;
 
 import net.tvburger.jdl.common.patterns.DomainObject;
+import net.tvburger.jdl.common.patterns.Entity;
 import net.tvburger.jdl.model.nn.activations.ActivationFunction;
 
 import java.util.Arrays;
@@ -40,25 +41,9 @@ import java.util.List;
  *   <li>Weight and bias setters are not synchronized; concurrent modification
  *       must be managed externally if required.</li>
  * </ul>
- *
- * <h2>Typical usage:</h2>
- * <pre>{@code
- * Neuron n1 = new Neuron("input1", List.of(), new Identity());
- * Neuron n2 = new Neuron("input2", List.of(), new Identity());
- * Neuron hidden = new Neuron("hidden", List.of(n1, n2), new Sigmoid());
- *
- * // set inputs manually
- * n1.setBias(1.0f); n1.activate(); // identity, so output = bias
- * n2.setBias(2.0f); n2.activate();
- *
- * hidden.setWeights(new float[]{0.5f, -0.3f});
- * hidden.setBias(0.1f);
- * hidden.activate();
- *
- * System.out.println(hidden.getOutput());
- * }</pre>
  */
 @DomainObject
+@Entity
 public class Neuron {
 
     private final String name;
