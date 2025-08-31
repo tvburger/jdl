@@ -85,8 +85,8 @@
 <span class="source-line-no">072</span><span id="line-72"></span>
 <span class="source-line-no">073</span><span id="line-73">    @Override</span>
 <span class="source-line-no">074</span><span id="line-74">    public void optimize(N neuralNetwork, DataSet trainingSet, ObjectiveFunction objective) {</span>
-<span class="source-line-no">075</span><span id="line-75">        final int sampleCount = trainingSet.samples().size();</span>
-<span class="source-line-no">076</span><span id="line-76">        if (sampleCount == 0) return;</span>
+<span class="source-line-no">075</span><span id="line-75">        final int batchSize = trainingSet.samples().size();</span>
+<span class="source-line-no">076</span><span id="line-76">        if (batchSize == 0) return;</span>
 <span class="source-line-no">077</span><span id="line-77"></span>
 <span class="source-line-no">078</span><span id="line-78">        final int depth = neuralNetwork.getDepth();</span>
 <span class="source-line-no">079</span><span id="line-79"></span>
@@ -94,48 +94,48 @@
 <span class="source-line-no">081</span><span id="line-81">        final Map&lt;Neuron, float[]&gt; dWsum = new IdentityHashMap&lt;&gt;();</span>
 <span class="source-line-no">082</span><span id="line-82">        final Map&lt;Neuron, Float&gt; dBsum = new IdentityHashMap&lt;&gt;();</span>
 <span class="source-line-no">083</span><span id="line-83"></span>
-<span class="source-line-no">084</span><span id="line-84">        for (int n = 0; n &lt; sampleCount; n++) {</span>
+<span class="source-line-no">084</span><span id="line-84">        for (int i = 0; i &lt; batchSize; i++) {</span>
 <span class="source-line-no">085</span><span id="line-85">            final Map&lt;Neuron, Float&gt; deltaN = new IdentityHashMap&lt;&gt;();</span>
 <span class="source-line-no">086</span><span id="line-86"></span>
 <span class="source-line-no">087</span><span id="line-87">            // Output layer deltas</span>
 <span class="source-line-no">088</span><span id="line-88">            int outWidth = neuralNetwork.coArity();</span>
-<span class="source-line-no">089</span><span id="line-89">            DataSet.Sample sample = trainingSet.samples().get(n);</span>
+<span class="source-line-no">089</span><span id="line-89">            DataSet.Sample sample = trainingSet.samples().get(i);</span>
 <span class="source-line-no">090</span><span id="line-90">            float[] estimated = neuralNetwork.estimate(sample.features());</span>
-<span class="source-line-no">091</span><span id="line-91">            float[] lossGradients = objective.determineGradients(estimated, sample.targetOutputs());</span>
+<span class="source-line-no">091</span><span id="line-91">            float[] lossGradients = objective.calculateGradient_dJ_da(batchSize, estimated, sample.targetOutputs());</span>
 <span class="source-line-no">092</span><span id="line-92"></span>
 <span class="source-line-no">093</span><span id="line-93">            for (int j = 0; j &lt; outWidth; j++) {</span>
 <span class="source-line-no">094</span><span id="line-94">                ActivationsCachedNeuron out = neuralNetwork.getNeuron(depth, j, ActivationsCachedNeuron.class);</span>
-<span class="source-line-no">095</span><span id="line-95">                ActivationsCachedNeuron.Activation activation = out.getCache().get(n);</span>
+<span class="source-line-no">095</span><span id="line-95">                ActivationsCachedNeuron.Activation activation = out.getCache().get(i);</span>
 <span class="source-line-no">096</span><span id="line-96"></span>
 <span class="source-line-no">097</span><span id="line-97">                float delta = lossGradients[j] * activation.gradient();</span>
 <span class="source-line-no">098</span><span id="line-98">                deltaN.put(out, delta);</span>
 <span class="source-line-no">099</span><span id="line-99"></span>
 <span class="source-line-no">100</span><span id="line-100">                float[] inputs = activation.inputs();</span>
 <span class="source-line-no">101</span><span id="line-101">                float[] gsum = dWsum.computeIfAbsent(out, k -&gt; new float[inputs.length]);</span>
-<span class="source-line-no">102</span><span id="line-102">                for (int i = 0; i &lt; inputs.length; i++) gsum[i] += delta * inputs[i];</span>
+<span class="source-line-no">102</span><span id="line-102">                for (int d = 0; d &lt; inputs.length; d++) gsum[d] += delta * inputs[d];</span>
 <span class="source-line-no">103</span><span id="line-103">                dBsum.merge(out, delta, Float::sum);</span>
 <span class="source-line-no">104</span><span id="line-104">            }</span>
 <span class="source-line-no">105</span><span id="line-105"></span>
 <span class="source-line-no">106</span><span id="line-106">            // Hidden layers deltas (backward)</span>
-<span class="source-line-no">107</span><span id="line-107">            for (int layer = depth - 1; layer &gt;= 1; layer--) {</span>
-<span class="source-line-no">108</span><span id="line-108">                int width = neuralNetwork.getWidth(layer);</span>
+<span class="source-line-no">107</span><span id="line-107">            for (int l = depth - 1; l &gt;= 1; l--) {</span>
+<span class="source-line-no">108</span><span id="line-108">                int width = neuralNetwork.getWidth(l);</span>
 <span class="source-line-no">109</span><span id="line-109">                for (int j = 0; j &lt; width; j++) {</span>
-<span class="source-line-no">110</span><span id="line-110">                    ActivationsCachedNeuron neuron = neuralNetwork.getNeuron(layer, j, ActivationsCachedNeuron.class);</span>
+<span class="source-line-no">110</span><span id="line-110">                    ActivationsCachedNeuron neuron = neuralNetwork.getNeuron(l, j, ActivationsCachedNeuron.class);</span>
 <span class="source-line-no">111</span><span id="line-111"></span>
 <span class="source-line-no">112</span><span id="line-112">                    float back = 0f;</span>
-<span class="source-line-no">113</span><span id="line-113">                    Map&lt;Neuron, Float&gt; outs = neuralNetwork.getOutputConnections(layer, j);</span>
+<span class="source-line-no">113</span><span id="line-113">                    Map&lt;Neuron, Float&gt; outs = neuralNetwork.getOutputConnections(l, j);</span>
 <span class="source-line-no">114</span><span id="line-114">                    for (Map.Entry&lt;Neuron, Float&gt; e : outs.entrySet()) {</span>
 <span class="source-line-no">115</span><span id="line-115">                        Float deltaNext = deltaN.get(e.getKey());</span>
 <span class="source-line-no">116</span><span id="line-116">                        if (deltaNext != null) back += deltaNext * e.getValue();</span>
 <span class="source-line-no">117</span><span id="line-117">                    }</span>
 <span class="source-line-no">118</span><span id="line-118"></span>
-<span class="source-line-no">119</span><span id="line-119">                    ActivationsCachedNeuron.Activation activation = neuron.getCache().get(n);</span>
+<span class="source-line-no">119</span><span id="line-119">                    ActivationsCachedNeuron.Activation activation = neuron.getCache().get(i);</span>
 <span class="source-line-no">120</span><span id="line-120">                    float delta = back * activation.gradient();</span>
 <span class="source-line-no">121</span><span id="line-121">                    deltaN.put(neuron, delta);</span>
 <span class="source-line-no">122</span><span id="line-122"></span>
 <span class="source-line-no">123</span><span id="line-123">                    float[] inputs = activation.inputs();</span>
 <span class="source-line-no">124</span><span id="line-124">                    float[] gsum = dWsum.computeIfAbsent(neuron, k -&gt; new float[inputs.length]);</span>
-<span class="source-line-no">125</span><span id="line-125">                    for (int i = 0; i &lt; inputs.length; i++) gsum[i] += delta * inputs[i];</span>
+<span class="source-line-no">125</span><span id="line-125">                    for (int d = 0; d &lt; inputs.length; d++) gsum[d] += delta * inputs[d];</span>
 <span class="source-line-no">126</span><span id="line-126">                    dBsum.merge(neuron, delta, Float::sum);</span>
 <span class="source-line-no">127</span><span id="line-127">                }</span>
 <span class="source-line-no">128</span><span id="line-128">            }</span>
@@ -143,7 +143,7 @@
 <span class="source-line-no">130</span><span id="line-130"></span>
 <span class="source-line-no">131</span><span id="line-131">        // ---- Adam update on averaged gradients ----</span>
 <span class="source-line-no">132</span><span id="line-132">        t += 1L; // step</span>
-<span class="source-line-no">133</span><span id="line-133">        final float invN = 1f / sampleCount;</span>
+<span class="source-line-no">133</span><span id="line-133">        final float invN = 1f / batchSize;</span>
 <span class="source-line-no">134</span><span id="line-134"></span>
 <span class="source-line-no">135</span><span id="line-135">        // Precompute bias correction factors</span>
 <span class="source-line-no">136</span><span id="line-136">        final double b1t = Math.pow(beta1, t);</span>
@@ -151,10 +151,10 @@
 <span class="source-line-no">138</span><span id="line-138">        final float biasCorr1 = (float) (1.0 / (1.0 - b1t));</span>
 <span class="source-line-no">139</span><span id="line-139">        final float biasCorr2 = (float) (1.0 / (1.0 - b2t));</span>
 <span class="source-line-no">140</span><span id="line-140"></span>
-<span class="source-line-no">141</span><span id="line-141">        for (int layer = 1; layer &lt;= depth; layer++) {</span>
-<span class="source-line-no">142</span><span id="line-142">            int width = neuralNetwork.getWidth(layer);</span>
+<span class="source-line-no">141</span><span id="line-141">        for (int l = 1; l &lt;= depth; l++) {</span>
+<span class="source-line-no">142</span><span id="line-142">            int width = neuralNetwork.getWidth(l);</span>
 <span class="source-line-no">143</span><span id="line-143">            for (int j = 0; j &lt; width; j++) {</span>
-<span class="source-line-no">144</span><span id="line-144">                ActivationsCachedNeuron neuron = neuralNetwork.getNeuron(layer, j, ActivationsCachedNeuron.class);</span>
+<span class="source-line-no">144</span><span id="line-144">                ActivationsCachedNeuron neuron = neuralNetwork.getNeuron(l, j, ActivationsCachedNeuron.class);</span>
 <span class="source-line-no">145</span><span id="line-145"></span>
 <span class="source-line-no">146</span><span id="line-146">                // Weights</span>
 <span class="source-line-no">147</span><span id="line-147">                float[] w = neuron.getWeights();</span>
@@ -171,20 +171,20 @@
 <span class="source-line-no">158</span><span id="line-158">                        vW.put(neuron, vWi);</span>
 <span class="source-line-no">159</span><span id="line-159">                    }</span>
 <span class="source-line-no">160</span><span id="line-160"></span>
-<span class="source-line-no">161</span><span id="line-161">                    for (int i = 0; i &lt; w.length; i++) {</span>
+<span class="source-line-no">161</span><span id="line-161">                    for (int d = 0; d &lt; w.length; d++) {</span>
 <span class="source-line-no">162</span><span id="line-162">                        // Average gradient over batch</span>
-<span class="source-line-no">163</span><span id="line-163">                        float g = invN * gWsum[i];</span>
+<span class="source-line-no">163</span><span id="line-163">                        float g = invN * gWsum[d];</span>
 <span class="source-line-no">164</span><span id="line-164"></span>
 <span class="source-line-no">165</span><span id="line-165">                        // Adam moment updates</span>
-<span class="source-line-no">166</span><span id="line-166">                        mWi[i] = beta1 * mWi[i] + (1 - beta1) * g;</span>
-<span class="source-line-no">167</span><span id="line-167">                        vWi[i] = beta2 * vWi[i] + (1 - beta2) * (g * g);</span>
+<span class="source-line-no">166</span><span id="line-166">                        mWi[d] = beta1 * mWi[d] + (1 - beta1) * g;</span>
+<span class="source-line-no">167</span><span id="line-167">                        vWi[d] = beta2 * vWi[d] + (1 - beta2) * (g * g);</span>
 <span class="source-line-no">168</span><span id="line-168"></span>
 <span class="source-line-no">169</span><span id="line-169">                        // Bias-corrected moments</span>
-<span class="source-line-no">170</span><span id="line-170">                        float mHat = mWi[i] * biasCorr1;</span>
-<span class="source-line-no">171</span><span id="line-171">                        float vHat = vWi[i] * biasCorr2;</span>
+<span class="source-line-no">170</span><span id="line-170">                        float mHat = mWi[d] * biasCorr1;</span>
+<span class="source-line-no">171</span><span id="line-171">                        float vHat = vWi[d] * biasCorr2;</span>
 <span class="source-line-no">172</span><span id="line-172"></span>
 <span class="source-line-no">173</span><span id="line-173">                        // Parameter update</span>
-<span class="source-line-no">174</span><span id="line-174">                        w[i] -= learningRate * (mHat / (float) (Math.sqrt(vHat) + (double) epsilon));</span>
+<span class="source-line-no">174</span><span id="line-174">                        w[d] -= learningRate * (mHat / (float) (Math.sqrt(vHat) + (double) epsilon));</span>
 <span class="source-line-no">175</span><span id="line-175">                    }</span>
 <span class="source-line-no">176</span><span id="line-176">                }</span>
 <span class="source-line-no">177</span><span id="line-177"></span>

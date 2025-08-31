@@ -1,7 +1,6 @@
 package net.tvburger.jdl.model.training;
 
 import net.tvburger.jdl.common.patterns.DomainObject;
-import net.tvburger.jdl.common.patterns.Mediator;
 import net.tvburger.jdl.common.patterns.Strategy;
 import net.tvburger.jdl.common.utils.Pair;
 import net.tvburger.jdl.model.training.loss.BatchLossFunction;
@@ -35,7 +34,7 @@ import java.util.List;
 public interface ObjectiveFunction extends LossFunction {
 
     /**
-     * Calculates the aggregated loss across a batch of samples.
+     * Calculates the loss for a batch of samples.
      *
      * <p>
      * Each sample in the batch is represented as a {@link Pair} of
@@ -49,7 +48,7 @@ public interface ObjectiveFunction extends LossFunction {
      *              {@code float[]} arrays (estimated vs target)
      * @return the aggregated loss value for the batch
      */
-    float calculateAggregatedLoss(List<Pair<float[], float[]>> batch);
+    float calculateLoss(List<Pair<float[], float[]>> batch);
 
     /**
      * Determines the gradients of the objective function with respect to
@@ -61,11 +60,12 @@ public interface ObjectiveFunction extends LossFunction {
      * can be used to update model parameters during optimization.
      * </p>
      *
+     * @param samples   the total number of samples in the batch
      * @param estimated the predicted values for a sample
      * @param target    the expected target values for the sample
      * @return an array of gradients, one per dimension of the input
      */
-    float[] determineGradients(float[] estimated, float[] target);
+    float[] calculateGradient_dJ_da(int samples, float[] estimated, float[] target);
 
     /**
      * Creates an {@link ObjectiveFunction} that minimizes the loss
@@ -97,57 +97,7 @@ public interface ObjectiveFunction extends LossFunction {
      * @return a composed {@link ObjectiveFunction} that minimizes loss
      */
     static ObjectiveFunction minimize(BatchLossFunction batchLossFunction, SampleLossFunction sampleLossFunction, DimensionLossFunction... dimensionLossFunctions) {
-        return new Impl(batchLossFunction, Pair.of(sampleLossFunction, Arrays.asList(dimensionLossFunctions)));
+        return new ObjectiveFunctionImpl(batchLossFunction, sampleLossFunction, Arrays.asList(dimensionLossFunctions));
     }
 
-    /**
-     * The implementation of the {@link ObjectiveFunction}.
-     *
-     * <p>
-     * {@code ObjectiveFunctionImpl} composes together different levels of
-     * loss functions — dimension, sample, and batch — to provide a complete
-     * objective function suitable for training and optimization.
-     * </p>
-     *
-     * <p>
-     * The implementation delegates responsibility as follows:
-     * <ul>
-     *   <li>Uses a {@link DimensionLossFunction} to compute per-dimension error
-     *       and gradients.</li>
-     *   <li>Uses a {@link SampleLossFunction} to aggregate dimension-level losses
-     *       into a single sample loss.</li>
-     *   <li>Uses a {@link BatchLossFunction} to aggregate sample losses into a
-     *       batch loss.</li>
-     * </ul>
-     * </p>
-     */
-    @Mediator
-    @Strategy(Strategy.Role.CONCRETE)
-    class Impl implements ObjectiveFunction {
-
-        private final Pair<SampleLossFunction, List<DimensionLossFunction>> sampleLossFunctions;
-        private final BatchLossFunction batchLossFunction;
-
-        private Impl(BatchLossFunction batchLossFunction, Pair<SampleLossFunction, List<DimensionLossFunction>> sampleLossFunctions) {
-            this.batchLossFunction = batchLossFunction;
-            this.sampleLossFunctions = sampleLossFunctions;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public float calculateAggregatedLoss(List<Pair<float[], float[]>> batch) {
-            return batchLossFunction.calculateBatchLoss(batch, sampleLossFunctions);
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public float[] determineGradients(float[] estimated, float[] target) {
-            return sampleLossFunctions.left().determineGradients(estimated, target, sampleLossFunctions.right());
-        }
-
-    }
 }

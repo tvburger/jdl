@@ -77,7 +77,7 @@
 <span class="source-line-no">064</span><span id="line-64">    /**</span>
 <span class="source-line-no">065</span><span id="line-65">     * {@inheritDoc}</span>
 <span class="source-line-no">066</span><span id="line-66">     */</span>
-<span class="source-line-no">067</span><span id="line-67">    public float determineGradient(float estimated, float target) {</span>
+<span class="source-line-no">067</span><span id="line-67">    public float calculateGradient_dl_da(float estimated, float target) {</span>
 <span class="source-line-no">068</span><span id="line-68">        float a = clamp01(estimated);</span>
 <span class="source-line-no">069</span><span id="line-69">        float y = target;</span>
 <span class="source-line-no">070</span><span id="line-70">        // dE/da for binary cross-entropy</span>

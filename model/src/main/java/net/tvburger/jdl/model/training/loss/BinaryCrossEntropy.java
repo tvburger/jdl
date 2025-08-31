@@ -64,7 +64,7 @@ public class BinaryCrossEntropy implements DimensionLossFunction {
     /**
      * {@inheritDoc}
      */
-    public float determineGradient(float estimated, float target) {
+    public float calculateGradient_dl_da(float estimated, float target) {
         float a = clamp01(estimated);
         float y = target;
         // dE/da for binary cross-entropy

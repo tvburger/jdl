@@ -2,7 +2,6 @@ package net.tvburger.jdl.model.training.loss;
 
 import net.tvburger.jdl.common.patterns.DomainObject;
 import net.tvburger.jdl.common.patterns.Strategy;
-import net.tvburger.jdl.common.utils.Pair;
 
 import java.util.List;
 
@@ -12,35 +11,35 @@ import java.util.List;
  * of samples used together in training for efficiency and stability
  * of gradient-based optimization.
  *
- * <p>
- * A {@code BatchLossFunction} leverages a {@link SampleLossFunction}
- * together with a set of {@link DimensionLossFunction}s to compute
- * the overall loss for an entire batch of samples.
+ * <p>Implementations of this interface compute both the total batch loss
+ * and the gradient of the batch loss with respect to per-sample losses.</p>
+ *
+ * <p>Definitions:</p>
+ * <ul>
+ *   <li><b>Batch loss:</b> the aggregated loss over all samples in the batch.</li>
+ *   <li><b>Gradient dJ/dL:</b> the derivative of the batch loss with respect to
+ *       the per-sample losses, used for backpropagation.</li>
+ * </ul>
  */
 @DomainObject
 @Strategy(Strategy.Role.INTERFACE)
 public interface BatchLossFunction extends LossFunction {
 
     /**
-     * Calculates the total loss for a batch of samples.
+     * Calculates the total loss for the batch by aggregating the per-sample losses.
      *
-     * <p>
-     * Each sample in the batch is represented as a {@link Pair} of
-     * float arrays, where the left element is the estimated (predicted)
-     * values and the right element is the target (expected) values.
-     * The provided {@link SampleLossFunction} and associated list of
-     * {@link DimensionLossFunction}s are used to compute the loss for
-     * each sample, which is then aggregated into the batch loss.
-     * </p>
-     *
-     * @param batch         a list of samples, where each sample is a pair
-     *                      of {@code float[]} arrays (estimated vs target)
-     * @param lossFunctions a pair consisting of a {@link SampleLossFunction}
-     *                      (for per-sample loss calculation) and the list
-     *                      of {@link DimensionLossFunction}s used within
-     *                      that sample loss calculation
-     * @return the aggregated batch loss as a {@code float}
+     * @param sampleLosses a list of individual sample losses
+     * @return the total batch loss
      */
-    float calculateBatchLoss(List<Pair<float[], float[]>> batch, Pair<SampleLossFunction, List<DimensionLossFunction>> lossFunctions);
+    float calculateBatchLoss(List<Float> sampleLosses);
+
+    /**
+     * Computes the gradient of the batch loss with respect to the per-sample losses.
+     * This is commonly denoted as dJ/dL in backpropagation equations.
+     *
+     * @param batchSize the number of samples in the batch
+     * @return the gradient of the batch loss with respect to each sample loss
+     */
+    float calculateGradient_dJ_dL(int batchSize);
 
 }

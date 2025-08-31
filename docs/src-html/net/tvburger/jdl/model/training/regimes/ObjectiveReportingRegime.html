@@ -114,7 +114,7 @@
 <span class="source-line-no">101</span><span id="line-101">        Float previousLoss;</span>
 <span class="source-line-no">102</span><span id="line-102">        if (objective != null &amp;&amp; iteration == 0) {</span>
 <span class="source-line-no">103</span><span id="line-103">            List&lt;Pair&lt;float[], float[]&gt;&gt; batch = trainingSet.samples().stream().map(s -&gt; Pair.of(estimationFunction.estimate(s.features()), s.targetOutputs())).toList();</span>
-<span class="source-line-no">104</span><span id="line-104">            previousLoss = objective.calculateAggregatedLoss(batch);</span>
+<span class="source-line-no">104</span><span id="line-104">            previousLoss = objective.calculateLoss(batch);</span>
 <span class="source-line-no">105</span><span id="line-105">            if (dump) {</span>
 <span class="source-line-no">106</span><span id="line-106">                System.out.printf("[Measurement %4d] Aggregated loss = %.4f (baseline)%n", iteration, previousLoss);</span>
 <span class="source-line-no">107</span><span id="line-107">            }</span>
@@ -125,7 +125,7 @@
 <span class="source-line-no">112</span><span id="line-112">        regime.train(estimationFunction, trainingSet, objective, optimizer);</span>
 <span class="source-line-no">113</span><span id="line-113">        if (objective != null) {</span>
 <span class="source-line-no">114</span><span id="line-114">            List&lt;Pair&lt;float[], float[]&gt;&gt; batch = trainingSet.samples().stream().map(s -&gt; Pair.of(estimationFunction.estimate(s.features()), s.targetOutputs())).toList();</span>
-<span class="source-line-no">115</span><span id="line-115">            currentLoss = objective.calculateAggregatedLoss(batch);</span>
+<span class="source-line-no">115</span><span id="line-115">            currentLoss = objective.calculateLoss(batch);</span>
 <span class="source-line-no">116</span><span id="line-116">            improvement = (previousLoss - currentLoss) / previousLoss * -100f;</span>
 <span class="source-line-no">117</span><span id="line-117">            if (dump) {</span>
 <span class="source-line-no">118</span><span id="line-118">                System.out.printf("[Measurement %4d] Aggregated loss = %.4f (%.2f%%)%n", iteration, currentLoss, improvement);</span>

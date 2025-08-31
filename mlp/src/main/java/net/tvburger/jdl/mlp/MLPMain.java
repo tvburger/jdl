@@ -19,11 +19,11 @@ import java.util.Arrays;
 public class MLPMain {
 
     public static void main(String[] args) {
-        DataSet dataSet = LogicalDataSets.xor().load();
-        DataSet trainingSet = dataSet;
+        DataSet dataSet = LogicalDataSets.or().load();
+        DataSet trainingSet = dataSet.subset(1, 3);
         DataSet testSet = dataSet;
 
-        MultiLayerPerceptron mlp = MultiLayerPerceptron.create(Activations.sigmoid(), Activations.sigmoid(), 2, 2, 1);
+        MultiLayerPerceptron mlp = MultiLayerPerceptron.create(Activations.sigmoid(), Activations.sigmoid(), 2, 1, 1, 1);
 
         NeuralNetworkInitializer initializer = new XavierInitializer();
         ObjectiveFunction objective = Losses.mSE();

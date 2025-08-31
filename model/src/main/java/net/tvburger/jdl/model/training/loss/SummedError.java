@@ -1,7 +1,6 @@
 package net.tvburger.jdl.model.training.loss;
 
 import net.tvburger.jdl.common.patterns.Strategy;
-import net.tvburger.jdl.common.utils.Pair;
 
 import java.util.List;
 
@@ -34,10 +33,10 @@ public class SummedError implements SampleLossFunction, BatchLossFunction {
      * {@inheritDoc}
      */
     @Override
-    public float calculateBatchLoss(List<Pair<float[], float[]>> batch, Pair<SampleLossFunction, List<DimensionLossFunction>> lossFunctions) {
+    public float calculateBatchLoss(List<Float> sampleLosses) {
         float loss = 0.0f;
-        for (Pair<float[], float[]> sample : batch) {
-            loss += lossFunctions.left().calculateSampleLoss(sample, lossFunctions.right());
+        for (float sampleLoss : sampleLosses) {
+            loss += sampleLoss;
         }
         return loss;
     }
@@ -46,13 +45,18 @@ public class SummedError implements SampleLossFunction, BatchLossFunction {
      * {@inheritDoc}
      */
     @Override
-    public float calculateSampleLoss(Pair<float[], float[]> sample, List<DimensionLossFunction> lossFunctions) {
+    public float calculateGradient_dJ_dL(int batchSize) {
+        return 1.0f;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public float calculateSampleLoss(List<Float> dimensionLosses) {
         float loss = 0.0f;
-        float[] estimated = sample.left();
-        float[] target = sample.right();
-        int dimension = estimated.length;
-        for (int i = 0; i < dimension; i++) {
-            loss += get(lossFunctions, i).calculateDimensionLoss(estimated[i], target[i]);
+        for (float dimensionLoss : dimensionLosses) {
+            loss += dimensionLoss;
         }
         return loss;
     }
@@ -61,13 +65,8 @@ public class SummedError implements SampleLossFunction, BatchLossFunction {
      * {@inheritDoc}
      */
     @Override
-    public float[] determineGradients(float[] estimated, float[] target, List<DimensionLossFunction> lossFunctions) {
-        int dimension = estimated.length;
-        float[] gradients = new float[dimension];
-        for (int i = 0; i < dimension; i++) {
-            gradients[i] = get(lossFunctions, i).determineGradient(estimated[i], target[i]);
-        }
-        return gradients;
+    public float calculateGradient_dL_dl(int dimensions) {
+        return 1.0f;
     }
 
 }

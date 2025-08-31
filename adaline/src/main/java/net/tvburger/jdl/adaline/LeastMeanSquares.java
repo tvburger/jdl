@@ -23,10 +23,10 @@ public class LeastMeanSquares implements Optimizer.OnlineOnly<Adaline> {
 
     public void optimize(Adaline adaline, DataSet.Sample sample, ObjectiveFunction objective) {
         float[] estimated = adaline.estimate(sample.features());
-        float[] gradients = objective.determineGradients(estimated, sample.targetOutputs());
-        for (int i = 0; i < estimated.length; i++) {
-            Neuron node = adaline.getNeuron(adaline.getDepth(), i, Neuron.class);
-            float errorSignal = gradients[i];
+        float[] gradients = objective.calculateGradient_dJ_da(1, estimated, sample.targetOutputs());
+        for (int j = 0; j < estimated.length; j++) {
+            Neuron node = adaline.getNeuron(adaline.getDepth(), j, Neuron.class);
+            float errorSignal = gradients[j];
             for (int w = 0; w < sample.featureCount(); w++) {
                 node.getWeights()[w] += learningRate * errorSignal * sample.features()[w];
             }

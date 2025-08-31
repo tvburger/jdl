@@ -2,7 +2,6 @@ package net.tvburger.jdl.model.training.loss;
 
 import net.tvburger.jdl.common.patterns.Decorator;
 import net.tvburger.jdl.common.patterns.Strategy;
-import net.tvburger.jdl.common.utils.Pair;
 
 import java.util.List;
 
@@ -48,8 +47,16 @@ public class ScaledError implements DimensionLossFunction, SampleLossFunction, B
      * {@inheritDoc}
      */
     @Override
-    public float calculateBatchLoss(List<Pair<float[], float[]>> batch, Pair<SampleLossFunction, List<DimensionLossFunction>> lossFunctions) {
-        return ((BatchLossFunction) lossFunction).calculateBatchLoss(batch, lossFunctions) * scale;
+    public float calculateBatchLoss(List<Float> sampleLosses) {
+        return ((BatchLossFunction) lossFunction).calculateBatchLoss(sampleLosses) * scale;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public float calculateGradient_dJ_dL(int batchSize) {
+        return ((BatchLossFunction) lossFunction).calculateGradient_dJ_dL(batchSize) * scale;
     }
 
     /**
@@ -64,27 +71,23 @@ public class ScaledError implements DimensionLossFunction, SampleLossFunction, B
      * {@inheritDoc}
      */
     @Override
-    public float determineGradient(float estimated, float target) {
-        return ((DimensionLossFunction) lossFunction).determineGradient(estimated, target) * scale;
+    public float calculateGradient_dl_da(float estimated, float target) {
+        return ((DimensionLossFunction) lossFunction).calculateGradient_dl_da(estimated, target) * scale;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public float calculateSampleLoss(Pair<float[], float[]> sample, List<DimensionLossFunction> lossFunctions) {
-        return ((SampleLossFunction) lossFunction).calculateSampleLoss(sample, lossFunctions);
+    public float calculateSampleLoss(List<Float> dimensionLosses) {
+        return ((SampleLossFunction) lossFunction).calculateSampleLoss(dimensionLosses) * scale;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public float[] determineGradients(float[] estimated, float[] target, List<DimensionLossFunction> lossFunctions) {
-        float[] gradients = ((SampleLossFunction) lossFunctions).determineGradients(estimated, target, lossFunctions);
-        for (int i = 0; i < gradients.length; i++) {
-            gradients[i] *= scale;
-        }
-        return gradients;
+    public float calculateGradient_dL_dl(int dimensions) {
+        return ((SampleLossFunction) lossFunction).calculateGradient_dL_dl(dimensions) * scale;
     }
 }

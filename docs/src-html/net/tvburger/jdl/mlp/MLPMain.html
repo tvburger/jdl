@@ -32,11 +32,11 @@
 <span class="source-line-no">019</span><span id="line-19">public class MLPMain {</span>
 <span class="source-line-no">020</span><span id="line-20"></span>
 <span class="source-line-no">021</span><span id="line-21">    public static void main(String[] args) {</span>
-<span class="source-line-no">022</span><span id="line-22">        DataSet dataSet = LogicalDataSets.xor().load();</span>
-<span class="source-line-no">023</span><span id="line-23">        DataSet trainingSet = dataSet;</span>
+<span class="source-line-no">022</span><span id="line-22">        DataSet dataSet = LogicalDataSets.or().load();</span>
+<span class="source-line-no">023</span><span id="line-23">        DataSet trainingSet = dataSet.subset(1, 3);</span>
 <span class="source-line-no">024</span><span id="line-24">        DataSet testSet = dataSet;</span>
 <span class="source-line-no">025</span><span id="line-25"></span>
-<span class="source-line-no">026</span><span id="line-26">        MultiLayerPerceptron mlp = MultiLayerPerceptron.create(Activations.sigmoid(), Activations.sigmoid(), 2, 2, 1);</span>
+<span class="source-line-no">026</span><span id="line-26">        MultiLayerPerceptron mlp = MultiLayerPerceptron.create(Activations.sigmoid(), Activations.sigmoid(), 2, 1, 1, 1);</span>
 <span class="source-line-no">027</span><span id="line-27"></span>
 <span class="source-line-no">028</span><span id="line-28">        NeuralNetworkInitializer initializer = new XavierInitializer();</span>
 <span class="source-line-no">029</span><span id="line-29">        ObjectiveFunction objective = Losses.mSE();</span>

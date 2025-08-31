@@ -2,66 +2,46 @@ package net.tvburger.jdl.model.training.loss;
 
 import net.tvburger.jdl.common.patterns.DomainObject;
 import net.tvburger.jdl.common.patterns.Strategy;
-import net.tvburger.jdl.common.utils.Pair;
 
 import java.util.List;
 
 /**
- * Represents a loss function that operates at the sample level,
- * i.e., over an entire set of estimated versus target values rather
- * than a single dimension.
- *
+ * Represents a loss function that operates at the per-sample level.
  * <p>
- * A {@code SampleLossFunction} coordinates multiple
- * {@link DimensionLossFunction} implementations to calculate the overall
- * sample loss and per-dimension gradients. This is typically used in
- * machine learning contexts where a sample consists of multiple features
- * or output dimensions.
+ * A sample loss aggregates the losses of individual output dimensions
+ * (dimension losses, {@code l}) into a single per-sample loss (L),
+ * which can then be used to compute batch-level loss (J) in
+ * {@link BatchLossFunction}.
+ * </p>
+ *
+ * <p>Definitions:</p>
+ * <ul>
+ *   <li><b>Sample loss (L):</b> the aggregated loss for a single training sample.</li>
+ *   <li><b>Gradient dL/dl:</b> the derivative of the sample loss with respect to each
+ *       dimension loss, used for backpropagation from the sample to individual dimensions.</li>
+ * </ul>
  */
 @DomainObject
 @Strategy(Strategy.Role.INTERFACE)
 public interface SampleLossFunction extends LossFunction {
 
     /**
-     * Calculates the total loss for a sample by applying the corresponding
-     * {@link DimensionLossFunction} to each element of the estimated and
-     * target arrays.
+     * Calculates the total loss for a single sample by aggregating
+     * the losses of its dimensions.
      *
-     * @param sample        a pair containing the estimated values (left)
-     *                      and target values (right) for a single sample
-     * @param lossFunctions the list of dimension-specific loss functions
-     *                      to be applied
-     * @return the total loss for the sample as a {@code float}
+     * @param dimensionLosses a list of losses for each output dimension
+     * @return the total sample loss
      */
-    float calculateSampleLoss(Pair<float[], float[]> sample, List<DimensionLossFunction> lossFunctions);
+    float calculateSampleLoss(List<Float> dimensionLosses);
 
     /**
-     * Determines the gradient of the loss function for each dimension of
-     * the sample, given the estimated and target arrays.
+     * Computes the gradient of the sample loss with respect to the
+     * individual dimension losses. This corresponds to dL/dl in
+     * backpropagation equations.
      *
-     * @param estimated     the predicted values for the sample
-     * @param target        the expected target values for the sample
-     * @param lossFunctions the list of dimension-specific loss functions
-     *                      to be applied
-     * @return an array of gradient values, one per dimension
+     * @param dimensions the number of output dimensions
+     * @return the gradient of the sample loss with respect to each dimension loss
      */
-    float[] determineGradients(float[] estimated, float[] target, List<DimensionLossFunction> lossFunctions);
+    float calculateGradient_dL_dl(int dimensions);
 
-    /**
-     * Retrieves the appropriate {@link DimensionLossFunction} for a given
-     * index. If the index exceeds the number of available loss functions,
-     * it is wrapped around using modulo arithmetic.
-     *
-     * <p>
-     * This provides a convenient way to cycle through loss functions
-     * when the number of dimensions exceeds the number of functions.
-     * </p>
-     *
-     * @param lossFunctions the list of dimension-specific loss functions
-     * @param index         the index of the dimension
-     * @return the corresponding {@link DimensionLossFunction}
-     */
-    default DimensionLossFunction get(List<DimensionLossFunction> lossFunctions, int index) {
-        return lossFunctions.get(index % lossFunctions.size());
-    }
 }

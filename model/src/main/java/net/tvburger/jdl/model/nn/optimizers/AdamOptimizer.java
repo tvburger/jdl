@@ -72,8 +72,8 @@ public class AdamOptimizer<N extends NeuralNetwork> implements Optimizer<N> {
 
     @Override
     public void optimize(N neuralNetwork, DataSet trainingSet, ObjectiveFunction objective) {
-        final int sampleCount = trainingSet.samples().size();
-        if (sampleCount == 0) return;
+        final int batchSize = trainingSet.samples().size();
+        if (batchSize == 0) return;
 
         final int depth = neuralNetwork.getDepth();
 
@@ -81,48 +81,48 @@ public class AdamOptimizer<N extends NeuralNetwork> implements Optimizer<N> {
         final Map<Neuron, float[]> dWsum = new IdentityHashMap<>();
         final Map<Neuron, Float> dBsum = new IdentityHashMap<>();
 
-        for (int n = 0; n < sampleCount; n++) {
+        for (int i = 0; i < batchSize; i++) {
             final Map<Neuron, Float> deltaN = new IdentityHashMap<>();
 
             // Output layer deltas
             int outWidth = neuralNetwork.coArity();
-            DataSet.Sample sample = trainingSet.samples().get(n);
+            DataSet.Sample sample = trainingSet.samples().get(i);
             float[] estimated = neuralNetwork.estimate(sample.features());
-            float[] lossGradients = objective.determineGradients(estimated, sample.targetOutputs());
+            float[] lossGradients = objective.calculateGradient_dJ_da(batchSize, estimated, sample.targetOutputs());
 
             for (int j = 0; j < outWidth; j++) {
                 ActivationsCachedNeuron out = neuralNetwork.getNeuron(depth, j, ActivationsCachedNeuron.class);
-                ActivationsCachedNeuron.Activation activation = out.getCache().get(n);
+                ActivationsCachedNeuron.Activation activation = out.getCache().get(i);
 
                 float delta = lossGradients[j] * activation.gradient();
                 deltaN.put(out, delta);
 
                 float[] inputs = activation.inputs();
                 float[] gsum = dWsum.computeIfAbsent(out, k -> new float[inputs.length]);
-                for (int i = 0; i < inputs.length; i++) gsum[i] += delta * inputs[i];
+                for (int d = 0; d < inputs.length; d++) gsum[d] += delta * inputs[d];
                 dBsum.merge(out, delta, Float::sum);
             }
 
             // Hidden layers deltas (backward)
-            for (int layer = depth - 1; layer >= 1; layer--) {
-                int width = neuralNetwork.getWidth(layer);
+            for (int l = depth - 1; l >= 1; l--) {
+                int width = neuralNetwork.getWidth(l);
                 for (int j = 0; j < width; j++) {
-                    ActivationsCachedNeuron neuron = neuralNetwork.getNeuron(layer, j, ActivationsCachedNeuron.class);
+                    ActivationsCachedNeuron neuron = neuralNetwork.getNeuron(l, j, ActivationsCachedNeuron.class);
 
                     float back = 0f;
-                    Map<Neuron, Float> outs = neuralNetwork.getOutputConnections(layer, j);
+                    Map<Neuron, Float> outs = neuralNetwork.getOutputConnections(l, j);
                     for (Map.Entry<Neuron, Float> e : outs.entrySet()) {
                         Float deltaNext = deltaN.get(e.getKey());
                         if (deltaNext != null) back += deltaNext * e.getValue();
                     }
 
-                    ActivationsCachedNeuron.Activation activation = neuron.getCache().get(n);
+                    ActivationsCachedNeuron.Activation activation = neuron.getCache().get(i);
                     float delta = back * activation.gradient();
                     deltaN.put(neuron, delta);
 
                     float[] inputs = activation.inputs();
                     float[] gsum = dWsum.computeIfAbsent(neuron, k -> new float[inputs.length]);
-                    for (int i = 0; i < inputs.length; i++) gsum[i] += delta * inputs[i];
+                    for (int d = 0; d < inputs.length; d++) gsum[d] += delta * inputs[d];
                     dBsum.merge(neuron, delta, Float::sum);
                 }
             }
@@ -130,7 +130,7 @@ public class AdamOptimizer<N extends NeuralNetwork> implements Optimizer<N> {
 
         // ---- Adam update on averaged gradients ----
         t += 1L; // step
-        final float invN = 1f / sampleCount;
+        final float invN = 1f / batchSize;
 
         // Precompute bias correction factors
         final double b1t = Math.pow(beta1, t);
@@ -138,10 +138,10 @@ public class AdamOptimizer<N extends NeuralNetwork> implements Optimizer<N> {
         final float biasCorr1 = (float) (1.0 / (1.0 - b1t));
         final float biasCorr2 = (float) (1.0 / (1.0 - b2t));
 
-        for (int layer = 1; layer <= depth; layer++) {
-            int width = neuralNetwork.getWidth(layer);
+        for (int l = 1; l <= depth; l++) {
+            int width = neuralNetwork.getWidth(l);
             for (int j = 0; j < width; j++) {
-                ActivationsCachedNeuron neuron = neuralNetwork.getNeuron(layer, j, ActivationsCachedNeuron.class);
+                ActivationsCachedNeuron neuron = neuralNetwork.getNeuron(l, j, ActivationsCachedNeuron.class);
 
                 // Weights
                 float[] w = neuron.getWeights();
@@ -158,20 +158,20 @@ public class AdamOptimizer<N extends NeuralNetwork> implements Optimizer<N> {
                         vW.put(neuron, vWi);
                     }
 
-                    for (int i = 0; i < w.length; i++) {
+                    for (int d = 0; d < w.length; d++) {
                         // Average gradient over batch
-                        float g = invN * gWsum[i];
+                        float g = invN * gWsum[d];
 
                         // Adam moment updates
-                        mWi[i] = beta1 * mWi[i] + (1 - beta1) * g;
-                        vWi[i] = beta2 * vWi[i] + (1 - beta2) * (g * g);
+                        mWi[d] = beta1 * mWi[d] + (1 - beta1) * g;
+                        vWi[d] = beta2 * vWi[d] + (1 - beta2) * (g * g);
 
                         // Bias-corrected moments
-                        float mHat = mWi[i] * biasCorr1;
-                        float vHat = vWi[i] * biasCorr2;
+                        float mHat = mWi[d] * biasCorr1;
+                        float vHat = vWi[d] * biasCorr2;
 
                         // Parameter update
-                        w[i] -= learningRate * (mHat / (float) (Math.sqrt(vHat) + (double) epsilon));
+                        w[d] -= learningRate * (mHat / (float) (Math.sqrt(vHat) + (double) epsilon));
                     }
                 }
 

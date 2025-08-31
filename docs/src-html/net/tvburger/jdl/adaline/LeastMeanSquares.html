@@ -36,10 +36,10 @@
 <span class="source-line-no">023</span><span id="line-23"></span>
 <span class="source-line-no">024</span><span id="line-24">    public void optimize(Adaline adaline, DataSet.Sample sample, ObjectiveFunction objective) {</span>
 <span class="source-line-no">025</span><span id="line-25">        float[] estimated = adaline.estimate(sample.features());</span>
-<span class="source-line-no">026</span><span id="line-26">        float[] gradients = objective.determineGradients(estimated, sample.targetOutputs());</span>
-<span class="source-line-no">027</span><span id="line-27">        for (int i = 0; i &lt; estimated.length; i++) {</span>
-<span class="source-line-no">028</span><span id="line-28">            Neuron node = adaline.getNeuron(adaline.getDepth(), i, Neuron.class);</span>
-<span class="source-line-no">029</span><span id="line-29">            float errorSignal = gradients[i];</span>
+<span class="source-line-no">026</span><span id="line-26">        float[] gradients = objective.calculateGradient_dJ_da(1, estimated, sample.targetOutputs());</span>
+<span class="source-line-no">027</span><span id="line-27">        for (int j = 0; j &lt; estimated.length; j++) {</span>
+<span class="source-line-no">028</span><span id="line-28">            Neuron node = adaline.getNeuron(adaline.getDepth(), j, Neuron.class);</span>
+<span class="source-line-no">029</span><span id="line-29">            float errorSignal = gradients[j];</span>
 <span class="source-line-no">030</span><span id="line-30">            for (int w = 0; w &lt; sample.featureCount(); w++) {</span>
 <span class="source-line-no">031</span><span id="line-31">                node.getWeights()[w] += learningRate * errorSignal * sample.features()[w];</span>
 <span class="source-line-no">032</span><span id="line-32">            }</span>

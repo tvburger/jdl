@@ -4,9 +4,19 @@ import net.tvburger.jdl.common.patterns.DomainObject;
 import net.tvburger.jdl.common.patterns.Strategy;
 
 /**
- * Represents a specialized loss function that operates on a single dimension
- * of a predicted versus target value. Implementations of this interface define
- * how the "dimension loss" and corresponding gradient are computed.
+ * Represents a loss function that operates at the per-dimension level.
+ * <p>
+ * Each output dimension of a sample can have its own loss, which is then
+ * aggregated into a per-sample loss (L) or batch loss (J) by higher-level
+ * loss functions such as {@link BatchLossFunction}.
+ * </p>
+ *
+ * <p>Definitions:</p>
+ * <ul>
+ *   <li><b>Dimension loss (l):</b> the loss computed for a single output dimension.</li>
+ *   <li><b>Gradient dl/da:</b> the derivative of the dimension loss with respect to the activation (output) of this dimension,
+ *       used in backpropagation.</li>
+ * </ul>
  */
 @DomainObject
 @Strategy(Strategy.Role.INTERFACE)
@@ -23,13 +33,14 @@ public interface DimensionLossFunction extends LossFunction {
     float calculateDimensionLoss(float estimated, float target);
 
     /**
-     * Determines the gradient of the loss function with respect to the
-     * estimated value, for a single dimension.
+     * Calculates the gradient of the dimension loss with respect to the
+     * activation (output) of this dimension. This corresponds to dl/da
+     * in backpropagation formulas.
      *
-     * @param estimated the predicted or estimated value
-     * @param target    the expected or target value
-     * @return the gradient as a {@code float}
+     * @param estimated the predicted or estimated value for this dimension
+     * @param target    the expected or target value for this dimension
+     * @return the gradient of the loss with respect to the activation
      */
-    float determineGradient(float estimated, float target);
+    float calculateGradient_dl_da(float estimated, float target);
 
 }

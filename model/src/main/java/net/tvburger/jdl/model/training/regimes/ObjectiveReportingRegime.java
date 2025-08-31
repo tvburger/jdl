@@ -101,7 +101,7 @@ public class ObjectiveReportingRegime extends DelegatedRegime {
         Float previousLoss;
         if (objective != null && iteration == 0) {
             List<Pair<float[], float[]>> batch = trainingSet.samples().stream().map(s -> Pair.of(estimationFunction.estimate(s.features()), s.targetOutputs())).toList();
-            previousLoss = objective.calculateAggregatedLoss(batch);
+            previousLoss = objective.calculateLoss(batch);
             if (dump) {
                 System.out.printf("[Measurement %4d] Aggregated loss = %.4f (baseline)%n", iteration, previousLoss);
             }
@@ -112,7 +112,7 @@ public class ObjectiveReportingRegime extends DelegatedRegime {
         regime.train(estimationFunction, trainingSet, objective, optimizer);
         if (objective != null) {
             List<Pair<float[], float[]>> batch = trainingSet.samples().stream().map(s -> Pair.of(estimationFunction.estimate(s.features()), s.targetOutputs())).toList();
-            currentLoss = objective.calculateAggregatedLoss(batch);
+            currentLoss = objective.calculateLoss(batch);
             improvement = (previousLoss - currentLoss) / previousLoss * -100f;
             if (dump) {
                 System.out.printf("[Measurement %4d] Aggregated loss = %.4f (%.2f%%)%n", iteration, currentLoss, improvement);

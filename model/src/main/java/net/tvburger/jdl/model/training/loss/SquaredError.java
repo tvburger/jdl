@@ -41,7 +41,7 @@ public class SquaredError implements DimensionLossFunction {
      * {@inheritDoc}
      */
     @Override
-    public float determineGradient(float estimated, float target) {
+    public float calculateGradient_dl_da(float estimated, float target) {
         return 2 * (target - estimated);
     }
 
