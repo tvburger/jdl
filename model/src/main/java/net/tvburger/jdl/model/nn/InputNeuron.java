@@ -43,6 +43,8 @@ import net.tvburger.jdl.common.patterns.DomainObject;
 @DomainObject
 public class InputNeuron extends Neuron {
 
+    private float input;
+
     /**
      * Constructs a new input neuron with the given name.
      * Input neurons have no inputs or activation function.
@@ -53,6 +55,11 @@ public class InputNeuron extends Neuron {
         super(name, null, null);
     }
 
+    @Override
+    public float estimateScalar(float[] inputs) {
+        return input;
+    }
+
     /**
      * Sets the externally provided input value for this neuron and marks
      * it as activated.
@@ -60,19 +67,8 @@ public class InputNeuron extends Neuron {
      * @param input the input value to assign
      */
     public void setInputValue(float input) {
-        output = input;
-        activated = true;
+        this.input = input;
+        activate();
     }
 
-    /**
-     * Verifies that an input value has been assigned.
-     *
-     * @throws IllegalStateException if no input value was set
-     */
-    @Override
-    public synchronized void activate() {
-        if (!isActivated()) {
-            throw new IllegalStateException("Must set input value!");
-        }
-    }
 }

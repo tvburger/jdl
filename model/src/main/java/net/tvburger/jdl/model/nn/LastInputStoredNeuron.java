@@ -1,7 +1,7 @@
 package net.tvburger.jdl.model.nn;
 
 import net.tvburger.jdl.common.patterns.Decorator;
-import net.tvburger.jdl.model.nn.activations.ActivationFunction;
+import net.tvburger.jdl.model.scalars.activations.ActivationFunction;
 
 import java.util.List;
 
@@ -21,7 +21,7 @@ import java.util.List;
  *   <li>On {@link #activate()}, performs the standard neuron computation
  *       (weighted sum + bias → activation function) and also stores a copy
  *       of the input values provided by connected neurons.</li>
- *   <li>The stored inputs can be retrieved via {@link #getStoredInputs()}.</li>
+ *   <li>The stored inputs can be retrieved via {@link #getStoredInput(int)}.</li>
  *   <li>Stored inputs can be explicitly cleared with
  *       {@link #clearStoredInputs()} to release memory or reset state
  *       between training iterations.</li>
@@ -53,20 +53,24 @@ public class LastInputStoredNeuron extends Neuron {
             return;
         }
         super.activate();
-        storedInputs = new float[getInputs().size()];
-        for (int i = 0; i < getInputs().size(); i++) {
-            storedInputs[i] = getInputs().get(i).getOutput();
+        storedInputs = new float[getInputNodes().size()];
+        for (int i = 0; i < getInputNodes().size(); i++) {
+            storedInputs[i] = getInputNodes().get(i).getOutput();
         }
     }
 
     /**
-     * Returns the inputs stored during the last activation.
+     * Returns the input value that was stored for a specific dimension during the
+     * most recent {@link #activate()} call.
+     * <p>
+     * Dimension indexing is 1-based, where {@code d = 1} refers to the first
+     * input neuron, {@code d = 2} to the second, and so on.
      *
-     * @return the most recent input values, or {@code null} if the neuron
-     * has not been activated or if stored inputs were cleared
+     * @param d the input dimension index (1-based)
+     * @return the stored input value for the specified dimension
      */
-    public float[] getStoredInputs() {
-        return storedInputs;
+    public float getStoredInput(int d) {
+        return storedInputs[validDimension(d) - 1];
     }
 
     /**

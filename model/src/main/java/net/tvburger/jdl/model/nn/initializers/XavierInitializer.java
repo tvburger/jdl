@@ -29,14 +29,13 @@ public class XavierInitializer implements NeuralNetworkInitializer {
      */
     @Override
     public void initialize(NeuralNetwork neuralNetwork, Neuron neuron) {
-        float[] weights = neuron.getWeights();
-        int fanIn = weights.length;
+        int fanIn = neuron.arity();
         int fanOut = neuralNetwork.getTargetNeurons(neuron).size();
 
         float limit = (float) Math.sqrt(6.0f / (fanIn + fanOut));
 
-        for (int i = 0; i < weights.length; i++) {
-            weights[i] = uniform(-limit, limit);
+        for (int d = 1; d <= neuron.arity(); d++) {
+            neuron.setWeight(d, uniform(-limit, limit));
         }
         // Bias left unchanged
     }

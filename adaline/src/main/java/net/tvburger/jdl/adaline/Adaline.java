@@ -4,7 +4,7 @@ import net.tvburger.jdl.common.utils.Floats;
 import net.tvburger.jdl.model.nn.DefaultNeuralNetwork;
 import net.tvburger.jdl.model.nn.InputNeuron;
 import net.tvburger.jdl.model.nn.Neuron;
-import net.tvburger.jdl.model.nn.activations.Activations;
+import net.tvburger.jdl.model.scalars.activations.Activations;
 
 import java.util.ArrayList;
 import java.util.List;

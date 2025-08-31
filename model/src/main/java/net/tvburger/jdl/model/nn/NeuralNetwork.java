@@ -4,6 +4,7 @@ import net.tvburger.jdl.common.patterns.DomainObject;
 import net.tvburger.jdl.common.patterns.Entity;
 import net.tvburger.jdl.model.EstimationFunction;
 import net.tvburger.jdl.model.nn.initializers.NeuralNetworkInitializer;
+import net.tvburger.jdl.model.training.TrainableFunction;
 
 import java.util.Map;
 import java.util.Set;
@@ -30,16 +31,16 @@ import java.util.Set;
  */
 @DomainObject
 @Entity
-public interface NeuralNetwork extends EstimationFunction {
+public interface NeuralNetwork extends TrainableFunction {
 
     /**
      * Returns the number of neurons in the given layer.
      *
-     * @param layer the layer index (0-based, where 0 is the input layer)
+     * @param l the layer index (0-based, where 0 is the input layer)
      * @return the number of neurons in that layer
      * @throws IndexOutOfBoundsException if the layer index is invalid
      */
-    int getWidth(int layer);
+    int getWidth(int l);
 
     /**
      * Returns the total number of layers in the network, including input and output layers.
@@ -51,23 +52,23 @@ public interface NeuralNetwork extends EstimationFunction {
     /**
      * Returns a specific neuron in the network by its layer and index.
      *
-     * @param layer the layer index (0-based)
-     * @param index the index of the neuron within the layer (0-based)
+     * @param l the layer index (0-based)
+     * @param j the index of the neuron within the layer (0-based)
      * @return the neuron at the specified position
      * @throws IndexOutOfBoundsException if the indices are invalid
      */
-    Neuron getNeuron(int layer, int index);
+    Neuron getNeuron(int l, int j);
 
     /**
      * Returns a specific neuron in the network by its layer and index.
      *
-     * @param layer     the layer index (0-based)
-     * @param index     the index of the neuron within the layer (0-based)
+     * @param l     the layer index (0-based)
+     * @param j     the index of the neuron within the layer (0-based)
      * @param classType the class of the neuron to be returned
      * @return the neuron at the specified position
      * @throws IndexOutOfBoundsException if the indices are invalid
      */
-    <N extends Neuron> N getNeuron(int layer, int index, Class<N> classType);
+    <N extends Neuron> N getNeuron(int l, int j, Class<N> classType);
 
     /**
      * Returns the outgoing connections of a given neuron in the network.
@@ -76,11 +77,11 @@ public interface NeuralNetwork extends EstimationFunction {
      * to the weight of the connection.
      * </p>
      *
-     * @param layer the layer index of the source neuron
-     * @param index the index of the source neuron within the layer
+     * @param l the layer index of the source neuron
+     * @param j the index of the source neuron within the layer
      * @return a map of target neurons to their associated connection weights
      */
-    Map<Neuron, Float> getOutputConnections(int layer, int index);
+    Map<Neuron, Float> getOutputConnections(int l, int j);
 
     /**
      * Returns the target neurons of the given neuron (thus the downstream nodeds).

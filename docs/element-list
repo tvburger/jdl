@@ -9,10 +9,11 @@ net.tvburger.jdl.mlp
 net.tvburger.jdl.model
 net.tvburger.jdl.model.distances
 net.tvburger.jdl.model.nn
-net.tvburger.jdl.model.nn.activations
 net.tvburger.jdl.model.nn.initializers
 net.tvburger.jdl.model.nn.optimizers
-net.tvburger.jdl.model.nn.regularizations
+net.tvburger.jdl.model.nn.regularizers
+net.tvburger.jdl.model.scalars
+net.tvburger.jdl.model.scalars.activations
 net.tvburger.jdl.model.training
 net.tvburger.jdl.model.training.loss
 net.tvburger.jdl.model.training.regimes

@@ -7,12 +7,12 @@ import java.util.Random;
 
 public class AdalineInitializer implements NeuralNetworkInitializer {
 
+    private final Random random = new Random();
+
     @Override
     public void initialize(Neuron neuron) {
-        Random random = new Random();
-        float[] weights = neuron.getWeights();
-        for (int i = 0; i < weights.length; i++) {
-            weights[i] = (random.nextFloat() - 0.5f) * 0.01f;
+        for (int d = 1; d <= neuron.arity(); d++) {
+            neuron.setWeight(1, (random.nextFloat() - 0.5f) * 0.01f);
         }
         neuron.setBias(0.0f);
     }

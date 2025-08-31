@@ -65,14 +65,14 @@ public final class NeuralNetworks {
      * @param layers the layers of a neural network
      * @return the node connections
      */
-    public static Map<Neuron, List<Pair<Neuron, Float>>> getNeuronConnections(List<List<? extends Neuron>> layers) {
-        Map<Neuron, List<Pair<Neuron, Float>>> connections = new IdentityHashMap<>();
+    public static Map<Neuron, List<Neuron>> getNeuronConnections(List<List<? extends Neuron>> layers) {
+        Map<Neuron, List<Neuron>> connections = new IdentityHashMap<>();
         for (List<? extends Neuron> layer : layers) {
             for (Neuron neuron : layer) {
                 float[] weights = neuron.getWeights();
                 for (int i = 0; i < weights.length; i++) {
-                    Neuron input = neuron.getInputs().get(i);
-                    connections.computeIfAbsent(input, k -> new ArrayList<>()).add(Pair.of(neuron, weights[i]));
+                    Neuron input = neuron.getInputNodes().get(i);
+                    connections.computeIfAbsent(input, k -> new ArrayList<>()).add(neuron);
                 }
             }
         }

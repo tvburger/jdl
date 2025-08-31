@@ -4,8 +4,8 @@ import net.tvburger.jdl.model.nn.DefaultNeuralNetwork;
 import net.tvburger.jdl.model.nn.InputNeuron;
 import net.tvburger.jdl.model.nn.LastInputStoredNeuron;
 import net.tvburger.jdl.model.nn.Neuron;
-import net.tvburger.jdl.model.nn.activations.ActivationFunction;
-import net.tvburger.jdl.model.nn.activations.Activations;
+import net.tvburger.jdl.model.scalars.activations.ActivationFunction;
+import net.tvburger.jdl.model.scalars.activations.Activations;
 
 import java.util.ArrayList;
 import java.util.List;

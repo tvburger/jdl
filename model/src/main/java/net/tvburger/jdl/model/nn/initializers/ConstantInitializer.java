@@ -3,8 +3,6 @@ package net.tvburger.jdl.model.nn.initializers;
 import net.tvburger.jdl.common.patterns.Strategy;
 import net.tvburger.jdl.model.nn.Neuron;
 
-import java.util.Arrays;
-
 /**
  * Implements an initializer that sets all parameters (weights and bias) to a given constant.
  */
@@ -27,8 +25,9 @@ public class ConstantInitializer implements NeuralNetworkInitializer {
      */
     @Override
     public void initialize(Neuron neuron) {
-        float[] weights = neuron.getWeights();
-        Arrays.fill(weights, constant);
+        for (int d = 1; d <= neuron.arity(); d++) {
+            neuron.setWeight(d, constant);
+        }
         neuron.setBias(constant);
     }
 }

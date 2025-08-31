@@ -3,11 +3,7 @@ package net.tvburger.jdl.model.nn;
 import net.tvburger.jdl.common.patterns.Mediator;
 import net.tvburger.jdl.common.utils.Pair;
 
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 /**
  * Provides a standard implementation for a neural network.
@@ -22,7 +18,7 @@ public class DefaultNeuralNetwork implements NeuralNetwork {
 
     private final List<List<? extends Neuron>> layers;
     private final Map<Neuron, Pair<Integer, Integer>> positions;
-    private final Map<Neuron, List<Pair<Neuron, Float>>> connections;
+    private final Map<Neuron, List<Neuron>> connections;
 
     /**
      * Constructs a neural network for the provided layers.
@@ -39,8 +35,8 @@ public class DefaultNeuralNetwork implements NeuralNetwork {
      * {@inheritDoc}
      */
     @Override
-    public int getWidth(int i) {
-        return layers.get(i).size();
+    public int getWidth(int l) {
+        return layers.get(l).size();
     }
 
     /**
@@ -55,38 +51,41 @@ public class DefaultNeuralNetwork implements NeuralNetwork {
      * {@inheritDoc}
      */
     @Override
-    public Neuron getNeuron(int layer, int index) {
-        return layers.get(layer).get(index);
+    public Neuron getNeuron(int l, int j) {
+        return layers.get(l).get(j);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public <N extends Neuron> N getNeuron(int layer, int index, Class<N> classType) {
-        return classType.cast(getNeuron(layer, index));
+    public <N extends Neuron> N getNeuron(int l, int j, Class<N> classType) {
+        return classType.cast(getNeuron(l, j));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Map<Neuron, Float> getOutputConnections(int layer, int index) {
-        Neuron neuron = getNeuron(layer, index);
-        List<Pair<Neuron, Float>> pairs = connections.get(neuron);
+    public Map<Neuron, Float> getOutputConnections(int l, int j) {
+        Neuron neuron = getNeuron(l, j);
+        List<Neuron> connectedNeurons = connections.get(neuron);
         Map<Neuron, Float> outputConnections = new IdentityHashMap<>();
-        if (pairs != null) {
-            for (Pair<Neuron, Float> pair : pairs) {
-                outputConnections.put(pair.left(), pair.right());
+        if (connectedNeurons != null) {
+            for (Neuron connectedNeuron : connectedNeurons) {
+                outputConnections.put(connectedNeuron, connectedNeuron.getWeight(neuron));
             }
         }
         return outputConnections;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Set<Neuron> getTargetNeurons(Neuron neuron) {
-        List<Pair<Neuron, Float>> pairs = connections.get(neuron);
-        return pairs == null ? Set.of() : pairs.stream().map(Pair::left).collect(Collectors.toSet());
+        List<Neuron> neurons = connections.get(neuron);
+        return neurons == null ? Set.of() : new HashSet<>(neurons);
     }
 
     /**
@@ -100,7 +99,7 @@ public class DefaultNeuralNetwork implements NeuralNetwork {
                 if (neuron instanceof InputNeuron) {
                     continue;
                 }
-                parameterCount += neuron.getWeights().length + 1;
+                parameterCount += neuron.getParameterCount();
             }
         }
         return parameterCount;
@@ -118,8 +117,8 @@ public class DefaultNeuralNetwork implements NeuralNetwork {
                 if (neuron instanceof InputNeuron) {
                     continue;
                 }
-                for (float weight : neuron.getWeights()) {
-                    parameters[i++] = weight;
+                for (int d = 1; d <= neuron.arity(); d++) {
+                    parameters[i++] = neuron.getWeight(d);
                 }
                 parameters[i++] = neuron.getBias();
             }
@@ -135,16 +134,16 @@ public class DefaultNeuralNetwork implements NeuralNetwork {
         for (List<? extends Neuron> layer : layers) {
             layer.forEach(Neuron::deactivate);
         }
-        for (int i = 0; i < inputs.length; i++) {
-            ((InputNeuron) layers.get(0).get(i)).setInputValue(inputs[i]);
+        for (int j = 0; j < inputs.length; j++) {
+            ((InputNeuron) layers.get(0).get(j)).setInputValue(inputs[j]);
         }
         for (List<? extends Neuron> layer : layers) {
             layer.forEach(Neuron::activate);
         }
         List<? extends Neuron> outputLayer = layers.get(layers.size() - 1);
         float[] outputs = new float[outputLayer.size()];
-        for (int i = 0; i < outputs.length; i++) {
-            outputs[i] = outputLayer.get(i).getOutput();
+        for (int j = 0; j < outputs.length; j++) {
+            outputs[j] = outputLayer.get(j).getOutput();
         }
         return outputs;
     }
@@ -178,26 +177,26 @@ public class DefaultNeuralNetwork implements NeuralNetwork {
         visitor.enterNetwork(this);
 
         int depth = getDepth();
-        for (int layer = 1; layer <= depth; layer++) {
-            visitor.enterLayer(this, layer);
+        for (int l = 1; l <= depth; l++) {
+            visitor.enterLayer(this, l);
 
-            int width = getWidth(layer);
+            int width = getWidth(l);
             for (int j = 0; j < width; j++) {
-                Neuron neuron = getNeuron(layer, j, Neuron.class);
-                visitor.visitNeuron(this, neuron, layer, j);
+                Neuron neuron = getNeuron(l, j, Neuron.class);
+                visitor.visitNeuron(this, neuron, l, j);
 
-                Map<Neuron, Float> outs = getOutputConnections(layer, j);
+                Map<Neuron, Float> outs = getOutputConnections(l, j);
                 if (outs != null) {
                     for (Map.Entry<Neuron, Float> connection : outs.entrySet()) {
                         Neuron target = connection.getKey();
                         Pair<Integer, Integer> targetPosition = positions.get(target);
-                        visitor.visitConnection(this, neuron, layer, j,
+                        visitor.visitConnection(this, neuron, l, j,
                                 target, targetPosition.left(), targetPosition.right(), connection.getValue());
                     }
                 }
             }
 
-            visitor.exitLayer(this, layer);
+            visitor.exitLayer(this, l);
         }
 
         visitor.exitNetwork(this);

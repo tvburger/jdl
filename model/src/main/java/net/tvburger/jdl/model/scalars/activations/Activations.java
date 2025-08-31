@@ -1,4 +1,4 @@
-package net.tvburger.jdl.model.nn.activations;
+package net.tvburger.jdl.model.scalars.activations;
 
 import net.tvburger.jdl.common.patterns.StaticUtility;
 

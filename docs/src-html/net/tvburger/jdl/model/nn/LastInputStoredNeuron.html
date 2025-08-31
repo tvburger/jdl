@@ -14,7 +14,7 @@
 <pre><span class="source-line-no">001</span><span id="line-1">package net.tvburger.jdl.model.nn;</span>
 <span class="source-line-no">002</span><span id="line-2"></span>
 <span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.patterns.Decorator;</span>
-<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.model.nn.activations.ActivationFunction;</span>
+<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.model.scalars.activations.ActivationFunction;</span>
 <span class="source-line-no">005</span><span id="line-5"></span>
 <span class="source-line-no">006</span><span id="line-6">import java.util.List;</span>
 <span class="source-line-no">007</span><span id="line-7"></span>
@@ -34,7 +34,7 @@
 <span class="source-line-no">021</span><span id="line-21"> *   &lt;li&gt;On {@link #activate()}, performs the standard neuron computation</span>
 <span class="source-line-no">022</span><span id="line-22"> *       (weighted sum + bias → activation function) and also stores a copy</span>
 <span class="source-line-no">023</span><span id="line-23"> *       of the input values provided by connected neurons.&lt;/li&gt;</span>
-<span class="source-line-no">024</span><span id="line-24"> *   &lt;li&gt;The stored inputs can be retrieved via {@link #getStoredInputs()}.&lt;/li&gt;</span>
+<span class="source-line-no">024</span><span id="line-24"> *   &lt;li&gt;The stored inputs can be retrieved via {@link #getStoredInput(int)}.&lt;/li&gt;</span>
 <span class="source-line-no">025</span><span id="line-25"> *   &lt;li&gt;Stored inputs can be explicitly cleared with</span>
 <span class="source-line-no">026</span><span id="line-26"> *       {@link #clearStoredInputs()} to release memory or reset state</span>
 <span class="source-line-no">027</span><span id="line-27"> *       between training iterations.&lt;/li&gt;</span>
@@ -66,30 +66,34 @@
 <span class="source-line-no">053</span><span id="line-53">            return;</span>
 <span class="source-line-no">054</span><span id="line-54">        }</span>
 <span class="source-line-no">055</span><span id="line-55">        super.activate();</span>
-<span class="source-line-no">056</span><span id="line-56">        storedInputs = new float[getInputs().size()];</span>
-<span class="source-line-no">057</span><span id="line-57">        for (int i = 0; i &lt; getInputs().size(); i++) {</span>
-<span class="source-line-no">058</span><span id="line-58">            storedInputs[i] = getInputs().get(i).getOutput();</span>
+<span class="source-line-no">056</span><span id="line-56">        storedInputs = new float[getInputNodes().size()];</span>
+<span class="source-line-no">057</span><span id="line-57">        for (int i = 0; i &lt; getInputNodes().size(); i++) {</span>
+<span class="source-line-no">058</span><span id="line-58">            storedInputs[i] = getInputNodes().get(i).getOutput();</span>
 <span class="source-line-no">059</span><span id="line-59">        }</span>
 <span class="source-line-no">060</span><span id="line-60">    }</span>
 <span class="source-line-no">061</span><span id="line-61"></span>
 <span class="source-line-no">062</span><span id="line-62">    /**</span>
-<span class="source-line-no">063</span><span id="line-63">     * Returns the inputs stored during the last activation.</span>
-<span class="source-line-no">064</span><span id="line-64">     *</span>
-<span class="source-line-no">065</span><span id="line-65">     * @return the most recent input values, or {@code null} if the neuron</span>
-<span class="source-line-no">066</span><span id="line-66">     * has not been activated or if stored inputs were cleared</span>
-<span class="source-line-no">067</span><span id="line-67">     */</span>
-<span class="source-line-no">068</span><span id="line-68">    public float[] getStoredInputs() {</span>
-<span class="source-line-no">069</span><span id="line-69">        return storedInputs;</span>
-<span class="source-line-no">070</span><span id="line-70">    }</span>
-<span class="source-line-no">071</span><span id="line-71"></span>
-<span class="source-line-no">072</span><span id="line-72">    /**</span>
-<span class="source-line-no">073</span><span id="line-73">     * Clears the stored inputs, releasing memory and resetting state.</span>
-<span class="source-line-no">074</span><span id="line-74">     */</span>
-<span class="source-line-no">075</span><span id="line-75">    public synchronized void clearStoredInputs() {</span>
-<span class="source-line-no">076</span><span id="line-76">        storedInputs = null;</span>
-<span class="source-line-no">077</span><span id="line-77">    }</span>
-<span class="source-line-no">078</span><span id="line-78"></span>
-<span class="source-line-no">079</span><span id="line-79">}</span>
+<span class="source-line-no">063</span><span id="line-63">     * Returns the input value that was stored for a specific dimension during the</span>
+<span class="source-line-no">064</span><span id="line-64">     * most recent {@link #activate()} call.</span>
+<span class="source-line-no">065</span><span id="line-65">     * &lt;p&gt;</span>
+<span class="source-line-no">066</span><span id="line-66">     * Dimension indexing is 1-based, where {@code d = 1} refers to the first</span>
+<span class="source-line-no">067</span><span id="line-67">     * input neuron, {@code d = 2} to the second, and so on.</span>
+<span class="source-line-no">068</span><span id="line-68">     *</span>
+<span class="source-line-no">069</span><span id="line-69">     * @param d the input dimension index (1-based)</span>
+<span class="source-line-no">070</span><span id="line-70">     * @return the stored input value for the specified dimension</span>
+<span class="source-line-no">071</span><span id="line-71">     */</span>
+<span class="source-line-no">072</span><span id="line-72">    public float getStoredInput(int d) {</span>
+<span class="source-line-no">073</span><span id="line-73">        return storedInputs[validDimension(d) - 1];</span>
+<span class="source-line-no">074</span><span id="line-74">    }</span>
+<span class="source-line-no">075</span><span id="line-75"></span>
+<span class="source-line-no">076</span><span id="line-76">    /**</span>
+<span class="source-line-no">077</span><span id="line-77">     * Clears the stored inputs, releasing memory and resetting state.</span>
+<span class="source-line-no">078</span><span id="line-78">     */</span>
+<span class="source-line-no">079</span><span id="line-79">    public synchronized void clearStoredInputs() {</span>
+<span class="source-line-no">080</span><span id="line-80">        storedInputs = null;</span>
+<span class="source-line-no">081</span><span id="line-81">    }</span>
+<span class="source-line-no">082</span><span id="line-82"></span>
+<span class="source-line-no">083</span><span id="line-83">}</span>
 
 
 

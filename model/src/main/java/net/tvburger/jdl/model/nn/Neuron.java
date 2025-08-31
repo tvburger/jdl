@@ -2,7 +2,8 @@ package net.tvburger.jdl.model.nn;
 
 import net.tvburger.jdl.common.patterns.DomainObject;
 import net.tvburger.jdl.common.patterns.Entity;
-import net.tvburger.jdl.model.nn.activations.ActivationFunction;
+import net.tvburger.jdl.model.scalars.NeuronFunction;
+import net.tvburger.jdl.model.scalars.activations.ActivationFunction;
 
 import java.util.Arrays;
 import java.util.List;
@@ -10,116 +11,115 @@ import java.util.List;
 /**
  * Represents a single artificial neuron in a neural network.
  * <p>
- * A {@code Neuron} receives inputs from other neurons, combines them
- * using a weighted sum plus a bias, and passes the result (the "logit")
- * through an {@link ActivationFunction} to produce its output.
- * </p>
+ * A {@code Neuron} receives inputs from other neurons, computes a weighted sum with a bias
+ * (the pre-activation or "logit"), and applies an {@link ActivationFunction} to produce its output.
+ * The neuron caches its most recent activation so repeated reads are cheap until explicitly
+ * {@linkplain #deactivate() deactivated}.
  *
  * <h2>Computation</h2>
- * For a neuron with inputs {@code x₁ … xₙ}, weights {@code w₁ … wₙ},
- * and bias {@code b}, the forward activation is:
+ * For inputs {@code x₁ … xₙ}, weights {@code w₁ … wₙ}, and bias {@code b}:
  * <pre>
- *   logit = b + Σ (wᵢ * xᵢ)
+ *   logit  = b + Σ (wᵢ * xᵢ)
  *   output = activationFunction.activate(logit)
  * </pre>
  *
  * <h2>Lifecycle</h2>
  * <ul>
- *   <li>Before activation, the neuron has no valid {@code logit} or {@code output}.</li>
- *   <li>{@link #activate()} computes the neuron’s output, caching
- *       the logit and activation result and marking it as "activated".</li>
- *   <li>{@link #deactivate()} resets the activation flag, allowing the neuron
- *       to be re-evaluated (e.g., for another forward pass).</li>
- *   <li>{@link #getLogit()} and {@link #getOutput()} may only be called
- *       after activation.</li>
+ *   <li>Before activation, no valid output is available.</li>
+ *   <li>{@link #activate()} pulls inputs from upstream neurons, computes and caches the output.</li>
+ *   <li>{@link #deactivate()} clears the activation state so the neuron can be evaluated again.</li>
  * </ul>
  *
- * <h2>Thread safety</h2>
+ * <h2>Thread-safety</h2>
  * <ul>
- *   <li>Activation and deactivation are synchronized to prevent race conditions
- *       in concurrent evaluation.</li>
- *   <li>Weight and bias setters are not synchronized; concurrent modification
- *       must be managed externally if required.</li>
+ *   <li>{@link #activate()} and {@link #deactivate()} are {@code synchronized} to avoid races.</li>
+ *   <li>Weight/bias mutation is not synchronized; coordinate externally if used concurrently.</li>
  * </ul>
  */
 @DomainObject
 @Entity
-public class Neuron {
+public class Neuron extends NeuronFunction {
 
     private final String name;
-    private final List<? extends Neuron> inputs;
-    private float[] weights;
-    private float bias;
-    /**
-     * Linear combination of inputs before activation.
-     */
-    protected float logit;
-    private final ActivationFunction activationFunction;
-    /**
-     * Cached output after applying the activation function.
-     */
-    protected float output;
-    /**
-     * Flag indicating whether {@link #activate()} has been called.
-     */
-    protected boolean activated;
+    private final List<? extends Neuron> inputNodes;
+
+    private final float[] inputValues;
+    private float output;
+    private boolean activated;
 
     /**
      * Constructs a new neuron with the given name, inputs, and activation function.
+     * <p>
+     * The parameter vector is sized as {@code inputs.size() + 1} where index {@code 0} is the bias
+     * and indices {@code 1..} are the weights corresponding to the {@code inputNodes} order.
      *
-     * @param name               human-readable identifier
-     * @param inputs             input neurons (empty if none)
-     * @param activationFunction function to apply to the weighted sum
+     * @param name               human-readable identifier for the neuron
+     * @param inputNodes         upstream input neurons in positional order; may be {@code null} for no inputs
+     * @param activationFunction activation applied to the weighted sum
+     * @throws NullPointerException if {@code activationFunction} is {@code null}
      */
-    public Neuron(String name, List<? extends Neuron> inputs, ActivationFunction activationFunction) {
+    public Neuron(String name, List<? extends Neuron> inputNodes, ActivationFunction activationFunction) {
+        super(new float[inputNodes == null ? 0 : inputNodes.size() + 1], activationFunction);
         this.name = name;
-        this.inputs = inputs == null ? List.of() : inputs;
-        this.weights = new float[this.inputs.size()];
-        this.activationFunction = activationFunction;
+        this.inputNodes = inputNodes == null ? List.of() : inputNodes;
+        this.inputValues = new float[inputNodes == null ? 0 : inputNodes.size()];
     }
 
     /**
-     * @return the human-readable identifier of this neuron
+     * Returns the neuron name.
+     *
+     * @return the human-readable identifier
      */
     public String getName() {
         return name;
     }
 
     /**
-     * @return the input neurons feeding into this neuron
+     * Returns the upstream input neurons feeding this neuron.
+     *
+     * @return an immutable list (possibly empty) of input neurons
      */
-    public List<? extends Neuron> getInputs() {
-        return inputs;
+    public List<? extends Neuron> getInputNodes() {
+        return inputNodes;
     }
 
     /**
-     * @return the activation function applied to the weighted sum
+     * Returns the cached input values used during the most recent {@link #activate()}.
+     *
+     * @return a snapshot array of input values corresponding to {@link #getInputNodes()}
+     * @throws IllegalStateException if the neuron has not been activated
      */
-    public ActivationFunction getActivationFunction() {
-        return activationFunction;
+    public float[] getInputValues() {
+        if (!isActivated()) {
+            throw new IllegalStateException("Neuron not activated!");
+        }
+        return inputValues;
     }
 
     /**
-     * Computes the logit and output of this neuron by aggregating inputs,
-     * applying weights and bias, and passing the result through the
-     * activation function. Subsequent calls are ignored until
-     * {@link #deactivate()} is invoked.
+     * Computes and caches this neuron's output by:
+     * <ol>
+     *   <li>Reading outputs from {@link #getInputNodes()} into an internal buffer,</li>
+     *   <li>Computing the weighted sum with bias,</li>
+     *   <li>Applying the {@link #getActivationFunction()}.</li>
+     * </ol>
+     * Subsequent calls are no-ops until {@link #deactivate()} is invoked.
      */
     public synchronized void activate() {
         if (isActivated()) {
             return;
         }
-        logit = bias;
-        for (int i = 0; i < inputs.size(); i++) {
-            float input = inputs.get(i).getOutput();
-            logit += input * weights[i];
+        for (int d = 1; d <= arity(); d++) {
+            inputValues[d - 1] = getInputNodes().get(d - 1).getOutput();
         }
-        output = activationFunction.activate(logit);
+        output = estimateScalar(inputValues);
         activated = true;
     }
 
     /**
-     * @return whether this neuron has been activated
+     * Indicates whether this neuron has a cached activation result.
+     *
+     * @return {@code true} if {@link #activate()} has been called and not yet {@link #deactivate()}ed; otherwise {@code false}
      */
     public boolean isActivated() {
         return activated;
@@ -130,47 +130,6 @@ public class Neuron {
      */
     public synchronized void deactivate() {
         activated = false;
-    }
-
-    /**
-     * @return the trainable weights of this neuron
-     */
-    public float[] getWeights() {
-        return weights;
-    }
-
-    /**
-     * Sets the trainable weights of this neuron.
-     */
-    public void setWeights(float[] weights) {
-        this.weights = weights;
-    }
-
-    /**
-     * @return the trainable bias of this neuron
-     */
-    public float getBias() {
-        return bias;
-    }
-
-    /**
-     * Sets the trainable bias of this neuron.
-     */
-    public void setBias(float bias) {
-        this.bias = bias;
-    }
-
-    /**
-     * Returns the pre-activation weighted sum of inputs.
-     *
-     * @return the computed logit
-     * @throws IllegalStateException if the neuron has not been activated
-     */
-    public float getLogit() {
-        if (!isActivated()) {
-            throw new IllegalStateException("Neuron not activated!");
-        }
-        return logit;
     }
 
     /**
@@ -192,21 +151,24 @@ public class Neuron {
      * @param source the input neuron
      * @return the corresponding weight, or {@code null} if not found
      */
-    public Float findWeight(Neuron source) {
-        for (int i = 0; i < inputs.size(); i++) {
-            if (inputs.get(i) == source) {
-                return weights[i];
+    public Float getWeight(Neuron source) {
+        for (int d = 1; d <= inputNodes.size(); d++) {
+            if (inputNodes.get(d - 1) == source) {
+                return getWeight(d);
             }
         }
         return null;
     }
 
     /**
-     * @return string representation including name, activation state, logit, output, weights, and bias
+     * Returns a concise string representation including name, activation state, last output,
+     * weights, and bias.
+     *
+     * @return a human-readable summary of this neuron
      */
     @Override
     public String toString() {
-        return name + "{" + activated + ", " + logit + ", " + output + "}" + Arrays.toString(weights) + (bias >= 0.0 ? "+" : "") + bias;
+        return name + "{" + activated + ", " + output + "}" + Arrays.toString(getWeights()) + (getBias() >= 0.0 ? "+" : "") + getBias();
     }
 
 }

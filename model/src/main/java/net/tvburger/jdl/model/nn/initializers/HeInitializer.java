@@ -24,13 +24,12 @@ public class HeInitializer implements NeuralNetworkInitializer {
      */
     @Override
     public void initialize(Neuron neuron) {
-        float[] weights = neuron.getWeights();
-        int fanIn = weights.length;
+        int fanIn = neuron.arity();
         double std = Math.sqrt(2.0 / fanIn);
 
-        for (int i = 0; i < weights.length; i++) {
+        for (int d = 1; d <= neuron.arity(); d++) {
             // Gaussian(0, std^2)
-            weights[i] = (float) (random.nextGaussian() * std);
+            neuron.setWeight(d, (float) (random.nextGaussian() * std));
         }
         // Bias left unchanged
     }

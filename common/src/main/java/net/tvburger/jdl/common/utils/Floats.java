@@ -13,6 +13,8 @@ public final class Floats {
      */
     public static final float EPSILON = 1e-6f;
 
+    public static final float[] EMPTY = new float[0];
+
     private Floats() {
     }
 

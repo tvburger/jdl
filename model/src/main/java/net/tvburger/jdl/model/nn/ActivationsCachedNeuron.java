@@ -1,7 +1,7 @@
 package net.tvburger.jdl.model.nn;
 
 import net.tvburger.jdl.common.patterns.Decorator;
-import net.tvburger.jdl.model.nn.activations.ActivationFunction;
+import net.tvburger.jdl.model.scalars.activations.ActivationFunction;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -29,12 +29,11 @@ public class ActivationsCachedNeuron extends Neuron {
      * <p>Stores the following information for each activation:
      * <ul>
      *     <li>{@code inputs} – the input values received by this neuron during activation</li>
-     *     <li>{@code logit} – the raw output before applying the activation function</li>
      *     <li>{@code output} – the output produced by the neuron</li>
      *     <li>{@code gradient} – the gradient calculated for this output (useful for learning)</li>
      * </ul>
      */
-    public record Activation(float[] inputs, float logit, float output, float gradient) {
+    public record Activation(float[] inputs, float output, float[] parameterGradients) {
 
     }
 
@@ -67,11 +66,9 @@ public class ActivationsCachedNeuron extends Neuron {
             return;
         }
         super.activate();
-        float[] inputs = new float[getInputs().size()];
-        for (int i = 0; i < inputs.length; i++) {
-            inputs[i] += getInputs().get(i).getOutput();
-        }
-        cachedActivations.add(new Activation(inputs, getLogit(), getOutput(), getActivationFunction().determineGradientForOutput(getOutput())));
+        float[] inputValues = getInputValues();
+        float output = getOutput();
+        cachedActivations.add(new Activation(inputValues, output, calculateParameterGradients_df_dp(inputValues)));
     }
 
     /**

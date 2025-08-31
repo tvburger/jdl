@@ -42,22 +42,21 @@
 <span class="source-line-no">029</span><span id="line-29">     */</span>
 <span class="source-line-no">030</span><span id="line-30">    @Override</span>
 <span class="source-line-no">031</span><span id="line-31">    public void initialize(NeuralNetwork neuralNetwork, Neuron neuron) {</span>
-<span class="source-line-no">032</span><span id="line-32">        float[] weights = neuron.getWeights();</span>
-<span class="source-line-no">033</span><span id="line-33">        int fanIn = weights.length;</span>
-<span class="source-line-no">034</span><span id="line-34">        int fanOut = neuralNetwork.getTargetNeurons(neuron).size();</span>
-<span class="source-line-no">035</span><span id="line-35"></span>
-<span class="source-line-no">036</span><span id="line-36">        float limit = (float) Math.sqrt(6.0f / (fanIn + fanOut));</span>
-<span class="source-line-no">037</span><span id="line-37"></span>
-<span class="source-line-no">038</span><span id="line-38">        for (int i = 0; i &lt; weights.length; i++) {</span>
-<span class="source-line-no">039</span><span id="line-39">            weights[i] = uniform(-limit, limit);</span>
-<span class="source-line-no">040</span><span id="line-40">        }</span>
-<span class="source-line-no">041</span><span id="line-41">        // Bias left unchanged</span>
-<span class="source-line-no">042</span><span id="line-42">    }</span>
-<span class="source-line-no">043</span><span id="line-43"></span>
-<span class="source-line-no">044</span><span id="line-44">    private float uniform(float min, float max) {</span>
-<span class="source-line-no">045</span><span id="line-45">        return min + (max - min) * random.nextFloat();</span>
-<span class="source-line-no">046</span><span id="line-46">    }</span>
-<span class="source-line-no">047</span><span id="line-47">}</span>
+<span class="source-line-no">032</span><span id="line-32">        int fanIn = neuron.arity();</span>
+<span class="source-line-no">033</span><span id="line-33">        int fanOut = neuralNetwork.getTargetNeurons(neuron).size();</span>
+<span class="source-line-no">034</span><span id="line-34"></span>
+<span class="source-line-no">035</span><span id="line-35">        float limit = (float) Math.sqrt(6.0f / (fanIn + fanOut));</span>
+<span class="source-line-no">036</span><span id="line-36"></span>
+<span class="source-line-no">037</span><span id="line-37">        for (int d = 1; d &lt;= neuron.arity(); d++) {</span>
+<span class="source-line-no">038</span><span id="line-38">            neuron.setWeight(d, uniform(-limit, limit));</span>
+<span class="source-line-no">039</span><span id="line-39">        }</span>
+<span class="source-line-no">040</span><span id="line-40">        // Bias left unchanged</span>
+<span class="source-line-no">041</span><span id="line-41">    }</span>
+<span class="source-line-no">042</span><span id="line-42"></span>
+<span class="source-line-no">043</span><span id="line-43">    private float uniform(float min, float max) {</span>
+<span class="source-line-no">044</span><span id="line-44">        return min + (max - min) * random.nextFloat();</span>
+<span class="source-line-no">045</span><span id="line-45">    }</span>
+<span class="source-line-no">046</span><span id="line-46">}</span>
 
 
 

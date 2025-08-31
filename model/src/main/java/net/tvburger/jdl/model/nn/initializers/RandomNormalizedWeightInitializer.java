@@ -21,9 +21,8 @@ public class RandomNormalizedWeightInitializer implements NeuralNetworkInitializ
      */
     @Override
     public void initialize(Neuron neuron) {
-        float[] weights = neuron.getWeights();
-        for (int i = 0; i < weights.length; i++) {
-            weights[i] = random() / weights.length;
+        for (int d = 1; d <= neuron.arity(); d++) {
+            neuron.setWeight(d, random() / neuron.arity());
         }
     }
 
