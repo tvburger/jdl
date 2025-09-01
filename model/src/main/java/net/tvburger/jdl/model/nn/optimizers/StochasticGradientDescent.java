@@ -87,26 +87,26 @@ public class StochasticGradientDescent<N extends NeuralNetwork> implements Optim
             return;
         }
 
-        // Allocate accumulators for gradients (sum over batch)
-        final Map<Neuron, float[]> dWsum = new IdentityHashMap<>();
-        final Map<Neuron, Float> dBsum = new IdentityHashMap<>();
+        // Collect and add all the weighted votes for parameter (bias + weights) corrections
+        Map<Neuron, float[]> weightedVotesForWeightCorrections = new IdentityHashMap<>();
+        Map<Neuron, Float> weightedVotesForBiasCorrections = new IdentityHashMap<>();
 
         // For each sample n, compute error signal δ - delta - layer-by-layer (backward), accumulate gradients
-        trainingSet.samples().forEach(s -> calculateDelta(s, batchSize, dWsum, dBsum, neuralNetwork, objective));
+        trainingSet.samples().forEach(s -> voteForParameterCorrections(s, batchSize, weightedVotesForWeightCorrections, weightedVotesForBiasCorrections, neuralNetwork, objective));
 
         // Apply changes
         neuralNetwork.accept(new NeuronVisitor() {
             @Override
             public void visitNeuron(NeuralNetwork neuralNetwork, Neuron neuron, int layerIndex, int neuronIndex) {
-                float[] gw = dWsum.get(neuron);
-                if (gw != null) {
+                float[] voteForWeights = weightedVotesForWeightCorrections.get(neuron);
+                if (voteForWeights != null) {
                     for (int d = 1; d <= neuron.arity(); d++) {
-                        neuron.adjustWeight(d, -learningRate * gw[d - 1]);
+                        neuron.adjustWeight(d, -learningRate * voteForWeights[d - 1]);
                     }
                 }
-                Float gb = dBsum.get(neuron);
-                if (gb != null) {
-                    neuron.adjustBias(-learningRate * gb);
+                Float voteForBias = weightedVotesForBiasCorrections.get(neuron);
+                if (voteForBias != null) {
+                    neuron.adjustBias(-learningRate * voteForBias);
                 }
                 if (neuron instanceof ActivationsCachedNeuron a) {
                     a.deactivate();
@@ -115,22 +115,22 @@ public class StochasticGradientDescent<N extends NeuralNetwork> implements Optim
         });
     }
 
-    private void calculateDelta(DataSet.Sample sample, int batchSize, Map<Neuron, float[]> dWsum, Map<Neuron, Float> dBsum, N neuralNetwork, ObjectiveFunction objective) {
+    private void voteForParameterCorrections(DataSet.Sample sample, int batchSize, Map<Neuron, float[]> weightedVotesForWeightCorrections, Map<Neuron, Float> weightedVotesForBiasCorrections, N neuralNetwork, ObjectiveFunction objective) {
         Map<Neuron, Float> errorSignals = new IdentityHashMap<>();
         float[] estimated = neuralNetwork.estimate(sample.features());
-        float[] lossGradients = objective.calculateGradient_dJ_da(batchSize, estimated, sample.targetOutputs());
+        float[] lossGradients = objective.calculateGradient_dJ_da(1, estimated, sample.targetOutputs());
         for (int j = 0; j < neuralNetwork.coArity(); j++) {
-            calculateDeltaForOutputNode(dWsum, dBsum, neuralNetwork, lossGradients, errorSignals, j);
+            voteForOutputNodeParameterCorrections(batchSize, weightedVotesForWeightCorrections, weightedVotesForBiasCorrections, neuralNetwork, lossGradients, errorSignals, j);
         }
         for (int l = neuralNetwork.getDepth() - 1; l >= 1; l--) {
             int width = neuralNetwork.getWidth(l);
             for (int j = 0; j < width; j++) {
-                calculateDeltaForHiddenNode(dWsum, dBsum, neuralNetwork, errorSignals, l, j);
+                voteForHiddenNodeParameterCorrections(batchSize, weightedVotesForWeightCorrections, weightedVotesForBiasCorrections, neuralNetwork, errorSignals, l, j);
             }
         }
     }
 
-    private void calculateDeltaForOutputNode(Map<Neuron, float[]> dWsum, Map<Neuron, Float> dBsum, N neuralNetwork, float[] lossGradients, Map<Neuron, Float> errorSignals, int j) {
+    private void voteForOutputNodeParameterCorrections(int batchSize, Map<Neuron, float[]> weightedVotesForWeightCorrections, Map<Neuron, Float> weightedVotesForBiasCorrections, N neuralNetwork, float[] lossGradients, Map<Neuron, Float> errorSignals, int j) {
         ActivationsCachedNeuron outputNode = neuralNetwork.getNeuron(neuralNetwork.getDepth(), j, ActivationsCachedNeuron.class);
         ActivationsCachedNeuron.Activation activation = outputNode.getCache().getLast();
 
@@ -139,10 +139,10 @@ public class StochasticGradientDescent<N extends NeuralNetwork> implements Optim
         errorSignals.put(outputNode, errorSignal); // track error signal for upstream nodes
 
         // determine bias gradient
-        calculateDeltaForNode(dWsum, dBsum, errorSignal, outputNode, activation);
+        voteForNodeParameterCorrections(batchSize, weightedVotesForWeightCorrections, weightedVotesForBiasCorrections, errorSignal, outputNode, activation);
     }
 
-    private void calculateDeltaForHiddenNode(Map<Neuron, float[]> dWsum, Map<Neuron, Float> dBsum, N neuralNetwork, Map<Neuron, Float> errorSignals, int l, int j) {
+    private void voteForHiddenNodeParameterCorrections(int batchSize, Map<Neuron, float[]> weightedVotesForWeightCorrections, Map<Neuron, Float> weightedVotesForBiasCorrections, N neuralNetwork, Map<Neuron, Float> errorSignals, int l, int j) {
         ActivationsCachedNeuron hiddenNode = neuralNetwork.getNeuron(l, j, ActivationsCachedNeuron.class);
         ActivationsCachedNeuron.Activation activation = hiddenNode.getCache().getLast();
 
@@ -157,22 +157,24 @@ public class StochasticGradientDescent<N extends NeuralNetwork> implements Optim
         float errorSignal = backPropagation * hiddenNode.getActivationFunction().determineGradientForOutput(activation.output());
         errorSignals.put(hiddenNode, errorSignal);
 
-        calculateDeltaForNode(dWsum, dBsum, errorSignal, hiddenNode, activation);
+        voteForNodeParameterCorrections(batchSize, weightedVotesForWeightCorrections, weightedVotesForBiasCorrections, errorSignal, hiddenNode, activation);
     }
 
-    private void calculateDeltaForNode(Map<Neuron, float[]> dWsum, Map<Neuron, Float> dBsum, float errorSignal, ActivationsCachedNeuron hiddenNode, ActivationsCachedNeuron.Activation activation) {
-        float[] parameterGrads = activation.parameterGradients();
+    private void voteForNodeParameterCorrections(int batchSize, Map<Neuron, float[]> weightedVotesForWeightCorrections, Map<Neuron, Float> weightedVotesForBiasCorrections, float errorSignal, ActivationsCachedNeuron hiddenNode, ActivationsCachedNeuron.Activation activation) {
+        float[] parameterGradients_df_dp = activation.parameterGradients_df_dp();
 
         // determine bias gradient
-        float biasGradient = errorSignal * parameterGrads[0];
-        dBsum.merge(hiddenNode, biasGradient, Float::sum); // add all up for all samples
+        float biasGradient = errorSignal * parameterGradients_df_dp[0];
+        float weightedVoteForBiasCorrection = biasGradient / batchSize;
+        weightedVotesForBiasCorrections.merge(hiddenNode, weightedVoteForBiasCorrection, Float::sum); // add all up for all samples
 
         // determine weight gradients
         float[] inputs = activation.inputs();
-        float[] gradientSumPerWeight = dWsum.computeIfAbsent(hiddenNode, k -> new float[inputs.length]);
+        float[] gradientSumPerWeight = weightedVotesForWeightCorrections.computeIfAbsent(hiddenNode, k -> new float[inputs.length]);
         for (int d = 1; d <= inputs.length; d++) {
-            float weightGradient = errorSignal * parameterGrads[d];
-            gradientSumPerWeight[d - 1] += weightGradient; // add the weight correction (over all samples)
+            float weightGradient = errorSignal * parameterGradients_df_dp[d];
+            float weightedVoteForWeightCorrection = weightGradient / batchSize;
+            gradientSumPerWeight[d - 1] += weightedVoteForWeightCorrection; // add the weight correction (over all samples)
         }
     }
 }

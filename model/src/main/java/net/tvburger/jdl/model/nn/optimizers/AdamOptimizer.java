@@ -94,7 +94,7 @@ public class AdamOptimizer<N extends NeuralNetwork> implements Optimizer<N> {
                 ActivationsCachedNeuron out = neuralNetwork.getNeuron(depth, j, ActivationsCachedNeuron.class);
                 ActivationsCachedNeuron.Activation activation = out.getCache().get(i);
 
-                float delta = lossGradients[j] * activation.parameterGradients()[0];
+                float delta = lossGradients[j] * activation.parameterGradients_df_dp()[0];
                 deltaN.put(out, delta);
 
                 float[] inputs = activation.inputs();
@@ -117,7 +117,7 @@ public class AdamOptimizer<N extends NeuralNetwork> implements Optimizer<N> {
                     }
 
                     ActivationsCachedNeuron.Activation activation = neuron.getCache().get(i);
-                    float delta = back * activation.parameterGradients()[0];
+                    float delta = back * activation.parameterGradients_df_dp()[0];
                     deltaN.put(neuron, delta);
 
                     float[] inputs = activation.inputs();

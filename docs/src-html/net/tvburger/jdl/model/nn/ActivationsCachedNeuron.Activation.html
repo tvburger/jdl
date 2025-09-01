@@ -43,10 +43,10 @@
 <span class="source-line-no">030</span><span id="line-30">     * &lt;ul&gt;</span>
 <span class="source-line-no">031</span><span id="line-31">     *     &lt;li&gt;{@code inputs} – the input values received by this neuron during activation&lt;/li&gt;</span>
 <span class="source-line-no">032</span><span id="line-32">     *     &lt;li&gt;{@code output} – the output produced by the neuron&lt;/li&gt;</span>
-<span class="source-line-no">033</span><span id="line-33">     *     &lt;li&gt;{@code gradient} – the gradient calculated for this output (useful for learning)&lt;/li&gt;</span>
+<span class="source-line-no">033</span><span id="line-33">     *     &lt;li&gt;{@code parameterGradients_df_dp} – the gradient calculated for this output (useful for learning)&lt;/li&gt;</span>
 <span class="source-line-no">034</span><span id="line-34">     * &lt;/ul&gt;</span>
 <span class="source-line-no">035</span><span id="line-35">     */</span>
-<span class="source-line-no">036</span><span id="line-36">    public record Activation(float[] inputs, float output, float[] parameterGradients) {</span>
+<span class="source-line-no">036</span><span id="line-36">    public record Activation(float[] inputs, float output, float[] parameterGradients_df_dp) {</span>
 <span class="source-line-no">037</span><span id="line-37"></span>
 <span class="source-line-no">038</span><span id="line-38">    }</span>
 <span class="source-line-no">039</span><span id="line-39"></span>

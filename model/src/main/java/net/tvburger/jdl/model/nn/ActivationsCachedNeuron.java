@@ -30,10 +30,10 @@ public class ActivationsCachedNeuron extends Neuron {
      * <ul>
      *     <li>{@code inputs} – the input values received by this neuron during activation</li>
      *     <li>{@code output} – the output produced by the neuron</li>
-     *     <li>{@code gradient} – the gradient calculated for this output (useful for learning)</li>
+     *     <li>{@code parameterGradients_df_dp} – the gradient calculated for this output (useful for learning)</li>
      * </ul>
      */
-    public record Activation(float[] inputs, float output, float[] parameterGradients) {
+    public record Activation(float[] inputs, float output, float[] parameterGradients_df_dp) {
 
     }
 
