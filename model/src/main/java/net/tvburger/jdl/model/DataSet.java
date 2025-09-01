@@ -305,6 +305,6 @@ public record DataSet(List<Sample> samples) implements Iterable<DataSet.Sample> 
      * @return true if empty
      */
     public boolean isEmpty() {
-        return samples().isEmpty();
+        return samples.isEmpty();
     }
 }

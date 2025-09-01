@@ -20,7 +20,24 @@ public final class Regimes {
         return new OnlineRegime();
     }
 
-    public static ChainedRegime.Builder chain() {
-        return new ChainedRegime.Builder();
+    public static ChainedRegime.Builder epochs(int epochs) {
+        return new ChainedRegime.Builder().epochs(epochs);
     }
+
+    public static ChainedRegime.Builder reportObjective() {
+        return new ChainedRegime.Builder().reportObjective();
+    }
+
+    public static ChainedRegime.Builder dumpNodes() {
+        return new ChainedRegime.Builder().dumpNodes();
+    }
+
+    public static ChainedRegime.Builder dumpNodes(boolean firstTime) {
+        return new ChainedRegime.Builder().dumpNodes(firstTime);
+    }
+
+    public final ChainedRegime.Builder dumpNodes(boolean firstTime, boolean includeInputs) {
+        return new ChainedRegime.Builder().dumpNodes(firstTime, includeInputs);
+    }
+
 }

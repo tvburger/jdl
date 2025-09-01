@@ -28,7 +28,7 @@ public class MLPMain {
         ObjectiveFunction objective = Losses.bCE();
         StochasticGradientDescent<MultiLayerPerceptron> gradientDescent = new StochasticGradientDescent<>();
         gradientDescent.setLearningRate(0.5f);
-        ChainedRegime regime = Regimes.chain().dumpNodes().epochs(10_000).reportObjective().batch();
+        ChainedRegime regime = Regimes.dumpNodes().epochs(10_000).reportObjective().batch();
         Trainer<MultiLayerPerceptron> mlpTrainer = Trainer.of(initializer, objective, gradientDescent, regime);
         mlpTrainer.train(mlp, trainingSet);
 
