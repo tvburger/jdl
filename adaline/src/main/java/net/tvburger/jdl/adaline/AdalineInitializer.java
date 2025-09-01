@@ -1,7 +1,7 @@
 package net.tvburger.jdl.adaline;
 
 import net.tvburger.jdl.model.nn.Neuron;
-import net.tvburger.jdl.model.nn.initializers.NeuralNetworkInitializer;
+import net.tvburger.jdl.model.nn.training.initializers.NeuralNetworkInitializer;
 
 import java.util.Random;
 

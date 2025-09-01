@@ -27,9 +27,7 @@ import net.tvburger.jdl.model.training.Regime;
  * @see DelegatedRegime
  */
 @Strategy(Strategy.Role.CONCRETE)
-public final class EpochRegime extends DelegatedRegime {
-
-    private int epochs;
+public final class EpochRegime extends DelegatedRegime implements EpochConfigurable {
 
     /**
      * Creates a new {@code EpochRegime} that delegates to the given regime
@@ -40,25 +38,7 @@ public final class EpochRegime extends DelegatedRegime {
      */
     public EpochRegime(Regime regime, int epochs) {
         super(regime);
-        this.epochs = epochs;
-    }
-
-    /**
-     * Returns the number of epochs configured for this regime.
-     *
-     * @return the number of epochs
-     */
-    public final int getEpochs() {
-        return epochs;
-    }
-
-    /**
-     * Sets the number of epochs to use when training.
-     *
-     * @param epochs the number of epochs (must be {@code >= 1})
-     */
-    public final void setEpochs(int epochs) {
-        this.epochs = epochs;
+        setHyperparameter(HP_EPOCHS, epochs);
     }
 
     /**
@@ -73,7 +53,7 @@ public final class EpochRegime extends DelegatedRegime {
      */
     @Override
     public <E extends EstimationFunction> void train(E estimationFunction, DataSet trainingSet, ObjectiveFunction objective, Optimizer<? super E> optimizer) {
-        for (int i = 0; i < epochs; i++) {
+        for (int i = 0; i < getEpochs(); i++) {
             regime.train(estimationFunction, trainingSet, objective, optimizer);
         }
     }

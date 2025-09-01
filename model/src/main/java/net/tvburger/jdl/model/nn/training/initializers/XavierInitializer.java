@@ -1,4 +1,4 @@
-package net.tvburger.jdl.model.nn.initializers;
+package net.tvburger.jdl.model.nn.training.initializers;
 
 import net.tvburger.jdl.common.patterns.Strategy;
 import net.tvburger.jdl.model.nn.NeuralNetwork;
@@ -22,7 +22,19 @@ import java.util.Random;
 @Strategy(Strategy.Role.CONCRETE)
 public class XavierInitializer implements NeuralNetworkInitializer {
 
-    private final Random random = new Random();
+    private final Random random;
+
+    public XavierInitializer() {
+        this(new Random());
+    }
+
+    public XavierInitializer(int seed) {
+        this(new Random(seed));
+    }
+
+    public XavierInitializer(Random random) {
+        this.random = random;
+    }
 
     /**
      * {@inheritDoc}

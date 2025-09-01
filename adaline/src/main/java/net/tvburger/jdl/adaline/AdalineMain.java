@@ -22,7 +22,7 @@ public class AdalineMain {
         Adaline adaline = Adaline.create(400, 8);
         ObjectiveFunction objective = Losses.mSE();
         LeastMeanSquares leastMeanSquares = new LeastMeanSquares(0.01f);
-        ChainedRegime regime = Regimes.chainTop().epochs(100).reportObjective().online().bottomChain();
+        ChainedRegime regime = Regimes.chain().epochs(100).reportObjective().online();
         Trainer<Adaline> adalineTrainer = Trainer.of(new AdalineInitializer(), objective, leastMeanSquares, regime);
         adalineTrainer.train(adaline, trainingSet);
 

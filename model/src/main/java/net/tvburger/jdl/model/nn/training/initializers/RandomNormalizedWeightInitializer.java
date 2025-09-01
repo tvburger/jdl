@@ -1,4 +1,4 @@
-package net.tvburger.jdl.model.nn.initializers;
+package net.tvburger.jdl.model.nn.training.initializers;
 
 import net.tvburger.jdl.common.patterns.Strategy;
 import net.tvburger.jdl.model.nn.Neuron;

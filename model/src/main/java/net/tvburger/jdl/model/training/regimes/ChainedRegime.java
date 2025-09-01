@@ -1,10 +1,7 @@
 package net.tvburger.jdl.model.training.regimes;
 
-import net.tvburger.jdl.common.patterns.Builder;
 import net.tvburger.jdl.common.patterns.Proxy;
 import net.tvburger.jdl.common.patterns.Strategy;
-import net.tvburger.jdl.common.patterns.TemplateMethod;
-import net.tvburger.jdl.common.utils.Floats;
 import net.tvburger.jdl.model.DataSet;
 import net.tvburger.jdl.model.EstimationFunction;
 import net.tvburger.jdl.model.training.ObjectiveFunction;
@@ -137,18 +134,12 @@ public class ChainedRegime implements Regime, Iterable<Regime> {
      *
      * <p>Used internally by builders to target the current top or relative positions
      * while the chain is being assembled.</p>
+     *
+     * @param chainedRegimes    Reference to the chained regimes
+     * @param linkedRegimeIndex The target index; negative values are relative to the end.
      */
     @Proxy
-    private class Link implements Regime {
-
-        /**
-         * The target index; negative values are relative to the end.
-         */
-        private final int linkedRegimeIndex;
-
-        private Link(int linkedRegimeIndex) {
-            this.linkedRegimeIndex = linkedRegimeIndex;
-        }
+    private record Link(List<Regime> chainedRegimes, int linkedRegimeIndex) implements Regime {
 
         /**
          * Resolves the linked regime by index (handling negative indexes).
@@ -179,40 +170,14 @@ public class ChainedRegime implements Regime, Iterable<Regime> {
         }
     }
 
-    /**
-     * Abstract base for creating fluent builders of {@link ChainedRegime}.
-     *
-     * <p>This class is not used directly; instead, concrete subclasses such as
-     * {@link TopDownChainer} and {@link BottomUpChainer} extend it to provide
-     * a fluent DSL for assembling training regimes. It maintains a list of
-     * chained regimes and a {@code targetRegime} pointer so that each newly
-     * added decorator can wrap the current top of the chain.</p>
-     *
-     * <p>Fluent methods such as {@link #epochs(int)}, {@link #miniBatch(int)},
-     * and {@link #reportObjective()} add specific {@link Regime} decorators
-     * around the current target, enabling expressive construction of complex
-     * training pipelines without manual wiring.</p>
-     *
-     * <p>Once the chain is complete, {@link #build()} produces an immutable
-     * {@link ChainedRegime} that can be passed to a {@code Trainer}.</p>
-     *
-     * @param <M> the concrete builder subtype (for fluent chaining)
-     * @see TopDownChainer
-     * @see BottomUpChainer
-     */
-    @TemplateMethod
-    protected static abstract class Modifiable<M extends Modifiable<M>> extends ChainedRegime {
+    @net.tvburger.jdl.common.patterns.Builder
+    public static class Builder {
 
-        /**
-         * The regime that the next decorator should wrap.
-         */
-        protected Regime targetRegime;
+        private final List<Regime> chainedRegimes = new ArrayList<>();
+        private Regime targetRegime = nextLink();
 
-        /**
-         * Creates a new, initially empty chain builder.
-         */
-        protected Modifiable() {
-            super(new ArrayList<>());
+        private Link nextLink() {
+            return new Link(chainedRegimes, -2 - chainedRegimes.size());
         }
 
         /**
@@ -221,7 +186,11 @@ public class ChainedRegime implements Regime, Iterable<Regime> {
          * @param regime the regime to add
          * @return {@code this} builder
          */
-        protected abstract M chainRegime(Regime regime);
+        private Builder chainRegime(Regime regime) {
+            chainedRegimes.addFirst(regime);
+            targetRegime = nextLink();
+            return this;
+        }
 
         /**
          * Adds a {@link BatchRegime} decorator around the current target.
@@ -229,8 +198,8 @@ public class ChainedRegime implements Regime, Iterable<Regime> {
          * @return this builder (for fluent chaining)
          * @see BatchRegime
          */
-        public final M batch() {
-            return chainRegime(new BatchRegime(targetRegime));
+        public final ChainedRegime batch() {
+            return chainRegime(new BatchRegime()).build();
         }
 
         /**
@@ -239,8 +208,8 @@ public class ChainedRegime implements Regime, Iterable<Regime> {
          * @return this builder (for fluent chaining)
          * @see OnlineRegime
          */
-        public final M online() {
-            return chainRegime(new OnlineRegime(targetRegime));
+        public final ChainedRegime online() {
+            return chainRegime(new OnlineRegime()).build();
         }
 
         /**
@@ -249,19 +218,19 @@ public class ChainedRegime implements Regime, Iterable<Regime> {
          * @return this builder (for fluent chaining)
          * @see MiniBatchRegime
          */
-        public final M miniBatch() {
+        public final ChainedRegime miniBatch() {
             return miniBatch(32);
         }
 
         /**
          * Adds a {@link MiniBatchRegime} decorator with the given batch size.
          *
-         * @param samplesPerLearning the number of samples per mini-batch (must be > 0)
+         * @param batchSize the number of samples per mini-batch (must be > 0)
          * @return this builder (for fluent chaining)
          * @see MiniBatchRegime
          */
-        public final M miniBatch(int samplesPerLearning) {
-            return chainRegime(new MiniBatchRegime(targetRegime, samplesPerLearning));
+        public final ChainedRegime miniBatch(int batchSize) {
+            return chainRegime(new MiniBatchRegime(batchSize)).build();
         }
 
         /**
@@ -270,7 +239,7 @@ public class ChainedRegime implements Regime, Iterable<Regime> {
          * @return this builder (for fluent chaining)
          * @see EpochRegime
          */
-        public final M epochs() {
+        public final Builder epochs() {
             return epochs(1_000);
         }
 
@@ -281,10 +250,9 @@ public class ChainedRegime implements Regime, Iterable<Regime> {
          * @return this builder (for fluent chaining)
          * @see EpochRegime
          */
-        public final M epochs(int epochs) {
+        public final Builder epochs(int epochs) {
             return chainRegime(new EpochRegime(targetRegime, epochs));
         }
-
 
         /**
          * Adds an {@link ObjectiveReportingRegime} decorator that reports
@@ -293,82 +261,8 @@ public class ChainedRegime implements Regime, Iterable<Regime> {
          * @return this builder (for fluent chaining)
          * @see ObjectiveReportingRegime
          */
-        public final M reportObjective() {
+        public final Builder reportObjective() {
             return chainRegime(new ObjectiveReportingRegime(targetRegime, true));
-        }
-
-        /**
-         * Adds a {@link StopIfNoImprovementRegime} decorator with default
-         * parameters (stall limit = 2, min improvement = {@link Floats#EPSILON}).
-         *
-         * @return this builder (for fluent chaining)
-         * @see StopIfNoImprovementRegime
-         */
-        public final M stopIfNoImprovements() {
-            return stopIfNoImprovements(2);
-        }
-
-        /**
-         * Adds a {@link StopIfNoImprovementRegime} decorator with the given stall limit.
-         *
-         * @param maxStalledEpochs maximum consecutive stalled epochs allowed
-         * @return this builder (for fluent chaining)
-         * @see StopIfNoImprovementRegime
-         */
-        public final M stopIfNoImprovements(int maxStalledEpochs) {
-            return stopIfNoImprovements(maxStalledEpochs, Floats.EPSILON);
-        }
-
-        /**
-         * Adds a {@link StopIfNoImprovementRegime} decorator with default stall limit (2)
-         * and the specified dumping flag.
-         *
-         * @param dumpLosses whether to print loss values during training
-         * @return this builder (for fluent chaining)
-         * @see StopIfNoImprovementRegime
-         */
-        public final M stopIfNoImprovements(boolean dumpLosses) {
-            return stopIfNoImprovements(2, dumpLosses);
-        }
-
-        /**
-         * Adds a {@link StopIfNoImprovementRegime} decorator with a stall limit
-         * and dumping flag.
-         *
-         * @param maxStalledEpochs maximum consecutive stalled epochs allowed
-         * @param dumpLosses       whether to print loss values during training
-         * @return this builder (for fluent chaining)
-         * @see StopIfNoImprovementRegime
-         */
-        public final M stopIfNoImprovements(int maxStalledEpochs, boolean dumpLosses) {
-            return stopIfNoImprovements(2, Floats.EPSILON, dumpLosses);
-        }
-
-
-        /**
-         * Adds a {@link StopIfNoImprovementRegime} decorator with the given
-         * stall limit and minimum improvement threshold.
-         *
-         * @param maxStalledEpochs maximum consecutive stalled epochs allowed
-         * @param minImprovement   minimum relative improvement (percentage) required
-         * @return this builder (for fluent chaining)
-         * @see StopIfNoImprovementRegime
-         */
-        public final M stopIfNoImprovements(int maxStalledEpochs, float minImprovement) {
-            return stopIfNoImprovements(maxStalledEpochs, minImprovement, true);
-        }
-
-        /**
-         * Adds a {@link StopIfNoImprovementRegime} decorator with full configuration.
-         *
-         * @param maxStalledEpochs maximum consecutive stalled epochs allowed
-         * @param minImprovement   minimum relative improvement (percentage) required
-         * @param dumpLosses       whether to print loss values during training
-         * @return this builder (for fluent chaining)
-         * @see StopIfNoImprovementRegime
-         */
-        public final M stopIfNoImprovements(int maxStalledEpochs, float minImprovement, boolean dumpLosses) {
-            return chainRegime(StopIfNoImprovementRegime.create(targetRegime, maxStalledEpochs, minImprovement, dumpLosses));
         }
 
         /**
@@ -377,7 +271,7 @@ public class ChainedRegime implements Regime, Iterable<Regime> {
          * @return this builder (for fluent chaining)
          * @see DumpNodesRegime
          */
-        public final M dumpNodes() {
+        public final Builder dumpNodes() {
             return dumpNodes(false);
         }
 
@@ -388,7 +282,7 @@ public class ChainedRegime implements Regime, Iterable<Regime> {
          * @return this builder (for fluent chaining)
          * @see DumpNodesRegime
          */
-        public final M dumpNodes(boolean firstTime) {
+        public final Builder dumpNodes(boolean firstTime) {
             return dumpNodes(firstTime, false);
         }
 
@@ -400,7 +294,7 @@ public class ChainedRegime implements Regime, Iterable<Regime> {
          * @return this builder (for fluent chaining)
          * @see DumpNodesRegime
          */
-        public final M dumpNodes(boolean firstTime, boolean includeInputs) {
+        public final Builder dumpNodes(boolean firstTime, boolean includeInputs) {
             return chainRegime(new DumpNodesRegime(targetRegime, firstTime, includeInputs));
         }
 
@@ -416,73 +310,16 @@ public class ChainedRegime implements Regime, Iterable<Regime> {
          * @see ChainedRegime
          */
         protected final ChainedRegime build() {
-            return new ChainedRegime(List.copyOf(chainedRegimes));
+            List<Regime> copyChainedRegimes = new ArrayList<>(chainedRegimes);
+            for (Regime regime : chainedRegimes) {
+                if (regime instanceof Link link) {
+                    copyChainedRegimes.add(new Link(copyChainedRegimes, link.linkedRegimeIndex));
+                } else {
+                    copyChainedRegimes.add(regime);
+                }
+            }
+            return new ChainedRegime(copyChainedRegimes);
         }
-
-    }
-
-    /**
-     * Fluent builder that composes the chain from <em>top down</em>.
-     * <p>Each added decorator becomes the new head, wrapping the previous head.
-     * Internally uses a {@link Link} to refer to the evolving predecessor.</p>
-     */
-    @Builder
-    public static final class TopDownChainer extends ChainedRegime.Modifiable<TopDownChainer> {
-
-        /**
-         * Initializes the builder with a link pointing one-before-last, then moves as items are added.
-         */
-        public TopDownChainer() {
-            targetRegime = nextLink();
-        }
-
-        private Link nextLink() {
-            return new Link(-2 - chainedRegimes.size());
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        protected TopDownChainer chainRegime(Regime regime) {
-            chainedRegimes.addFirst(regime);
-            targetRegime = nextLink();
-            return this;
-        }
-
-        /**
-         * Finalizes the composition and returns unmodifiable chain.
-         */
-        public ChainedRegime bottomChain() {
-            return build();
-        }
-    }
-
-    /**
-     * Fluent builder that composes the chain from <em>bottom up</em>.
-     * <p>Each added decorator wraps the previous target; the most recently added
-     * decorator becomes the top.</p>
-     */
-    @Builder
-    public static final class BottomUpChainer extends ChainedRegime.Modifiable<BottomUpChainer> {
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        protected BottomUpChainer chainRegime(Regime regime) {
-            targetRegime = regime;
-            chainedRegimes.add(targetRegime);
-            return this;
-        }
-
-        /**
-         * Finalizes the composition and returns unmodifiable chain.
-         */
-        public ChainedRegime topChain() {
-            return build();
-        }
-
     }
 
 }

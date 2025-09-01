@@ -17,7 +17,7 @@ public class Mark1 {
         DataSet dataSet = new LinesAndCircles().load();
         DataSet trainingSet = dataSet.subset(10, dataSet.samples().size());
         DataSet validationSet = dataSet.subset(0, 10);
-        Regime regime = Regimes.chainTop().epochs(10).online().bottomChain();
+        Regime regime = Regimes.chain().epochs(10).reportObjective().online();
         Trainer<Perceptron> trainer = Trainer.of(new PerceptronInitializer(), null, new PerceptronUpdateRule(), regime);
         trainer.train(mark1, trainingSet);
 

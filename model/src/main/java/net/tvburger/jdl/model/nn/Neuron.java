@@ -106,6 +106,10 @@ public class Neuron extends NeuronFunction {
      * Subsequent calls are no-ops until {@link #deactivate()} is invoked.
      */
     public synchronized void activate() {
+        if (getParameterCount() == 0) {
+            activated = true;
+            return;
+        }
         if (isActivated()) {
             return;
         }
