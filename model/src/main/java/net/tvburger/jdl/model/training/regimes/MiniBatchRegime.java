@@ -22,11 +22,11 @@ public final class MiniBatchRegime extends DelegatedRegime implements BatchSizeC
     @Override
     public <E extends EstimationFunction> void train(E estimationFunction, DataSet trainingSet, ObjectiveFunction objective, Optimizer<? super E> optimizer) {
         int offset = 0;
-        int trainingSetSize = trainingSet.samples().size();
+        int trainingSetSize = trainingSet.size();
         do {
             int newOffset = Math.min(trainingSetSize, offset + getBatchSize());
             regime.train(estimationFunction, trainingSet.subset(offset, newOffset), objective, optimizer);
             offset = newOffset;
-        } while (offset >= trainingSet.samples().size());
+        } while (offset >= trainingSet.size());
     }
 }

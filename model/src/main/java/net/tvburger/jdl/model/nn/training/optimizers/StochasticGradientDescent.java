@@ -68,7 +68,7 @@ public class StochasticGradientDescent<N extends NeuralNetwork> implements Optim
      */
     @Override
     public void optimize(N neuralNetwork, DataSet trainingSet, ObjectiveFunction objective) {
-        int batchSize = trainingSet.samples().size();
+        int batchSize = trainingSet.size();
         if (batchSize == 0) {
             return;
         }
@@ -77,7 +77,7 @@ public class StochasticGradientDescent<N extends NeuralNetwork> implements Optim
         Map<Neuron, float[]> accumulatedWeightedVotesForParameterCorrections = new IdentityHashMap<>();
 
         // For each sample n, compute error signal δ - delta - layer-by-layer (backward), accumulate gradients
-        trainingSet.samples().forEach(s -> voteForParameterCorrections(s, batchSize, accumulatedWeightedVotesForParameterCorrections, neuralNetwork, objective));
+        trainingSet.forEach(s -> voteForParameterCorrections(s, batchSize, accumulatedWeightedVotesForParameterCorrections, neuralNetwork, objective));
 
         // Apply changes
         neuralNetwork.accept(new NeuronVisitor() {

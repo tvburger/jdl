@@ -12,8 +12,8 @@ public final class OnlineRegime implements Regime {
 
     @Override
     public <E extends EstimationFunction> void train(E estimationFunction, DataSet trainingSet, ObjectiveFunction objective, Optimizer<? super E> optimizer) {
-        for (int i = 0; i < trainingSet.samples().size(); i++) {
-            optimizer.optimize(estimationFunction, trainingSet, objective);
+        for (int i = 0; i < trainingSet.size(); i++) {
+            optimizer.optimize(estimationFunction, trainingSet.subset(i, i + 1), objective);
         }
     }
 

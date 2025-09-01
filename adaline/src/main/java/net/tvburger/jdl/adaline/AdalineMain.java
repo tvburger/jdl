@@ -16,7 +16,7 @@ public class AdalineMain {
 
     public static void main(String[] args) {
         DataSet dataSet = LogicalDataSets.toMinusSet(new LinesAndCircles().load());
-        DataSet trainingSet = dataSet.subset(11, dataSet.samples().size());
+        DataSet trainingSet = dataSet.subset(11, dataSet.size());
         DataSet testSet = dataSet.subset(1, 11);
 
         Adaline adaline = Adaline.create(400, 8);

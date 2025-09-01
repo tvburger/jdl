@@ -48,10 +48,10 @@ public class NearestNeighbors implements EstimationFunction {
         if (k < 0) {
             throw new IllegalStateException("Invalid k set (" + k + ")! Must be positive!");
         }
-        if (memory == null || memory.samples().isEmpty()) {
+        if (memory == null || memory.isEmpty()) {
             throw new IllegalStateException("Model has not been trained!");
         }
-        if (k > memory.samples().size()) {
+        if (k > memory.size()) {
             throw new IllegalArgumentException("We have not enough samples!");
         }
         float maxDistance = Float.POSITIVE_INFINITY;
@@ -88,18 +88,18 @@ public class NearestNeighbors implements EstimationFunction {
 
     @Override
     public int arity() {
-        if (memory == null || memory.samples().isEmpty()) {
+        if (memory == null || memory.isEmpty()) {
             throw new IllegalStateException("Not trained!");
         }
-        return memory.samples().iterator().next().features().length;
+        return memory.getFeatureCount();
     }
 
     @Override
     public int coArity() {
-        if (memory == null || memory.samples().isEmpty()) {
+        if (memory == null || memory.isEmpty()) {
             throw new IllegalStateException("Not trained!");
         }
-        return memory.samples().iterator().next().targetOutputs().length;
+        return memory.getTargetCount();
     }
 
     private Comparator<? super Pair<DataSet.Sample, Float>> furthestFirst() {

@@ -13,13 +13,13 @@ public class KnnMain {
         NearestNeighbors nearestNeighbors = new NearestNeighbors(1, Metrics.euclidean(), new UniformWeighting());
 
         DataSet dataSet = new StraightLineWithNoise().load();
-        DataSet trainingSet = dataSet.subset(10, dataSet.samples().size());
+        DataSet trainingSet = dataSet.subset(10, dataSet.size());
         DataSet validationSet = dataSet.subset(0, 10);
         NearestNeighborsPreparer regime = new NearestNeighborsPreparer();
         Trainer<NearestNeighbors> nearestNeighborsTrainer = Trainer.of(null, null, null, regime);
         nearestNeighborsTrainer.train(nearestNeighbors, trainingSet);
 
-        for (DataSet.Sample sample : validationSet.samples()) {
+        for (DataSet.Sample sample : validationSet) {
             float[] estimate = nearestNeighbors.estimate(sample.features());
             System.out.println("real = " + Arrays.toString(sample.targetOutputs()) + " estimated = " + Arrays.toString(estimate));
         }
