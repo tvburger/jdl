@@ -35,65 +35,52 @@
 <span class="source-line-no">022</span><span id="line-22"> *       (weighted sum + bias → activation function) and also stores a copy</span>
 <span class="source-line-no">023</span><span id="line-23"> *       of the input values provided by connected neurons.&lt;/li&gt;</span>
 <span class="source-line-no">024</span><span id="line-24"> *   &lt;li&gt;The stored inputs can be retrieved via {@link #getStoredInput(int)}.&lt;/li&gt;</span>
-<span class="source-line-no">025</span><span id="line-25"> *   &lt;li&gt;Stored inputs can be explicitly cleared with</span>
-<span class="source-line-no">026</span><span id="line-26"> *       {@link #clearStoredInputs()} to release memory or reset state</span>
-<span class="source-line-no">027</span><span id="line-27"> *       between training iterations.&lt;/li&gt;</span>
-<span class="source-line-no">028</span><span id="line-28"> * &lt;/ul&gt;</span>
-<span class="source-line-no">029</span><span id="line-29"> */</span>
-<span class="source-line-no">030</span><span id="line-30">@Decorator</span>
-<span class="source-line-no">031</span><span id="line-31">public class LastInputStoredNeuron extends Neuron {</span>
-<span class="source-line-no">032</span><span id="line-32"></span>
-<span class="source-line-no">033</span><span id="line-33">    private float[] storedInputs;</span>
-<span class="source-line-no">034</span><span id="line-34"></span>
-<span class="source-line-no">035</span><span id="line-35">    /**</span>
-<span class="source-line-no">036</span><span id="line-36">     * Constructs a neuron that stores the inputs from its most recent activation.</span>
-<span class="source-line-no">037</span><span id="line-37">     *</span>
-<span class="source-line-no">038</span><span id="line-38">     * @param name               human-readable identifier</span>
-<span class="source-line-no">039</span><span id="line-39">     * @param inputs             input neurons feeding into this neuron</span>
-<span class="source-line-no">040</span><span id="line-40">     * @param activationFunction activation function to apply after weighted sum</span>
-<span class="source-line-no">041</span><span id="line-41">     */</span>
-<span class="source-line-no">042</span><span id="line-42">    public LastInputStoredNeuron(String name, List&lt;? extends Neuron&gt; inputs, ActivationFunction activationFunction) {</span>
-<span class="source-line-no">043</span><span id="line-43">        super(name, inputs, activationFunction);</span>
-<span class="source-line-no">044</span><span id="line-44">    }</span>
-<span class="source-line-no">045</span><span id="line-45"></span>
-<span class="source-line-no">046</span><span id="line-46">    /**</span>
-<span class="source-line-no">047</span><span id="line-47">     * Activates this neuron by performing the normal weighted sum</span>
-<span class="source-line-no">048</span><span id="line-48">     * and activation function, and additionally storing the raw input</span>
-<span class="source-line-no">049</span><span id="line-49">     * values from connected neurons.</span>
-<span class="source-line-no">050</span><span id="line-50">     */</span>
-<span class="source-line-no">051</span><span id="line-51">    public synchronized void activate() {</span>
-<span class="source-line-no">052</span><span id="line-52">        if (isActivated()) {</span>
-<span class="source-line-no">053</span><span id="line-53">            return;</span>
-<span class="source-line-no">054</span><span id="line-54">        }</span>
-<span class="source-line-no">055</span><span id="line-55">        super.activate();</span>
-<span class="source-line-no">056</span><span id="line-56">        storedInputs = new float[getInputNodes().size()];</span>
-<span class="source-line-no">057</span><span id="line-57">        for (int i = 0; i &lt; getInputNodes().size(); i++) {</span>
-<span class="source-line-no">058</span><span id="line-58">            storedInputs[i] = getInputNodes().get(i).getOutput();</span>
-<span class="source-line-no">059</span><span id="line-59">        }</span>
-<span class="source-line-no">060</span><span id="line-60">    }</span>
-<span class="source-line-no">061</span><span id="line-61"></span>
-<span class="source-line-no">062</span><span id="line-62">    /**</span>
-<span class="source-line-no">063</span><span id="line-63">     * Returns the input value that was stored for a specific dimension during the</span>
-<span class="source-line-no">064</span><span id="line-64">     * most recent {@link #activate()} call.</span>
-<span class="source-line-no">065</span><span id="line-65">     * &lt;p&gt;</span>
-<span class="source-line-no">066</span><span id="line-66">     * Dimension indexing is 1-based, where {@code d = 1} refers to the first</span>
-<span class="source-line-no">067</span><span id="line-67">     * input neuron, {@code d = 2} to the second, and so on.</span>
-<span class="source-line-no">068</span><span id="line-68">     *</span>
-<span class="source-line-no">069</span><span id="line-69">     * @param d the input dimension index (1-based)</span>
-<span class="source-line-no">070</span><span id="line-70">     * @return the stored input value for the specified dimension</span>
-<span class="source-line-no">071</span><span id="line-71">     */</span>
-<span class="source-line-no">072</span><span id="line-72">    public float getStoredInput(int d) {</span>
-<span class="source-line-no">073</span><span id="line-73">        return storedInputs[validDimension(d) - 1];</span>
-<span class="source-line-no">074</span><span id="line-74">    }</span>
-<span class="source-line-no">075</span><span id="line-75"></span>
-<span class="source-line-no">076</span><span id="line-76">    /**</span>
-<span class="source-line-no">077</span><span id="line-77">     * Clears the stored inputs, releasing memory and resetting state.</span>
-<span class="source-line-no">078</span><span id="line-78">     */</span>
-<span class="source-line-no">079</span><span id="line-79">    public synchronized void clearStoredInputs() {</span>
-<span class="source-line-no">080</span><span id="line-80">        storedInputs = null;</span>
-<span class="source-line-no">081</span><span id="line-81">    }</span>
-<span class="source-line-no">082</span><span id="line-82"></span>
-<span class="source-line-no">083</span><span id="line-83">}</span>
+<span class="source-line-no">025</span><span id="line-25"> * &lt;/ul&gt;</span>
+<span class="source-line-no">026</span><span id="line-26"> */</span>
+<span class="source-line-no">027</span><span id="line-27">@Decorator</span>
+<span class="source-line-no">028</span><span id="line-28">public class LastInputStoredNeuron extends Neuron {</span>
+<span class="source-line-no">029</span><span id="line-29"></span>
+<span class="source-line-no">030</span><span id="line-30">    private final float[] storedInputs;</span>
+<span class="source-line-no">031</span><span id="line-31"></span>
+<span class="source-line-no">032</span><span id="line-32">    /**</span>
+<span class="source-line-no">033</span><span id="line-33">     * Constructs a neuron that stores the inputs from its most recent activation.</span>
+<span class="source-line-no">034</span><span id="line-34">     *</span>
+<span class="source-line-no">035</span><span id="line-35">     * @param name               human-readable identifier</span>
+<span class="source-line-no">036</span><span id="line-36">     * @param inputs             input neurons feeding into this neuron</span>
+<span class="source-line-no">037</span><span id="line-37">     * @param activationFunction activation function to apply after weighted sum</span>
+<span class="source-line-no">038</span><span id="line-38">     */</span>
+<span class="source-line-no">039</span><span id="line-39">    public LastInputStoredNeuron(String name, List&lt;? extends Neuron&gt; inputs, ActivationFunction activationFunction) {</span>
+<span class="source-line-no">040</span><span id="line-40">        super(name, inputs, activationFunction);</span>
+<span class="source-line-no">041</span><span id="line-41">        storedInputs = new float[inputs == null ? 0 : inputs.size()];</span>
+<span class="source-line-no">042</span><span id="line-42">    }</span>
+<span class="source-line-no">043</span><span id="line-43"></span>
+<span class="source-line-no">044</span><span id="line-44">    /**</span>
+<span class="source-line-no">045</span><span id="line-45">     * Activates this neuron by performing the normal weighted sum</span>
+<span class="source-line-no">046</span><span id="line-46">     * and activation function, and additionally storing the raw input</span>
+<span class="source-line-no">047</span><span id="line-47">     * values from connected neurons.</span>
+<span class="source-line-no">048</span><span id="line-48">     */</span>
+<span class="source-line-no">049</span><span id="line-49">    public synchronized void activate() {</span>
+<span class="source-line-no">050</span><span id="line-50">        super.activate();</span>
+<span class="source-line-no">051</span><span id="line-51">        for (int i = 0; i &lt; getInputNodes().size(); i++) {</span>
+<span class="source-line-no">052</span><span id="line-52">            storedInputs[i] = getInputNodes().get(i).getOutput();</span>
+<span class="source-line-no">053</span><span id="line-53">        }</span>
+<span class="source-line-no">054</span><span id="line-54">    }</span>
+<span class="source-line-no">055</span><span id="line-55"></span>
+<span class="source-line-no">056</span><span id="line-56">    /**</span>
+<span class="source-line-no">057</span><span id="line-57">     * Returns the input value that was stored for a specific dimension during the</span>
+<span class="source-line-no">058</span><span id="line-58">     * most recent {@link #activate()} call.</span>
+<span class="source-line-no">059</span><span id="line-59">     * &lt;p&gt;</span>
+<span class="source-line-no">060</span><span id="line-60">     * Dimension indexing is 1-based, where {@code d = 1} refers to the first</span>
+<span class="source-line-no">061</span><span id="line-61">     * input neuron, {@code d = 2} to the second, and so on.</span>
+<span class="source-line-no">062</span><span id="line-62">     *</span>
+<span class="source-line-no">063</span><span id="line-63">     * @param d the input dimension index (1-based)</span>
+<span class="source-line-no">064</span><span id="line-64">     * @return the stored input value for the specified dimension</span>
+<span class="source-line-no">065</span><span id="line-65">     */</span>
+<span class="source-line-no">066</span><span id="line-66">    public float getStoredInput(int d) {</span>
+<span class="source-line-no">067</span><span id="line-67">        return storedInputs[validDimension(d) - 1];</span>
+<span class="source-line-no">068</span><span id="line-68">    }</span>
+<span class="source-line-no">069</span><span id="line-69"></span>
+<span class="source-line-no">070</span><span id="line-70">}</span>
 
 
 

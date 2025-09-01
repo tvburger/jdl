@@ -33,14 +33,27 @@
 <span class="source-line-no">020</span><span id="line-20">        return new OnlineRegime();</span>
 <span class="source-line-no">021</span><span id="line-21">    }</span>
 <span class="source-line-no">022</span><span id="line-22"></span>
-<span class="source-line-no">023</span><span id="line-23">    public static ChainedRegime.BottomUpChainer chainBottom() {</span>
-<span class="source-line-no">024</span><span id="line-24">        return new ChainedRegime.BottomUpChainer();</span>
+<span class="source-line-no">023</span><span id="line-23">    public static ChainedRegime.Builder epochs(int epochs) {</span>
+<span class="source-line-no">024</span><span id="line-24">        return new ChainedRegime.Builder().epochs(epochs);</span>
 <span class="source-line-no">025</span><span id="line-25">    }</span>
 <span class="source-line-no">026</span><span id="line-26"></span>
-<span class="source-line-no">027</span><span id="line-27">    public static ChainedRegime.TopDownChainer chainTop() {</span>
-<span class="source-line-no">028</span><span id="line-28">        return new ChainedRegime.TopDownChainer();</span>
+<span class="source-line-no">027</span><span id="line-27">    public static ChainedRegime.Builder reportObjective() {</span>
+<span class="source-line-no">028</span><span id="line-28">        return new ChainedRegime.Builder().reportObjective();</span>
 <span class="source-line-no">029</span><span id="line-29">    }</span>
-<span class="source-line-no">030</span><span id="line-30">}</span>
+<span class="source-line-no">030</span><span id="line-30"></span>
+<span class="source-line-no">031</span><span id="line-31">    public static ChainedRegime.Builder dumpNodes() {</span>
+<span class="source-line-no">032</span><span id="line-32">        return new ChainedRegime.Builder().dumpNodes();</span>
+<span class="source-line-no">033</span><span id="line-33">    }</span>
+<span class="source-line-no">034</span><span id="line-34"></span>
+<span class="source-line-no">035</span><span id="line-35">    public static ChainedRegime.Builder dumpNodes(boolean firstTime) {</span>
+<span class="source-line-no">036</span><span id="line-36">        return new ChainedRegime.Builder().dumpNodes(firstTime);</span>
+<span class="source-line-no">037</span><span id="line-37">    }</span>
+<span class="source-line-no">038</span><span id="line-38"></span>
+<span class="source-line-no">039</span><span id="line-39">    public final ChainedRegime.Builder dumpNodes(boolean firstTime, boolean includeInputs) {</span>
+<span class="source-line-no">040</span><span id="line-40">        return new ChainedRegime.Builder().dumpNodes(firstTime, includeInputs);</span>
+<span class="source-line-no">041</span><span id="line-41">    }</span>
+<span class="source-line-no">042</span><span id="line-42"></span>
+<span class="source-line-no">043</span><span id="line-43">}</span>
 
 
 

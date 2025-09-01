@@ -13,492 +13,329 @@
 <div class="source-container">
 <pre><span class="source-line-no">001</span><span id="line-1">package net.tvburger.jdl.model.training.regimes;</span>
 <span class="source-line-no">002</span><span id="line-2"></span>
-<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.patterns.Builder;</span>
-<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.patterns.Proxy;</span>
-<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.common.patterns.Strategy;</span>
-<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.common.patterns.TemplateMethod;</span>
-<span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.common.utils.Floats;</span>
-<span class="source-line-no">008</span><span id="line-8">import net.tvburger.jdl.model.DataSet;</span>
-<span class="source-line-no">009</span><span id="line-9">import net.tvburger.jdl.model.EstimationFunction;</span>
-<span class="source-line-no">010</span><span id="line-10">import net.tvburger.jdl.model.training.ObjectiveFunction;</span>
-<span class="source-line-no">011</span><span id="line-11">import net.tvburger.jdl.model.training.Optimizer;</span>
-<span class="source-line-no">012</span><span id="line-12">import net.tvburger.jdl.model.training.Regime;</span>
-<span class="source-line-no">013</span><span id="line-13"></span>
-<span class="source-line-no">014</span><span id="line-14">import java.util.ArrayList;</span>
-<span class="source-line-no">015</span><span id="line-15">import java.util.Iterator;</span>
-<span class="source-line-no">016</span><span id="line-16">import java.util.List;</span>
-<span class="source-line-no">017</span><span id="line-17">import java.util.Optional;</span>
-<span class="source-line-no">018</span><span id="line-18">import java.util.function.Predicate;</span>
-<span class="source-line-no">019</span><span id="line-19"></span>
-<span class="source-line-no">020</span><span id="line-20">/**</span>
-<span class="source-line-no">021</span><span id="line-21"> * Composes and executes a chain of {@link Regime} decorators.</span>
-<span class="source-line-no">022</span><span id="line-22"> *</span>
-<span class="source-line-no">023</span><span id="line-23"> * &lt;p&gt;The chain stores regimes in order and, when trained, delegates to the</span>
-<span class="source-line-no">024</span><span id="line-24"> * &lt;em&gt;top&lt;/em&gt; (last) regime. If the chain is empty, this class will invoke</span>
-<span class="source-line-no">025</span><span id="line-25"> * the provided {@link Optimizer} directly on the full {@link DataSet} as a</span>
-<span class="source-line-no">026</span><span id="line-26"> * single batch (a safe no-op fallback if the caller omitted regimes).&lt;/p&gt;</span>
-<span class="source-line-no">027</span><span id="line-27"> *</span>
-<span class="source-line-no">028</span><span id="line-28"> * &lt;h3&gt;Semantics&lt;/h3&gt;</span>
-<span class="source-line-no">029</span><span id="line-29"> * &lt;ul&gt;</span>
-<span class="source-line-no">030</span><span id="line-30"> *   &lt;li&gt;&lt;strong&gt;Top regime:&lt;/strong&gt; the last element in {@code chainedRegimes} receives</span>
-<span class="source-line-no">031</span><span id="line-31"> *       the {@link #train} call and typically wraps the rest.&lt;/li&gt;</span>
-<span class="source-line-no">032</span><span id="line-32"> *   &lt;li&gt;&lt;strong&gt;Lookup:&lt;/strong&gt; {@link #getRegime(Class)} and {@link #findRegime(java.util.function.Predicate)}</span>
-<span class="source-line-no">033</span><span id="line-33"> *       return the first matching regime for introspection or reconfiguration.&lt;/li&gt;</span>
-<span class="source-line-no">034</span><span id="line-34"> *   &lt;li&gt;&lt;strong&gt;Iteration:&lt;/strong&gt; Implements {@link Iterable} to expose the chain order (top to bottom).&lt;/li&gt;</span>
-<span class="source-line-no">035</span><span id="line-35"> * &lt;/ul&gt;</span>
-<span class="source-line-no">036</span><span id="line-36"> */</span>
-<span class="source-line-no">037</span><span id="line-37">@Strategy(Strategy.Role.CONCRETE)</span>
-<span class="source-line-no">038</span><span id="line-38">public class ChainedRegime implements Regime, Iterable&lt;Regime&gt; {</span>
-<span class="source-line-no">039</span><span id="line-39"></span>
-<span class="source-line-no">040</span><span id="line-40">    /**</span>
-<span class="source-line-no">041</span><span id="line-41">     * The ordered chain of regimes; the last element is the top/outermost decorator.</span>
-<span class="source-line-no">042</span><span id="line-42">     */</span>
-<span class="source-line-no">043</span><span id="line-43">    protected final List&lt;Regime&gt; chainedRegimes;</span>
-<span class="source-line-no">044</span><span id="line-44"></span>
-<span class="source-line-no">045</span><span id="line-45">    /**</span>
-<span class="source-line-no">046</span><span id="line-46">     * Creates a new chain.</span>
-<span class="source-line-no">047</span><span id="line-47">     *</span>
-<span class="source-line-no">048</span><span id="line-48">     * @param chainedRegimes ordered regimes; the last is considered the "top".</span>
-<span class="source-line-no">049</span><span id="line-49">     *                       May be empty; in that case {@link #train} falls back</span>
-<span class="source-line-no">050</span><span id="line-50">     *                       to direct optimizer invocation if provided.</span>
-<span class="source-line-no">051</span><span id="line-51">     */</span>
-<span class="source-line-no">052</span><span id="line-52">    protected ChainedRegime(List&lt;Regime&gt; chainedRegimes) {</span>
-<span class="source-line-no">053</span><span id="line-53">        this.chainedRegimes = chainedRegimes;</span>
-<span class="source-line-no">054</span><span id="line-54">    }</span>
-<span class="source-line-no">055</span><span id="line-55"></span>
-<span class="source-line-no">056</span><span id="line-56">    /**</span>
-<span class="source-line-no">057</span><span id="line-57">     * Trains by delegating to the topmost regime in the chain. If the chain is empty,</span>
-<span class="source-line-no">058</span><span id="line-58">     * invokes the {@link Optimizer} directly (if non-null) on the full dataset.</span>
-<span class="source-line-no">059</span><span id="line-59">     *</span>
-<span class="source-line-no">060</span><span id="line-60">     * @param estimationFunction the model to train</span>
-<span class="source-line-no">061</span><span id="line-61">     * @param trainingSet        the dataset to train on</span>
-<span class="source-line-no">062</span><span id="line-62">     * @param objective          the objective (loss) function</span>
-<span class="source-line-no">063</span><span id="line-63">     * @param optimizer          the optimizer to apply updates (used directly if chain is empty)</span>
-<span class="source-line-no">064</span><span id="line-64">     * @param &lt;E&gt;                the type of estimation function</span>
-<span class="source-line-no">065</span><span id="line-65">     */</span>
-<span class="source-line-no">066</span><span id="line-66">    @Override</span>
-<span class="source-line-no">067</span><span id="line-67">    public &lt;E extends EstimationFunction&gt; void train(E estimationFunction, DataSet trainingSet, ObjectiveFunction objective, Optimizer&lt;? super E&gt; optimizer) {</span>
-<span class="source-line-no">068</span><span id="line-68">        if (chainedRegimes.isEmpty()) {</span>
-<span class="source-line-no">069</span><span id="line-69">            if (optimizer != null) {</span>
-<span class="source-line-no">070</span><span id="line-70">                optimizer.optimize(estimationFunction, trainingSet, objective);</span>
-<span class="source-line-no">071</span><span id="line-71">            }</span>
-<span class="source-line-no">072</span><span id="line-72">        } else {</span>
-<span class="source-line-no">073</span><span id="line-73">            chainedRegimes.getLast().train(estimationFunction, trainingSet, objective, optimizer);</span>
-<span class="source-line-no">074</span><span id="line-74">        }</span>
-<span class="source-line-no">075</span><span id="line-75">    }</span>
-<span class="source-line-no">076</span><span id="line-76"></span>
-<span class="source-line-no">077</span><span id="line-77">    /**</span>
-<span class="source-line-no">078</span><span id="line-78">     * Returns an iterator over the regimes in from top to bottom.</span>
-<span class="source-line-no">079</span><span id="line-79">     */</span>
-<span class="source-line-no">080</span><span id="line-80">    @Override</span>
-<span class="source-line-no">081</span><span id="line-81">    public Iterator&lt;Regime&gt; iterator() {</span>
-<span class="source-line-no">082</span><span id="line-82">        return chainedRegimes.reversed().iterator();</span>
-<span class="source-line-no">083</span><span id="line-83">    }</span>
-<span class="source-line-no">084</span><span id="line-84"></span>
-<span class="source-line-no">085</span><span id="line-85">    /**</span>
-<span class="source-line-no">086</span><span id="line-86">     * Returns the first regime assignable to {@code regimeTypeClass}, or throws if none.</span>
-<span class="source-line-no">087</span><span id="line-87">     *</span>
-<span class="source-line-no">088</span><span id="line-88">     * @param regimeTypeClass the desired regime type</span>
-<span class="source-line-no">089</span><span id="line-89">     * @param &lt;R&gt;             type parameter of the regime</span>
-<span class="source-line-no">090</span><span id="line-90">     * @return the first matching regime</span>
-<span class="source-line-no">091</span><span id="line-91">     * @throws java.util.NoSuchElementException if none found</span>
-<span class="source-line-no">092</span><span id="line-92">     */</span>
-<span class="source-line-no">093</span><span id="line-93">    public &lt;R extends Regime&gt; R asRegime(Class&lt;R&gt; regimeTypeClass) {</span>
-<span class="source-line-no">094</span><span id="line-94">        return getRegime(regimeTypeClass).orElseThrow();</span>
-<span class="source-line-no">095</span><span id="line-95">    }</span>
-<span class="source-line-no">096</span><span id="line-96"></span>
-<span class="source-line-no">097</span><span id="line-97">    /**</span>
-<span class="source-line-no">098</span><span id="line-98">     * Returns the first regime assignable to the requested type, if any.</span>
-<span class="source-line-no">099</span><span id="line-99">     *</span>
-<span class="source-line-no">100</span><span id="line-100">     * @param regimeTypeClass the desired regime type</span>
-<span class="source-line-no">101</span><span id="line-101">     * @param &lt;R&gt;             type parameter of the regime</span>
-<span class="source-line-no">102</span><span id="line-102">     * @return an {@link Optional} containing the first match, or empty</span>
-<span class="source-line-no">103</span><span id="line-103">     */</span>
-<span class="source-line-no">104</span><span id="line-104">    public &lt;R extends Regime&gt; Optional&lt;R&gt; getRegime(Class&lt;R&gt; regimeTypeClass) {</span>
-<span class="source-line-no">105</span><span id="line-105">        for (Regime regime : chainedRegimes) {</span>
-<span class="source-line-no">106</span><span id="line-106">            if (regimeTypeClass.isInstance(regime)) {</span>
-<span class="source-line-no">107</span><span id="line-107">                return Optional.of(regimeTypeClass.cast(regime));</span>
-<span class="source-line-no">108</span><span id="line-108">            }</span>
-<span class="source-line-no">109</span><span id="line-109">        }</span>
-<span class="source-line-no">110</span><span id="line-110">        return Optional.empty();</span>
-<span class="source-line-no">111</span><span id="line-111">    }</span>
-<span class="source-line-no">112</span><span id="line-112"></span>
-<span class="source-line-no">113</span><span id="line-113">    /**</span>
-<span class="source-line-no">114</span><span id="line-114">     * Returns the first regime matching the predicate, if any.</span>
-<span class="source-line-no">115</span><span id="line-115">     *</span>
-<span class="source-line-no">116</span><span id="line-116">     * @param predicate match condition</span>
-<span class="source-line-no">117</span><span id="line-117">     * @return an {@link Optional} containing the first match, or empty</span>
-<span class="source-line-no">118</span><span id="line-118">     */</span>
-<span class="source-line-no">119</span><span id="line-119">    public Optional&lt;Regime&gt; findRegime(Predicate&lt;? super Regime&gt; predicate) {</span>
-<span class="source-line-no">120</span><span id="line-120">        for (Regime regime : chainedRegimes) {</span>
-<span class="source-line-no">121</span><span id="line-121">            if (predicate.test(regime)) return Optional.of(regime);</span>
-<span class="source-line-no">122</span><span id="line-122">        }</span>
-<span class="source-line-no">123</span><span id="line-123">        return Optional.empty();</span>
-<span class="source-line-no">124</span><span id="line-124">    }</span>
-<span class="source-line-no">125</span><span id="line-125"></span>
-<span class="source-line-no">126</span><span id="line-126">    /**</span>
-<span class="source-line-no">127</span><span id="line-127">     * {@inheritDoc}</span>
-<span class="source-line-no">128</span><span id="line-128">     */</span>
-<span class="source-line-no">129</span><span id="line-129">    @Override</span>
-<span class="source-line-no">130</span><span id="line-130">    public String toString() {</span>
-<span class="source-line-no">131</span><span id="line-131">        return "ChainedRegime" + chainedRegimes;</span>
-<span class="source-line-no">132</span><span id="line-132">    }</span>
-<span class="source-line-no">133</span><span id="line-133"></span>
-<span class="source-line-no">134</span><span id="line-134">    /**</span>
-<span class="source-line-no">135</span><span id="line-135">     * A lightweight link that forwards {@link Regime#train} to another regime in the chain</span>
-<span class="source-line-no">136</span><span id="line-136">     * by index (supports negative indexes counted from the end).</span>
+<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.patterns.Proxy;</span>
+<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.patterns.Strategy;</span>
+<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.model.DataSet;</span>
+<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.model.EstimationFunction;</span>
+<span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.model.training.ObjectiveFunction;</span>
+<span class="source-line-no">008</span><span id="line-8">import net.tvburger.jdl.model.training.Optimizer;</span>
+<span class="source-line-no">009</span><span id="line-9">import net.tvburger.jdl.model.training.Regime;</span>
+<span class="source-line-no">010</span><span id="line-10"></span>
+<span class="source-line-no">011</span><span id="line-11">import java.util.ArrayList;</span>
+<span class="source-line-no">012</span><span id="line-12">import java.util.Iterator;</span>
+<span class="source-line-no">013</span><span id="line-13">import java.util.List;</span>
+<span class="source-line-no">014</span><span id="line-14">import java.util.Optional;</span>
+<span class="source-line-no">015</span><span id="line-15">import java.util.function.Predicate;</span>
+<span class="source-line-no">016</span><span id="line-16"></span>
+<span class="source-line-no">017</span><span id="line-17">/**</span>
+<span class="source-line-no">018</span><span id="line-18"> * Composes and executes a chain of {@link Regime} decorators.</span>
+<span class="source-line-no">019</span><span id="line-19"> *</span>
+<span class="source-line-no">020</span><span id="line-20"> * &lt;p&gt;The chain stores regimes in order and, when trained, delegates to the</span>
+<span class="source-line-no">021</span><span id="line-21"> * &lt;em&gt;top&lt;/em&gt; (last) regime. If the chain is empty, this class will invoke</span>
+<span class="source-line-no">022</span><span id="line-22"> * the provided {@link Optimizer} directly on the full {@link DataSet} as a</span>
+<span class="source-line-no">023</span><span id="line-23"> * single batch (a safe no-op fallback if the caller omitted regimes).&lt;/p&gt;</span>
+<span class="source-line-no">024</span><span id="line-24"> *</span>
+<span class="source-line-no">025</span><span id="line-25"> * &lt;h3&gt;Semantics&lt;/h3&gt;</span>
+<span class="source-line-no">026</span><span id="line-26"> * &lt;ul&gt;</span>
+<span class="source-line-no">027</span><span id="line-27"> *   &lt;li&gt;&lt;strong&gt;Top regime:&lt;/strong&gt; the last element in {@code chainedRegimes} receives</span>
+<span class="source-line-no">028</span><span id="line-28"> *       the {@link #train} call and typically wraps the rest.&lt;/li&gt;</span>
+<span class="source-line-no">029</span><span id="line-29"> *   &lt;li&gt;&lt;strong&gt;Lookup:&lt;/strong&gt; {@link #getRegime(Class)} and {@link #findRegime(java.util.function.Predicate)}</span>
+<span class="source-line-no">030</span><span id="line-30"> *       return the first matching regime for introspection or reconfiguration.&lt;/li&gt;</span>
+<span class="source-line-no">031</span><span id="line-31"> *   &lt;li&gt;&lt;strong&gt;Iteration:&lt;/strong&gt; Implements {@link Iterable} to expose the chain order (top to bottom).&lt;/li&gt;</span>
+<span class="source-line-no">032</span><span id="line-32"> * &lt;/ul&gt;</span>
+<span class="source-line-no">033</span><span id="line-33"> */</span>
+<span class="source-line-no">034</span><span id="line-34">@Strategy(Strategy.Role.CONCRETE)</span>
+<span class="source-line-no">035</span><span id="line-35">public class ChainedRegime implements Regime, Iterable&lt;Regime&gt; {</span>
+<span class="source-line-no">036</span><span id="line-36"></span>
+<span class="source-line-no">037</span><span id="line-37">    /**</span>
+<span class="source-line-no">038</span><span id="line-38">     * The ordered chain of regimes; the last element is the top/outermost decorator.</span>
+<span class="source-line-no">039</span><span id="line-39">     */</span>
+<span class="source-line-no">040</span><span id="line-40">    protected final List&lt;Regime&gt; chainedRegimes;</span>
+<span class="source-line-no">041</span><span id="line-41"></span>
+<span class="source-line-no">042</span><span id="line-42">    /**</span>
+<span class="source-line-no">043</span><span id="line-43">     * Creates a new chain.</span>
+<span class="source-line-no">044</span><span id="line-44">     *</span>
+<span class="source-line-no">045</span><span id="line-45">     * @param chainedRegimes ordered regimes; the last is considered the "top".</span>
+<span class="source-line-no">046</span><span id="line-46">     *                       May be empty; in that case {@link #train} falls back</span>
+<span class="source-line-no">047</span><span id="line-47">     *                       to direct optimizer invocation if provided.</span>
+<span class="source-line-no">048</span><span id="line-48">     */</span>
+<span class="source-line-no">049</span><span id="line-49">    protected ChainedRegime(List&lt;Regime&gt; chainedRegimes) {</span>
+<span class="source-line-no">050</span><span id="line-50">        this.chainedRegimes = chainedRegimes;</span>
+<span class="source-line-no">051</span><span id="line-51">    }</span>
+<span class="source-line-no">052</span><span id="line-52"></span>
+<span class="source-line-no">053</span><span id="line-53">    /**</span>
+<span class="source-line-no">054</span><span id="line-54">     * Trains by delegating to the topmost regime in the chain. If the chain is empty,</span>
+<span class="source-line-no">055</span><span id="line-55">     * invokes the {@link Optimizer} directly (if non-null) on the full dataset.</span>
+<span class="source-line-no">056</span><span id="line-56">     *</span>
+<span class="source-line-no">057</span><span id="line-57">     * @param estimationFunction the model to train</span>
+<span class="source-line-no">058</span><span id="line-58">     * @param trainingSet        the dataset to train on</span>
+<span class="source-line-no">059</span><span id="line-59">     * @param objective          the objective (loss) function</span>
+<span class="source-line-no">060</span><span id="line-60">     * @param optimizer          the optimizer to apply updates (used directly if chain is empty)</span>
+<span class="source-line-no">061</span><span id="line-61">     * @param &lt;E&gt;                the type of estimation function</span>
+<span class="source-line-no">062</span><span id="line-62">     */</span>
+<span class="source-line-no">063</span><span id="line-63">    @Override</span>
+<span class="source-line-no">064</span><span id="line-64">    public &lt;E extends EstimationFunction&gt; void train(E estimationFunction, DataSet trainingSet, ObjectiveFunction objective, Optimizer&lt;? super E&gt; optimizer) {</span>
+<span class="source-line-no">065</span><span id="line-65">        if (chainedRegimes.isEmpty()) {</span>
+<span class="source-line-no">066</span><span id="line-66">            if (optimizer != null) {</span>
+<span class="source-line-no">067</span><span id="line-67">                optimizer.optimize(estimationFunction, trainingSet, objective);</span>
+<span class="source-line-no">068</span><span id="line-68">            }</span>
+<span class="source-line-no">069</span><span id="line-69">        } else {</span>
+<span class="source-line-no">070</span><span id="line-70">            chainedRegimes.getLast().train(estimationFunction, trainingSet, objective, optimizer);</span>
+<span class="source-line-no">071</span><span id="line-71">        }</span>
+<span class="source-line-no">072</span><span id="line-72">    }</span>
+<span class="source-line-no">073</span><span id="line-73"></span>
+<span class="source-line-no">074</span><span id="line-74">    /**</span>
+<span class="source-line-no">075</span><span id="line-75">     * Returns an iterator over the regimes in from top to bottom.</span>
+<span class="source-line-no">076</span><span id="line-76">     */</span>
+<span class="source-line-no">077</span><span id="line-77">    @Override</span>
+<span class="source-line-no">078</span><span id="line-78">    public Iterator&lt;Regime&gt; iterator() {</span>
+<span class="source-line-no">079</span><span id="line-79">        return chainedRegimes.reversed().iterator();</span>
+<span class="source-line-no">080</span><span id="line-80">    }</span>
+<span class="source-line-no">081</span><span id="line-81"></span>
+<span class="source-line-no">082</span><span id="line-82">    /**</span>
+<span class="source-line-no">083</span><span id="line-83">     * Returns the first regime assignable to {@code regimeTypeClass}, or throws if none.</span>
+<span class="source-line-no">084</span><span id="line-84">     *</span>
+<span class="source-line-no">085</span><span id="line-85">     * @param regimeTypeClass the desired regime type</span>
+<span class="source-line-no">086</span><span id="line-86">     * @param &lt;R&gt;             type parameter of the regime</span>
+<span class="source-line-no">087</span><span id="line-87">     * @return the first matching regime</span>
+<span class="source-line-no">088</span><span id="line-88">     * @throws java.util.NoSuchElementException if none found</span>
+<span class="source-line-no">089</span><span id="line-89">     */</span>
+<span class="source-line-no">090</span><span id="line-90">    public &lt;R extends Regime&gt; R asRegime(Class&lt;R&gt; regimeTypeClass) {</span>
+<span class="source-line-no">091</span><span id="line-91">        return getRegime(regimeTypeClass).orElseThrow();</span>
+<span class="source-line-no">092</span><span id="line-92">    }</span>
+<span class="source-line-no">093</span><span id="line-93"></span>
+<span class="source-line-no">094</span><span id="line-94">    /**</span>
+<span class="source-line-no">095</span><span id="line-95">     * Returns the first regime assignable to the requested type, if any.</span>
+<span class="source-line-no">096</span><span id="line-96">     *</span>
+<span class="source-line-no">097</span><span id="line-97">     * @param regimeTypeClass the desired regime type</span>
+<span class="source-line-no">098</span><span id="line-98">     * @param &lt;R&gt;             type parameter of the regime</span>
+<span class="source-line-no">099</span><span id="line-99">     * @return an {@link Optional} containing the first match, or empty</span>
+<span class="source-line-no">100</span><span id="line-100">     */</span>
+<span class="source-line-no">101</span><span id="line-101">    public &lt;R extends Regime&gt; Optional&lt;R&gt; getRegime(Class&lt;R&gt; regimeTypeClass) {</span>
+<span class="source-line-no">102</span><span id="line-102">        for (Regime regime : chainedRegimes) {</span>
+<span class="source-line-no">103</span><span id="line-103">            if (regimeTypeClass.isInstance(regime)) {</span>
+<span class="source-line-no">104</span><span id="line-104">                return Optional.of(regimeTypeClass.cast(regime));</span>
+<span class="source-line-no">105</span><span id="line-105">            }</span>
+<span class="source-line-no">106</span><span id="line-106">        }</span>
+<span class="source-line-no">107</span><span id="line-107">        return Optional.empty();</span>
+<span class="source-line-no">108</span><span id="line-108">    }</span>
+<span class="source-line-no">109</span><span id="line-109"></span>
+<span class="source-line-no">110</span><span id="line-110">    /**</span>
+<span class="source-line-no">111</span><span id="line-111">     * Returns the first regime matching the predicate, if any.</span>
+<span class="source-line-no">112</span><span id="line-112">     *</span>
+<span class="source-line-no">113</span><span id="line-113">     * @param predicate match condition</span>
+<span class="source-line-no">114</span><span id="line-114">     * @return an {@link Optional} containing the first match, or empty</span>
+<span class="source-line-no">115</span><span id="line-115">     */</span>
+<span class="source-line-no">116</span><span id="line-116">    public Optional&lt;Regime&gt; findRegime(Predicate&lt;? super Regime&gt; predicate) {</span>
+<span class="source-line-no">117</span><span id="line-117">        for (Regime regime : chainedRegimes) {</span>
+<span class="source-line-no">118</span><span id="line-118">            if (predicate.test(regime)) return Optional.of(regime);</span>
+<span class="source-line-no">119</span><span id="line-119">        }</span>
+<span class="source-line-no">120</span><span id="line-120">        return Optional.empty();</span>
+<span class="source-line-no">121</span><span id="line-121">    }</span>
+<span class="source-line-no">122</span><span id="line-122"></span>
+<span class="source-line-no">123</span><span id="line-123">    /**</span>
+<span class="source-line-no">124</span><span id="line-124">     * {@inheritDoc}</span>
+<span class="source-line-no">125</span><span id="line-125">     */</span>
+<span class="source-line-no">126</span><span id="line-126">    @Override</span>
+<span class="source-line-no">127</span><span id="line-127">    public String toString() {</span>
+<span class="source-line-no">128</span><span id="line-128">        return "ChainedRegime" + chainedRegimes;</span>
+<span class="source-line-no">129</span><span id="line-129">    }</span>
+<span class="source-line-no">130</span><span id="line-130"></span>
+<span class="source-line-no">131</span><span id="line-131">    /**</span>
+<span class="source-line-no">132</span><span id="line-132">     * A lightweight link that forwards {@link Regime#train} to another regime in the chain</span>
+<span class="source-line-no">133</span><span id="line-133">     * by index (supports negative indexes counted from the end).</span>
+<span class="source-line-no">134</span><span id="line-134">     *</span>
+<span class="source-line-no">135</span><span id="line-135">     * &lt;p&gt;Used internally by builders to target the current top or relative positions</span>
+<span class="source-line-no">136</span><span id="line-136">     * while the chain is being assembled.&lt;/p&gt;</span>
 <span class="source-line-no">137</span><span id="line-137">     *</span>
-<span class="source-line-no">138</span><span id="line-138">     * &lt;p&gt;Used internally by builders to target the current top or relative positions</span>
-<span class="source-line-no">139</span><span id="line-139">     * while the chain is being assembled.&lt;/p&gt;</span>
+<span class="source-line-no">138</span><span id="line-138">     * @param chainedRegimes    Reference to the chained regimes</span>
+<span class="source-line-no">139</span><span id="line-139">     * @param linkedRegimeIndex The target index; negative values are relative to the end.</span>
 <span class="source-line-no">140</span><span id="line-140">     */</span>
 <span class="source-line-no">141</span><span id="line-141">    @Proxy</span>
-<span class="source-line-no">142</span><span id="line-142">    private class Link implements Regime {</span>
+<span class="source-line-no">142</span><span id="line-142">    private record Link(List&lt;Regime&gt; chainedRegimes, int linkedRegimeIndex) implements Regime {</span>
 <span class="source-line-no">143</span><span id="line-143"></span>
 <span class="source-line-no">144</span><span id="line-144">        /**</span>
-<span class="source-line-no">145</span><span id="line-145">         * The target index; negative values are relative to the end.</span>
-<span class="source-line-no">146</span><span id="line-146">         */</span>
-<span class="source-line-no">147</span><span id="line-147">        private final int linkedRegimeIndex;</span>
-<span class="source-line-no">148</span><span id="line-148"></span>
-<span class="source-line-no">149</span><span id="line-149">        private Link(int linkedRegimeIndex) {</span>
-<span class="source-line-no">150</span><span id="line-150">            this.linkedRegimeIndex = linkedRegimeIndex;</span>
-<span class="source-line-no">151</span><span id="line-151">        }</span>
-<span class="source-line-no">152</span><span id="line-152"></span>
-<span class="source-line-no">153</span><span id="line-153">        /**</span>
-<span class="source-line-no">154</span><span id="line-154">         * Resolves the linked regime by index (handling negative indexes).</span>
-<span class="source-line-no">155</span><span id="line-155">         *</span>
-<span class="source-line-no">156</span><span id="line-156">         * @return the target regime or {@code null} if out of bounds</span>
-<span class="source-line-no">157</span><span id="line-157">         */</span>
-<span class="source-line-no">158</span><span id="line-158">        private Regime getLinkedRegime() {</span>
-<span class="source-line-no">159</span><span id="line-159">            int index = linkedRegimeIndex &lt; 0 ? chainedRegimes.size() + linkedRegimeIndex : linkedRegimeIndex;</span>
-<span class="source-line-no">160</span><span id="line-160">            return index &lt; chainedRegimes.size() &amp;&amp; index &gt;= 0</span>
-<span class="source-line-no">161</span><span id="line-161">                    ? chainedRegimes.get(index)</span>
-<span class="source-line-no">162</span><span id="line-162">                    : null;</span>
-<span class="source-line-no">163</span><span id="line-163">        }</span>
-<span class="source-line-no">164</span><span id="line-164"></span>
-<span class="source-line-no">165</span><span id="line-165">        /**</span>
-<span class="source-line-no">166</span><span id="line-166">         * Forwards training to the linked regime if available; otherwise falls back</span>
-<span class="source-line-no">167</span><span id="line-167">         * to direct optimizer invocation (if non-null).</span>
-<span class="source-line-no">168</span><span id="line-168">         */</span>
-<span class="source-line-no">169</span><span id="line-169">        @Override</span>
-<span class="source-line-no">170</span><span id="line-170">        public &lt;E extends EstimationFunction&gt; void train(E estimationFunction, DataSet trainingSet, ObjectiveFunction objective, Optimizer&lt;? super E&gt; optimizer) {</span>
-<span class="source-line-no">171</span><span id="line-171">            Regime linkedRegime = getLinkedRegime();</span>
-<span class="source-line-no">172</span><span id="line-172">            if (linkedRegime != null) {</span>
-<span class="source-line-no">173</span><span id="line-173">                linkedRegime.train(estimationFunction, trainingSet, objective, optimizer);</span>
-<span class="source-line-no">174</span><span id="line-174">            } else {</span>
-<span class="source-line-no">175</span><span id="line-175">                if (optimizer != null) {</span>
-<span class="source-line-no">176</span><span id="line-176">                    optimizer.optimize(estimationFunction, trainingSet, objective);</span>
-<span class="source-line-no">177</span><span id="line-177">                }</span>
-<span class="source-line-no">178</span><span id="line-178">            }</span>
-<span class="source-line-no">179</span><span id="line-179">        }</span>
-<span class="source-line-no">180</span><span id="line-180">    }</span>
-<span class="source-line-no">181</span><span id="line-181"></span>
-<span class="source-line-no">182</span><span id="line-182">    /**</span>
-<span class="source-line-no">183</span><span id="line-183">     * Abstract base for creating fluent builders of {@link ChainedRegime}.</span>
-<span class="source-line-no">184</span><span id="line-184">     *</span>
-<span class="source-line-no">185</span><span id="line-185">     * &lt;p&gt;This class is not used directly; instead, concrete subclasses such as</span>
-<span class="source-line-no">186</span><span id="line-186">     * {@link TopDownChainer} and {@link BottomUpChainer} extend it to provide</span>
-<span class="source-line-no">187</span><span id="line-187">     * a fluent DSL for assembling training regimes. It maintains a list of</span>
-<span class="source-line-no">188</span><span id="line-188">     * chained regimes and a {@code targetRegime} pointer so that each newly</span>
-<span class="source-line-no">189</span><span id="line-189">     * added decorator can wrap the current top of the chain.&lt;/p&gt;</span>
-<span class="source-line-no">190</span><span id="line-190">     *</span>
-<span class="source-line-no">191</span><span id="line-191">     * &lt;p&gt;Fluent methods such as {@link #epochs(int)}, {@link #miniBatch(int)},</span>
-<span class="source-line-no">192</span><span id="line-192">     * and {@link #reportObjective()} add specific {@link Regime} decorators</span>
-<span class="source-line-no">193</span><span id="line-193">     * around the current target, enabling expressive construction of complex</span>
-<span class="source-line-no">194</span><span id="line-194">     * training pipelines without manual wiring.&lt;/p&gt;</span>
-<span class="source-line-no">195</span><span id="line-195">     *</span>
-<span class="source-line-no">196</span><span id="line-196">     * &lt;p&gt;Once the chain is complete, {@link #build()} produces an immutable</span>
-<span class="source-line-no">197</span><span id="line-197">     * {@link ChainedRegime} that can be passed to a {@code Trainer}.&lt;/p&gt;</span>
-<span class="source-line-no">198</span><span id="line-198">     *</span>
-<span class="source-line-no">199</span><span id="line-199">     * @param &lt;M&gt; the concrete builder subtype (for fluent chaining)</span>
-<span class="source-line-no">200</span><span id="line-200">     * @see TopDownChainer</span>
-<span class="source-line-no">201</span><span id="line-201">     * @see BottomUpChainer</span>
-<span class="source-line-no">202</span><span id="line-202">     */</span>
-<span class="source-line-no">203</span><span id="line-203">    @TemplateMethod</span>
-<span class="source-line-no">204</span><span id="line-204">    protected static abstract class Modifiable&lt;M extends Modifiable&lt;M&gt;&gt; extends ChainedRegime {</span>
-<span class="source-line-no">205</span><span id="line-205"></span>
-<span class="source-line-no">206</span><span id="line-206">        /**</span>
-<span class="source-line-no">207</span><span id="line-207">         * The regime that the next decorator should wrap.</span>
-<span class="source-line-no">208</span><span id="line-208">         */</span>
-<span class="source-line-no">209</span><span id="line-209">        protected Regime targetRegime;</span>
-<span class="source-line-no">210</span><span id="line-210"></span>
-<span class="source-line-no">211</span><span id="line-211">        /**</span>
-<span class="source-line-no">212</span><span id="line-212">         * Creates a new, initially empty chain builder.</span>
-<span class="source-line-no">213</span><span id="line-213">         */</span>
-<span class="source-line-no">214</span><span id="line-214">        protected Modifiable() {</span>
-<span class="source-line-no">215</span><span id="line-215">            super(new ArrayList&lt;&gt;());</span>
-<span class="source-line-no">216</span><span id="line-216">        }</span>
-<span class="source-line-no">217</span><span id="line-217"></span>
-<span class="source-line-no">218</span><span id="line-218">        /**</span>
-<span class="source-line-no">219</span><span id="line-219">         * Adds the given regime to the chain and updates {@link #targetRegime}.</span>
-<span class="source-line-no">220</span><span id="line-220">         *</span>
-<span class="source-line-no">221</span><span id="line-221">         * @param regime the regime to add</span>
-<span class="source-line-no">222</span><span id="line-222">         * @return {@code this} builder</span>
-<span class="source-line-no">223</span><span id="line-223">         */</span>
-<span class="source-line-no">224</span><span id="line-224">        protected abstract M chainRegime(Regime regime);</span>
-<span class="source-line-no">225</span><span id="line-225"></span>
-<span class="source-line-no">226</span><span id="line-226">        /**</span>
-<span class="source-line-no">227</span><span id="line-227">         * Adds a {@link BatchRegime} decorator around the current target.</span>
-<span class="source-line-no">228</span><span id="line-228">         *</span>
+<span class="source-line-no">145</span><span id="line-145">         * Resolves the linked regime by index (handling negative indexes).</span>
+<span class="source-line-no">146</span><span id="line-146">         *</span>
+<span class="source-line-no">147</span><span id="line-147">         * @return the target regime or {@code null} if out of bounds</span>
+<span class="source-line-no">148</span><span id="line-148">         */</span>
+<span class="source-line-no">149</span><span id="line-149">        private Regime getLinkedRegime() {</span>
+<span class="source-line-no">150</span><span id="line-150">            int index = linkedRegimeIndex &lt; 0 ? chainedRegimes.size() + linkedRegimeIndex : linkedRegimeIndex;</span>
+<span class="source-line-no">151</span><span id="line-151">            return index &lt; chainedRegimes.size() &amp;&amp; index &gt;= 0</span>
+<span class="source-line-no">152</span><span id="line-152">                    ? chainedRegimes.get(index)</span>
+<span class="source-line-no">153</span><span id="line-153">                    : null;</span>
+<span class="source-line-no">154</span><span id="line-154">        }</span>
+<span class="source-line-no">155</span><span id="line-155"></span>
+<span class="source-line-no">156</span><span id="line-156">        /**</span>
+<span class="source-line-no">157</span><span id="line-157">         * Forwards training to the linked regime if available; otherwise falls back</span>
+<span class="source-line-no">158</span><span id="line-158">         * to direct optimizer invocation (if non-null).</span>
+<span class="source-line-no">159</span><span id="line-159">         */</span>
+<span class="source-line-no">160</span><span id="line-160">        @Override</span>
+<span class="source-line-no">161</span><span id="line-161">        public &lt;E extends EstimationFunction&gt; void train(E estimationFunction, DataSet trainingSet, ObjectiveFunction objective, Optimizer&lt;? super E&gt; optimizer) {</span>
+<span class="source-line-no">162</span><span id="line-162">            Regime linkedRegime = getLinkedRegime();</span>
+<span class="source-line-no">163</span><span id="line-163">            if (linkedRegime != null) {</span>
+<span class="source-line-no">164</span><span id="line-164">                linkedRegime.train(estimationFunction, trainingSet, objective, optimizer);</span>
+<span class="source-line-no">165</span><span id="line-165">            } else {</span>
+<span class="source-line-no">166</span><span id="line-166">                if (optimizer != null) {</span>
+<span class="source-line-no">167</span><span id="line-167">                    optimizer.optimize(estimationFunction, trainingSet, objective);</span>
+<span class="source-line-no">168</span><span id="line-168">                }</span>
+<span class="source-line-no">169</span><span id="line-169">            }</span>
+<span class="source-line-no">170</span><span id="line-170">        }</span>
+<span class="source-line-no">171</span><span id="line-171">    }</span>
+<span class="source-line-no">172</span><span id="line-172"></span>
+<span class="source-line-no">173</span><span id="line-173">    @net.tvburger.jdl.common.patterns.Builder</span>
+<span class="source-line-no">174</span><span id="line-174">    public static class Builder {</span>
+<span class="source-line-no">175</span><span id="line-175"></span>
+<span class="source-line-no">176</span><span id="line-176">        private final List&lt;Regime&gt; chainedRegimes = new ArrayList&lt;&gt;();</span>
+<span class="source-line-no">177</span><span id="line-177">        private Regime targetRegime = nextLink();</span>
+<span class="source-line-no">178</span><span id="line-178"></span>
+<span class="source-line-no">179</span><span id="line-179">        private Link nextLink() {</span>
+<span class="source-line-no">180</span><span id="line-180">            return new Link(chainedRegimes, -2 - chainedRegimes.size());</span>
+<span class="source-line-no">181</span><span id="line-181">        }</span>
+<span class="source-line-no">182</span><span id="line-182"></span>
+<span class="source-line-no">183</span><span id="line-183">        /**</span>
+<span class="source-line-no">184</span><span id="line-184">         * Adds the given regime to the chain and updates {@link #targetRegime}.</span>
+<span class="source-line-no">185</span><span id="line-185">         *</span>
+<span class="source-line-no">186</span><span id="line-186">         * @param regime the regime to add</span>
+<span class="source-line-no">187</span><span id="line-187">         * @return {@code this} builder</span>
+<span class="source-line-no">188</span><span id="line-188">         */</span>
+<span class="source-line-no">189</span><span id="line-189">        private Builder chainRegime(Regime regime) {</span>
+<span class="source-line-no">190</span><span id="line-190">            chainedRegimes.addFirst(regime);</span>
+<span class="source-line-no">191</span><span id="line-191">            targetRegime = nextLink();</span>
+<span class="source-line-no">192</span><span id="line-192">            return this;</span>
+<span class="source-line-no">193</span><span id="line-193">        }</span>
+<span class="source-line-no">194</span><span id="line-194"></span>
+<span class="source-line-no">195</span><span id="line-195">        /**</span>
+<span class="source-line-no">196</span><span id="line-196">         * Adds a {@link BatchRegime} decorator around the current target.</span>
+<span class="source-line-no">197</span><span id="line-197">         *</span>
+<span class="source-line-no">198</span><span id="line-198">         * @return this builder (for fluent chaining)</span>
+<span class="source-line-no">199</span><span id="line-199">         * @see BatchRegime</span>
+<span class="source-line-no">200</span><span id="line-200">         */</span>
+<span class="source-line-no">201</span><span id="line-201">        public final ChainedRegime batch() {</span>
+<span class="source-line-no">202</span><span id="line-202">            return chainRegime(new BatchRegime()).build();</span>
+<span class="source-line-no">203</span><span id="line-203">        }</span>
+<span class="source-line-no">204</span><span id="line-204"></span>
+<span class="source-line-no">205</span><span id="line-205">        /**</span>
+<span class="source-line-no">206</span><span id="line-206">         * Adds an {@link OnlineRegime} decorator around the current target.</span>
+<span class="source-line-no">207</span><span id="line-207">         *</span>
+<span class="source-line-no">208</span><span id="line-208">         * @return this builder (for fluent chaining)</span>
+<span class="source-line-no">209</span><span id="line-209">         * @see OnlineRegime</span>
+<span class="source-line-no">210</span><span id="line-210">         */</span>
+<span class="source-line-no">211</span><span id="line-211">        public final ChainedRegime online() {</span>
+<span class="source-line-no">212</span><span id="line-212">            return chainRegime(new OnlineRegime()).build();</span>
+<span class="source-line-no">213</span><span id="line-213">        }</span>
+<span class="source-line-no">214</span><span id="line-214"></span>
+<span class="source-line-no">215</span><span id="line-215">        /**</span>
+<span class="source-line-no">216</span><span id="line-216">         * Adds a {@link MiniBatchRegime} decorator with a default batch size of 32.</span>
+<span class="source-line-no">217</span><span id="line-217">         *</span>
+<span class="source-line-no">218</span><span id="line-218">         * @return this builder (for fluent chaining)</span>
+<span class="source-line-no">219</span><span id="line-219">         * @see MiniBatchRegime</span>
+<span class="source-line-no">220</span><span id="line-220">         */</span>
+<span class="source-line-no">221</span><span id="line-221">        public final ChainedRegime miniBatch() {</span>
+<span class="source-line-no">222</span><span id="line-222">            return miniBatch(32);</span>
+<span class="source-line-no">223</span><span id="line-223">        }</span>
+<span class="source-line-no">224</span><span id="line-224"></span>
+<span class="source-line-no">225</span><span id="line-225">        /**</span>
+<span class="source-line-no">226</span><span id="line-226">         * Adds a {@link MiniBatchRegime} decorator with the given batch size.</span>
+<span class="source-line-no">227</span><span id="line-227">         *</span>
+<span class="source-line-no">228</span><span id="line-228">         * @param batchSize the number of samples per mini-batch (must be &gt; 0)</span>
 <span class="source-line-no">229</span><span id="line-229">         * @return this builder (for fluent chaining)</span>
-<span class="source-line-no">230</span><span id="line-230">         * @see BatchRegime</span>
+<span class="source-line-no">230</span><span id="line-230">         * @see MiniBatchRegime</span>
 <span class="source-line-no">231</span><span id="line-231">         */</span>
-<span class="source-line-no">232</span><span id="line-232">        public final M batch() {</span>
-<span class="source-line-no">233</span><span id="line-233">            return chainRegime(new BatchRegime(targetRegime));</span>
+<span class="source-line-no">232</span><span id="line-232">        public final ChainedRegime miniBatch(int batchSize) {</span>
+<span class="source-line-no">233</span><span id="line-233">            return chainRegime(new MiniBatchRegime(batchSize)).build();</span>
 <span class="source-line-no">234</span><span id="line-234">        }</span>
 <span class="source-line-no">235</span><span id="line-235"></span>
 <span class="source-line-no">236</span><span id="line-236">        /**</span>
-<span class="source-line-no">237</span><span id="line-237">         * Adds an {@link OnlineRegime} decorator around the current target.</span>
+<span class="source-line-no">237</span><span id="line-237">         * Adds an {@link EpochRegime} decorator with a default of 1,000 epochs.</span>
 <span class="source-line-no">238</span><span id="line-238">         *</span>
 <span class="source-line-no">239</span><span id="line-239">         * @return this builder (for fluent chaining)</span>
-<span class="source-line-no">240</span><span id="line-240">         * @see OnlineRegime</span>
+<span class="source-line-no">240</span><span id="line-240">         * @see EpochRegime</span>
 <span class="source-line-no">241</span><span id="line-241">         */</span>
-<span class="source-line-no">242</span><span id="line-242">        public final M online() {</span>
-<span class="source-line-no">243</span><span id="line-243">            return chainRegime(new OnlineRegime(targetRegime));</span>
+<span class="source-line-no">242</span><span id="line-242">        public final Builder epochs() {</span>
+<span class="source-line-no">243</span><span id="line-243">            return epochs(1_000);</span>
 <span class="source-line-no">244</span><span id="line-244">        }</span>
 <span class="source-line-no">245</span><span id="line-245"></span>
 <span class="source-line-no">246</span><span id="line-246">        /**</span>
-<span class="source-line-no">247</span><span id="line-247">         * Adds a {@link MiniBatchRegime} decorator with a default batch size of 32.</span>
+<span class="source-line-no">247</span><span id="line-247">         * Adds an {@link EpochRegime} decorator with the given number of epochs.</span>
 <span class="source-line-no">248</span><span id="line-248">         *</span>
-<span class="source-line-no">249</span><span id="line-249">         * @return this builder (for fluent chaining)</span>
-<span class="source-line-no">250</span><span id="line-250">         * @see MiniBatchRegime</span>
-<span class="source-line-no">251</span><span id="line-251">         */</span>
-<span class="source-line-no">252</span><span id="line-252">        public final M miniBatch() {</span>
-<span class="source-line-no">253</span><span id="line-253">            return miniBatch(32);</span>
-<span class="source-line-no">254</span><span id="line-254">        }</span>
-<span class="source-line-no">255</span><span id="line-255"></span>
-<span class="source-line-no">256</span><span id="line-256">        /**</span>
-<span class="source-line-no">257</span><span id="line-257">         * Adds a {@link MiniBatchRegime} decorator with the given batch size.</span>
-<span class="source-line-no">258</span><span id="line-258">         *</span>
-<span class="source-line-no">259</span><span id="line-259">         * @param samplesPerLearning the number of samples per mini-batch (must be &gt; 0)</span>
-<span class="source-line-no">260</span><span id="line-260">         * @return this builder (for fluent chaining)</span>
-<span class="source-line-no">261</span><span id="line-261">         * @see MiniBatchRegime</span>
-<span class="source-line-no">262</span><span id="line-262">         */</span>
-<span class="source-line-no">263</span><span id="line-263">        public final M miniBatch(int samplesPerLearning) {</span>
-<span class="source-line-no">264</span><span id="line-264">            return chainRegime(new MiniBatchRegime(targetRegime, samplesPerLearning));</span>
-<span class="source-line-no">265</span><span id="line-265">        }</span>
-<span class="source-line-no">266</span><span id="line-266"></span>
-<span class="source-line-no">267</span><span id="line-267">        /**</span>
-<span class="source-line-no">268</span><span id="line-268">         * Adds an {@link EpochRegime} decorator with a default of 1,000 epochs.</span>
-<span class="source-line-no">269</span><span id="line-269">         *</span>
-<span class="source-line-no">270</span><span id="line-270">         * @return this builder (for fluent chaining)</span>
-<span class="source-line-no">271</span><span id="line-271">         * @see EpochRegime</span>
-<span class="source-line-no">272</span><span id="line-272">         */</span>
-<span class="source-line-no">273</span><span id="line-273">        public final M epochs() {</span>
-<span class="source-line-no">274</span><span id="line-274">            return epochs(1_000);</span>
-<span class="source-line-no">275</span><span id="line-275">        }</span>
-<span class="source-line-no">276</span><span id="line-276"></span>
-<span class="source-line-no">277</span><span id="line-277">        /**</span>
-<span class="source-line-no">278</span><span id="line-278">         * Adds an {@link EpochRegime} decorator with the given number of epochs.</span>
-<span class="source-line-no">279</span><span id="line-279">         *</span>
-<span class="source-line-no">280</span><span id="line-280">         * @param epochs the number of epochs to run (must be &gt;= 1)</span>
-<span class="source-line-no">281</span><span id="line-281">         * @return this builder (for fluent chaining)</span>
-<span class="source-line-no">282</span><span id="line-282">         * @see EpochRegime</span>
-<span class="source-line-no">283</span><span id="line-283">         */</span>
-<span class="source-line-no">284</span><span id="line-284">        public final M epochs(int epochs) {</span>
-<span class="source-line-no">285</span><span id="line-285">            return chainRegime(new EpochRegime(targetRegime, epochs));</span>
-<span class="source-line-no">286</span><span id="line-286">        }</span>
-<span class="source-line-no">287</span><span id="line-287"></span>
+<span class="source-line-no">249</span><span id="line-249">         * @param epochs the number of epochs to run (must be &gt;= 1)</span>
+<span class="source-line-no">250</span><span id="line-250">         * @return this builder (for fluent chaining)</span>
+<span class="source-line-no">251</span><span id="line-251">         * @see EpochRegime</span>
+<span class="source-line-no">252</span><span id="line-252">         */</span>
+<span class="source-line-no">253</span><span id="line-253">        public final Builder epochs(int epochs) {</span>
+<span class="source-line-no">254</span><span id="line-254">            return chainRegime(new EpochRegime(targetRegime, epochs));</span>
+<span class="source-line-no">255</span><span id="line-255">        }</span>
+<span class="source-line-no">256</span><span id="line-256"></span>
+<span class="source-line-no">257</span><span id="line-257">        /**</span>
+<span class="source-line-no">258</span><span id="line-258">         * Adds an {@link ObjectiveReportingRegime} decorator that reports</span>
+<span class="source-line-no">259</span><span id="line-259">         * objective (loss) values with dumping enabled.</span>
+<span class="source-line-no">260</span><span id="line-260">         *</span>
+<span class="source-line-no">261</span><span id="line-261">         * @return this builder (for fluent chaining)</span>
+<span class="source-line-no">262</span><span id="line-262">         * @see ObjectiveReportingRegime</span>
+<span class="source-line-no">263</span><span id="line-263">         */</span>
+<span class="source-line-no">264</span><span id="line-264">        public final Builder reportObjective() {</span>
+<span class="source-line-no">265</span><span id="line-265">            return chainRegime(new ObjectiveReportingRegime(targetRegime, true));</span>
+<span class="source-line-no">266</span><span id="line-266">        }</span>
+<span class="source-line-no">267</span><span id="line-267"></span>
+<span class="source-line-no">268</span><span id="line-268">        /**</span>
+<span class="source-line-no">269</span><span id="line-269">         * Adds a {@link DumpNodesRegime} decorator with default options (dump after training).</span>
+<span class="source-line-no">270</span><span id="line-270">         *</span>
+<span class="source-line-no">271</span><span id="line-271">         * @return this builder (for fluent chaining)</span>
+<span class="source-line-no">272</span><span id="line-272">         * @see DumpNodesRegime</span>
+<span class="source-line-no">273</span><span id="line-273">         */</span>
+<span class="source-line-no">274</span><span id="line-274">        public final Builder dumpNodes() {</span>
+<span class="source-line-no">275</span><span id="line-275">            return dumpNodes(false);</span>
+<span class="source-line-no">276</span><span id="line-276">        }</span>
+<span class="source-line-no">277</span><span id="line-277"></span>
+<span class="source-line-no">278</span><span id="line-278">        /**</span>
+<span class="source-line-no">279</span><span id="line-279">         * Adds a {@link DumpNodesRegime} decorator with an initial dump toggle.</span>
+<span class="source-line-no">280</span><span id="line-280">         *</span>
+<span class="source-line-no">281</span><span id="line-281">         * @param firstTime whether to dump before the first training step</span>
+<span class="source-line-no">282</span><span id="line-282">         * @return this builder (for fluent chaining)</span>
+<span class="source-line-no">283</span><span id="line-283">         * @see DumpNodesRegime</span>
+<span class="source-line-no">284</span><span id="line-284">         */</span>
+<span class="source-line-no">285</span><span id="line-285">        public final Builder dumpNodes(boolean firstTime) {</span>
+<span class="source-line-no">286</span><span id="line-286">            return dumpNodes(firstTime, false);</span>
+<span class="source-line-no">287</span><span id="line-287">        }</span>
 <span class="source-line-no">288</span><span id="line-288"></span>
 <span class="source-line-no">289</span><span id="line-289">        /**</span>
-<span class="source-line-no">290</span><span id="line-290">         * Adds an {@link ObjectiveReportingRegime} decorator that reports</span>
-<span class="source-line-no">291</span><span id="line-291">         * objective (loss) values with dumping enabled.</span>
-<span class="source-line-no">292</span><span id="line-292">         *</span>
-<span class="source-line-no">293</span><span id="line-293">         * @return this builder (for fluent chaining)</span>
-<span class="source-line-no">294</span><span id="line-294">         * @see ObjectiveReportingRegime</span>
-<span class="source-line-no">295</span><span id="line-295">         */</span>
-<span class="source-line-no">296</span><span id="line-296">        public final M reportObjective() {</span>
-<span class="source-line-no">297</span><span id="line-297">            return chainRegime(new ObjectiveReportingRegime(targetRegime, true));</span>
-<span class="source-line-no">298</span><span id="line-298">        }</span>
-<span class="source-line-no">299</span><span id="line-299"></span>
-<span class="source-line-no">300</span><span id="line-300">        /**</span>
-<span class="source-line-no">301</span><span id="line-301">         * Adds a {@link StopIfNoImprovementRegime} decorator with default</span>
-<span class="source-line-no">302</span><span id="line-302">         * parameters (stall limit = 2, min improvement = {@link Floats#EPSILON}).</span>
+<span class="source-line-no">290</span><span id="line-290">         * Adds a {@link DumpNodesRegime} decorator with full configuration.</span>
+<span class="source-line-no">291</span><span id="line-291">         *</span>
+<span class="source-line-no">292</span><span id="line-292">         * @param firstTime     whether to dump before the first training step</span>
+<span class="source-line-no">293</span><span id="line-293">         * @param includeInputs whether to include input nodes in the dump</span>
+<span class="source-line-no">294</span><span id="line-294">         * @return this builder (for fluent chaining)</span>
+<span class="source-line-no">295</span><span id="line-295">         * @see DumpNodesRegime</span>
+<span class="source-line-no">296</span><span id="line-296">         */</span>
+<span class="source-line-no">297</span><span id="line-297">        public final Builder dumpNodes(boolean firstTime, boolean includeInputs) {</span>
+<span class="source-line-no">298</span><span id="line-298">            return chainRegime(new DumpNodesRegime(targetRegime, firstTime, includeInputs));</span>
+<span class="source-line-no">299</span><span id="line-299">        }</span>
+<span class="source-line-no">300</span><span id="line-300"></span>
+<span class="source-line-no">301</span><span id="line-301">        /**</span>
+<span class="source-line-no">302</span><span id="line-302">         * Finalizes the builder and creates an immutable {@link ChainedRegime}.</span>
 <span class="source-line-no">303</span><span id="line-303">         *</span>
-<span class="source-line-no">304</span><span id="line-304">         * @return this builder (for fluent chaining)</span>
-<span class="source-line-no">305</span><span id="line-305">         * @see StopIfNoImprovementRegime</span>
-<span class="source-line-no">306</span><span id="line-306">         */</span>
-<span class="source-line-no">307</span><span id="line-307">        public final M stopIfNoImprovements() {</span>
-<span class="source-line-no">308</span><span id="line-308">            return stopIfNoImprovements(2);</span>
-<span class="source-line-no">309</span><span id="line-309">        }</span>
-<span class="source-line-no">310</span><span id="line-310"></span>
-<span class="source-line-no">311</span><span id="line-311">        /**</span>
-<span class="source-line-no">312</span><span id="line-312">         * Adds a {@link StopIfNoImprovementRegime} decorator with the given stall limit.</span>
-<span class="source-line-no">313</span><span id="line-313">         *</span>
-<span class="source-line-no">314</span><span id="line-314">         * @param maxStalledEpochs maximum consecutive stalled epochs allowed</span>
-<span class="source-line-no">315</span><span id="line-315">         * @return this builder (for fluent chaining)</span>
-<span class="source-line-no">316</span><span id="line-316">         * @see StopIfNoImprovementRegime</span>
-<span class="source-line-no">317</span><span id="line-317">         */</span>
-<span class="source-line-no">318</span><span id="line-318">        public final M stopIfNoImprovements(int maxStalledEpochs) {</span>
-<span class="source-line-no">319</span><span id="line-319">            return stopIfNoImprovements(maxStalledEpochs, Floats.EPSILON);</span>
-<span class="source-line-no">320</span><span id="line-320">        }</span>
-<span class="source-line-no">321</span><span id="line-321"></span>
-<span class="source-line-no">322</span><span id="line-322">        /**</span>
-<span class="source-line-no">323</span><span id="line-323">         * Adds a {@link StopIfNoImprovementRegime} decorator with default stall limit (2)</span>
-<span class="source-line-no">324</span><span id="line-324">         * and the specified dumping flag.</span>
-<span class="source-line-no">325</span><span id="line-325">         *</span>
-<span class="source-line-no">326</span><span id="line-326">         * @param dumpLosses whether to print loss values during training</span>
-<span class="source-line-no">327</span><span id="line-327">         * @return this builder (for fluent chaining)</span>
-<span class="source-line-no">328</span><span id="line-328">         * @see StopIfNoImprovementRegime</span>
-<span class="source-line-no">329</span><span id="line-329">         */</span>
-<span class="source-line-no">330</span><span id="line-330">        public final M stopIfNoImprovements(boolean dumpLosses) {</span>
-<span class="source-line-no">331</span><span id="line-331">            return stopIfNoImprovements(2, dumpLosses);</span>
-<span class="source-line-no">332</span><span id="line-332">        }</span>
-<span class="source-line-no">333</span><span id="line-333"></span>
-<span class="source-line-no">334</span><span id="line-334">        /**</span>
-<span class="source-line-no">335</span><span id="line-335">         * Adds a {@link StopIfNoImprovementRegime} decorator with a stall limit</span>
-<span class="source-line-no">336</span><span id="line-336">         * and dumping flag.</span>
-<span class="source-line-no">337</span><span id="line-337">         *</span>
-<span class="source-line-no">338</span><span id="line-338">         * @param maxStalledEpochs maximum consecutive stalled epochs allowed</span>
-<span class="source-line-no">339</span><span id="line-339">         * @param dumpLosses       whether to print loss values during training</span>
-<span class="source-line-no">340</span><span id="line-340">         * @return this builder (for fluent chaining)</span>
-<span class="source-line-no">341</span><span id="line-341">         * @see StopIfNoImprovementRegime</span>
-<span class="source-line-no">342</span><span id="line-342">         */</span>
-<span class="source-line-no">343</span><span id="line-343">        public final M stopIfNoImprovements(int maxStalledEpochs, boolean dumpLosses) {</span>
-<span class="source-line-no">344</span><span id="line-344">            return stopIfNoImprovements(2, Floats.EPSILON, dumpLosses);</span>
-<span class="source-line-no">345</span><span id="line-345">        }</span>
-<span class="source-line-no">346</span><span id="line-346"></span>
-<span class="source-line-no">347</span><span id="line-347"></span>
-<span class="source-line-no">348</span><span id="line-348">        /**</span>
-<span class="source-line-no">349</span><span id="line-349">         * Adds a {@link StopIfNoImprovementRegime} decorator with the given</span>
-<span class="source-line-no">350</span><span id="line-350">         * stall limit and minimum improvement threshold.</span>
-<span class="source-line-no">351</span><span id="line-351">         *</span>
-<span class="source-line-no">352</span><span id="line-352">         * @param maxStalledEpochs maximum consecutive stalled epochs allowed</span>
-<span class="source-line-no">353</span><span id="line-353">         * @param minImprovement   minimum relative improvement (percentage) required</span>
-<span class="source-line-no">354</span><span id="line-354">         * @return this builder (for fluent chaining)</span>
-<span class="source-line-no">355</span><span id="line-355">         * @see StopIfNoImprovementRegime</span>
-<span class="source-line-no">356</span><span id="line-356">         */</span>
-<span class="source-line-no">357</span><span id="line-357">        public final M stopIfNoImprovements(int maxStalledEpochs, float minImprovement) {</span>
-<span class="source-line-no">358</span><span id="line-358">            return stopIfNoImprovements(maxStalledEpochs, minImprovement, true);</span>
-<span class="source-line-no">359</span><span id="line-359">        }</span>
-<span class="source-line-no">360</span><span id="line-360"></span>
-<span class="source-line-no">361</span><span id="line-361">        /**</span>
-<span class="source-line-no">362</span><span id="line-362">         * Adds a {@link StopIfNoImprovementRegime} decorator with full configuration.</span>
-<span class="source-line-no">363</span><span id="line-363">         *</span>
-<span class="source-line-no">364</span><span id="line-364">         * @param maxStalledEpochs maximum consecutive stalled epochs allowed</span>
-<span class="source-line-no">365</span><span id="line-365">         * @param minImprovement   minimum relative improvement (percentage) required</span>
-<span class="source-line-no">366</span><span id="line-366">         * @param dumpLosses       whether to print loss values during training</span>
-<span class="source-line-no">367</span><span id="line-367">         * @return this builder (for fluent chaining)</span>
-<span class="source-line-no">368</span><span id="line-368">         * @see StopIfNoImprovementRegime</span>
-<span class="source-line-no">369</span><span id="line-369">         */</span>
-<span class="source-line-no">370</span><span id="line-370">        public final M stopIfNoImprovements(int maxStalledEpochs, float minImprovement, boolean dumpLosses) {</span>
-<span class="source-line-no">371</span><span id="line-371">            return chainRegime(StopIfNoImprovementRegime.create(targetRegime, maxStalledEpochs, minImprovement, dumpLosses));</span>
-<span class="source-line-no">372</span><span id="line-372">        }</span>
-<span class="source-line-no">373</span><span id="line-373"></span>
-<span class="source-line-no">374</span><span id="line-374">        /**</span>
-<span class="source-line-no">375</span><span id="line-375">         * Adds a {@link DumpNodesRegime} decorator with default options (dump after training).</span>
-<span class="source-line-no">376</span><span id="line-376">         *</span>
-<span class="source-line-no">377</span><span id="line-377">         * @return this builder (for fluent chaining)</span>
-<span class="source-line-no">378</span><span id="line-378">         * @see DumpNodesRegime</span>
-<span class="source-line-no">379</span><span id="line-379">         */</span>
-<span class="source-line-no">380</span><span id="line-380">        public final M dumpNodes() {</span>
-<span class="source-line-no">381</span><span id="line-381">            return dumpNodes(false);</span>
-<span class="source-line-no">382</span><span id="line-382">        }</span>
-<span class="source-line-no">383</span><span id="line-383"></span>
-<span class="source-line-no">384</span><span id="line-384">        /**</span>
-<span class="source-line-no">385</span><span id="line-385">         * Adds a {@link DumpNodesRegime} decorator with an initial dump toggle.</span>
-<span class="source-line-no">386</span><span id="line-386">         *</span>
-<span class="source-line-no">387</span><span id="line-387">         * @param firstTime whether to dump before the first training step</span>
-<span class="source-line-no">388</span><span id="line-388">         * @return this builder (for fluent chaining)</span>
-<span class="source-line-no">389</span><span id="line-389">         * @see DumpNodesRegime</span>
-<span class="source-line-no">390</span><span id="line-390">         */</span>
-<span class="source-line-no">391</span><span id="line-391">        public final M dumpNodes(boolean firstTime) {</span>
-<span class="source-line-no">392</span><span id="line-392">            return dumpNodes(firstTime, false);</span>
-<span class="source-line-no">393</span><span id="line-393">        }</span>
-<span class="source-line-no">394</span><span id="line-394"></span>
-<span class="source-line-no">395</span><span id="line-395">        /**</span>
-<span class="source-line-no">396</span><span id="line-396">         * Adds a {@link DumpNodesRegime} decorator with full configuration.</span>
-<span class="source-line-no">397</span><span id="line-397">         *</span>
-<span class="source-line-no">398</span><span id="line-398">         * @param firstTime     whether to dump before the first training step</span>
-<span class="source-line-no">399</span><span id="line-399">         * @param includeInputs whether to include input nodes in the dump</span>
-<span class="source-line-no">400</span><span id="line-400">         * @return this builder (for fluent chaining)</span>
-<span class="source-line-no">401</span><span id="line-401">         * @see DumpNodesRegime</span>
-<span class="source-line-no">402</span><span id="line-402">         */</span>
-<span class="source-line-no">403</span><span id="line-403">        public final M dumpNodes(boolean firstTime, boolean includeInputs) {</span>
-<span class="source-line-no">404</span><span id="line-404">            return chainRegime(new DumpNodesRegime(targetRegime, firstTime, includeInputs));</span>
-<span class="source-line-no">405</span><span id="line-405">        }</span>
-<span class="source-line-no">406</span><span id="line-406"></span>
-<span class="source-line-no">407</span><span id="line-407">        /**</span>
-<span class="source-line-no">408</span><span id="line-408">         * Finalizes the builder and creates an immutable {@link ChainedRegime}.</span>
-<span class="source-line-no">409</span><span id="line-409">         *</span>
-<span class="source-line-no">410</span><span id="line-410">         * &lt;p&gt;The returned {@link ChainedRegime} contains the current list of</span>
-<span class="source-line-no">411</span><span id="line-411">         * decorators in the order they were added. The underlying list is wrapped</span>
-<span class="source-line-no">412</span><span id="line-412">         * with {@link List#copyOf(java.util.Collection)} to ensure immutability,</span>
-<span class="source-line-no">413</span><span id="line-413">         * so further modifications to this builder will not affect the built chain.&lt;/p&gt;</span>
-<span class="source-line-no">414</span><span id="line-414">         *</span>
-<span class="source-line-no">415</span><span id="line-415">         * @return an immutable {@link ChainedRegime} representing the current builder state</span>
-<span class="source-line-no">416</span><span id="line-416">         * @see ChainedRegime</span>
-<span class="source-line-no">417</span><span id="line-417">         */</span>
-<span class="source-line-no">418</span><span id="line-418">        protected final ChainedRegime build() {</span>
-<span class="source-line-no">419</span><span id="line-419">            return new ChainedRegime(List.copyOf(chainedRegimes));</span>
-<span class="source-line-no">420</span><span id="line-420">        }</span>
-<span class="source-line-no">421</span><span id="line-421"></span>
-<span class="source-line-no">422</span><span id="line-422">    }</span>
-<span class="source-line-no">423</span><span id="line-423"></span>
-<span class="source-line-no">424</span><span id="line-424">    /**</span>
-<span class="source-line-no">425</span><span id="line-425">     * Fluent builder that composes the chain from &lt;em&gt;top down&lt;/em&gt;.</span>
-<span class="source-line-no">426</span><span id="line-426">     * &lt;p&gt;Each added decorator becomes the new head, wrapping the previous head.</span>
-<span class="source-line-no">427</span><span id="line-427">     * Internally uses a {@link Link} to refer to the evolving predecessor.&lt;/p&gt;</span>
-<span class="source-line-no">428</span><span id="line-428">     */</span>
-<span class="source-line-no">429</span><span id="line-429">    @Builder</span>
-<span class="source-line-no">430</span><span id="line-430">    public static final class TopDownChainer extends ChainedRegime.Modifiable&lt;TopDownChainer&gt; {</span>
-<span class="source-line-no">431</span><span id="line-431"></span>
-<span class="source-line-no">432</span><span id="line-432">        /**</span>
-<span class="source-line-no">433</span><span id="line-433">         * Initializes the builder with a link pointing one-before-last, then moves as items are added.</span>
-<span class="source-line-no">434</span><span id="line-434">         */</span>
-<span class="source-line-no">435</span><span id="line-435">        public TopDownChainer() {</span>
-<span class="source-line-no">436</span><span id="line-436">            targetRegime = nextLink();</span>
-<span class="source-line-no">437</span><span id="line-437">        }</span>
-<span class="source-line-no">438</span><span id="line-438"></span>
-<span class="source-line-no">439</span><span id="line-439">        private Link nextLink() {</span>
-<span class="source-line-no">440</span><span id="line-440">            return new Link(-2 - chainedRegimes.size());</span>
-<span class="source-line-no">441</span><span id="line-441">        }</span>
-<span class="source-line-no">442</span><span id="line-442"></span>
-<span class="source-line-no">443</span><span id="line-443">        /**</span>
-<span class="source-line-no">444</span><span id="line-444">         * {@inheritDoc}</span>
-<span class="source-line-no">445</span><span id="line-445">         */</span>
-<span class="source-line-no">446</span><span id="line-446">        @Override</span>
-<span class="source-line-no">447</span><span id="line-447">        protected TopDownChainer chainRegime(Regime regime) {</span>
-<span class="source-line-no">448</span><span id="line-448">            chainedRegimes.addFirst(regime);</span>
-<span class="source-line-no">449</span><span id="line-449">            targetRegime = nextLink();</span>
-<span class="source-line-no">450</span><span id="line-450">            return this;</span>
-<span class="source-line-no">451</span><span id="line-451">        }</span>
-<span class="source-line-no">452</span><span id="line-452"></span>
-<span class="source-line-no">453</span><span id="line-453">        /**</span>
-<span class="source-line-no">454</span><span id="line-454">         * Finalizes the composition and returns unmodifiable chain.</span>
-<span class="source-line-no">455</span><span id="line-455">         */</span>
-<span class="source-line-no">456</span><span id="line-456">        public ChainedRegime bottomChain() {</span>
-<span class="source-line-no">457</span><span id="line-457">            return build();</span>
-<span class="source-line-no">458</span><span id="line-458">        }</span>
-<span class="source-line-no">459</span><span id="line-459">    }</span>
-<span class="source-line-no">460</span><span id="line-460"></span>
-<span class="source-line-no">461</span><span id="line-461">    /**</span>
-<span class="source-line-no">462</span><span id="line-462">     * Fluent builder that composes the chain from &lt;em&gt;bottom up&lt;/em&gt;.</span>
-<span class="source-line-no">463</span><span id="line-463">     * &lt;p&gt;Each added decorator wraps the previous target; the most recently added</span>
-<span class="source-line-no">464</span><span id="line-464">     * decorator becomes the top.&lt;/p&gt;</span>
-<span class="source-line-no">465</span><span id="line-465">     */</span>
-<span class="source-line-no">466</span><span id="line-466">    @Builder</span>
-<span class="source-line-no">467</span><span id="line-467">    public static final class BottomUpChainer extends ChainedRegime.Modifiable&lt;BottomUpChainer&gt; {</span>
-<span class="source-line-no">468</span><span id="line-468"></span>
-<span class="source-line-no">469</span><span id="line-469">        /**</span>
-<span class="source-line-no">470</span><span id="line-470">         * {@inheritDoc}</span>
-<span class="source-line-no">471</span><span id="line-471">         */</span>
-<span class="source-line-no">472</span><span id="line-472">        @Override</span>
-<span class="source-line-no">473</span><span id="line-473">        protected BottomUpChainer chainRegime(Regime regime) {</span>
-<span class="source-line-no">474</span><span id="line-474">            targetRegime = regime;</span>
-<span class="source-line-no">475</span><span id="line-475">            chainedRegimes.add(targetRegime);</span>
-<span class="source-line-no">476</span><span id="line-476">            return this;</span>
-<span class="source-line-no">477</span><span id="line-477">        }</span>
-<span class="source-line-no">478</span><span id="line-478"></span>
-<span class="source-line-no">479</span><span id="line-479">        /**</span>
-<span class="source-line-no">480</span><span id="line-480">         * Finalizes the composition and returns unmodifiable chain.</span>
-<span class="source-line-no">481</span><span id="line-481">         */</span>
-<span class="source-line-no">482</span><span id="line-482">        public ChainedRegime topChain() {</span>
-<span class="source-line-no">483</span><span id="line-483">            return build();</span>
-<span class="source-line-no">484</span><span id="line-484">        }</span>
-<span class="source-line-no">485</span><span id="line-485"></span>
-<span class="source-line-no">486</span><span id="line-486">    }</span>
-<span class="source-line-no">487</span><span id="line-487"></span>
-<span class="source-line-no">488</span><span id="line-488">}</span>
+<span class="source-line-no">304</span><span id="line-304">         * &lt;p&gt;The returned {@link ChainedRegime} contains the current list of</span>
+<span class="source-line-no">305</span><span id="line-305">         * decorators in the order they were added. The underlying list is wrapped</span>
+<span class="source-line-no">306</span><span id="line-306">         * with {@link List#copyOf(java.util.Collection)} to ensure immutability,</span>
+<span class="source-line-no">307</span><span id="line-307">         * so further modifications to this builder will not affect the built chain.&lt;/p&gt;</span>
+<span class="source-line-no">308</span><span id="line-308">         *</span>
+<span class="source-line-no">309</span><span id="line-309">         * @return an immutable {@link ChainedRegime} representing the current builder state</span>
+<span class="source-line-no">310</span><span id="line-310">         * @see ChainedRegime</span>
+<span class="source-line-no">311</span><span id="line-311">         */</span>
+<span class="source-line-no">312</span><span id="line-312">        protected final ChainedRegime build() {</span>
+<span class="source-line-no">313</span><span id="line-313">            List&lt;Regime&gt; copyChainedRegimes = new ArrayList&lt;&gt;(chainedRegimes);</span>
+<span class="source-line-no">314</span><span id="line-314">            for (Regime regime : chainedRegimes) {</span>
+<span class="source-line-no">315</span><span id="line-315">                if (regime instanceof Link link) {</span>
+<span class="source-line-no">316</span><span id="line-316">                    copyChainedRegimes.add(new Link(copyChainedRegimes, link.linkedRegimeIndex));</span>
+<span class="source-line-no">317</span><span id="line-317">                } else {</span>
+<span class="source-line-no">318</span><span id="line-318">                    copyChainedRegimes.add(regime);</span>
+<span class="source-line-no">319</span><span id="line-319">                }</span>
+<span class="source-line-no">320</span><span id="line-320">            }</span>
+<span class="source-line-no">321</span><span id="line-321">            return new ChainedRegime(copyChainedRegimes);</span>
+<span class="source-line-no">322</span><span id="line-322">        }</span>
+<span class="source-line-no">323</span><span id="line-323">    }</span>
+<span class="source-line-no">324</span><span id="line-324"></span>
+<span class="source-line-no">325</span><span id="line-325">}</span>
 
 
 

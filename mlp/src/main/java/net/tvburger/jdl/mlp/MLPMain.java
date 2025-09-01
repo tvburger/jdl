@@ -3,10 +3,9 @@ package net.tvburger.jdl.mlp;
 import net.tvburger.jdl.datasets.LogicalDataSets;
 import net.tvburger.jdl.model.DataSet;
 import net.tvburger.jdl.model.nn.NeuralNetworks;
-import net.tvburger.jdl.model.nn.initializers.NeuralNetworkInitializer;
-import net.tvburger.jdl.model.nn.initializers.XavierInitializer;
-import net.tvburger.jdl.model.nn.optimizers.AdamOptimizer;
-import net.tvburger.jdl.model.nn.optimizers.StochasticGradientDescent;
+import net.tvburger.jdl.model.nn.training.initializers.NeuralNetworkInitializer;
+import net.tvburger.jdl.model.nn.training.initializers.XavierInitializer;
+import net.tvburger.jdl.model.nn.training.optimizers.StochasticGradientDescent;
 import net.tvburger.jdl.model.scalars.activations.Activations;
 import net.tvburger.jdl.model.training.ObjectiveFunction;
 import net.tvburger.jdl.model.training.Trainer;
@@ -28,9 +27,8 @@ public class MLPMain {
         NeuralNetworkInitializer initializer = new XavierInitializer();
         ObjectiveFunction objective = Losses.bCE();
         StochasticGradientDescent<MultiLayerPerceptron> gradientDescent = new StochasticGradientDescent<>();
-        AdamOptimizer<MultiLayerPerceptron> adamOptimizer = new AdamOptimizer<>();
         gradientDescent.setLearningRate(0.5f);
-        ChainedRegime regime = Regimes.chainTop().dumpNodes().epochs(10_000).reportObjective().dumpNodes().batch().bottomChain();
+        ChainedRegime regime = Regimes.dumpNodes().epochs(10_000).reportObjective().batch();
         Trainer<MultiLayerPerceptron> mlpTrainer = Trainer.of(initializer, objective, gradientDescent, regime);
         mlpTrainer.train(mlp, trainingSet);
 

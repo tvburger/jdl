@@ -3,7 +3,6 @@ package net.tvburger.jdl.model.nn;
 import net.tvburger.jdl.common.patterns.DomainObject;
 import net.tvburger.jdl.common.patterns.Entity;
 import net.tvburger.jdl.model.EstimationFunction;
-import net.tvburger.jdl.model.nn.initializers.NeuralNetworkInitializer;
 import net.tvburger.jdl.model.training.TrainableFunction;
 
 import java.util.Map;
@@ -14,9 +13,9 @@ import java.util.Set;
  * <p>
  * A neural network consists of multiple layers of {@link Neuron}s connected
  * through weighted edges. This interface exposes structural information
- * (layers, neurons, connections), parameter management, and initialization
- * capabilities. It does not prescribe a specific network architecture
- * (e.g., fully connected, convolutional, recurrent).
+ * (layers, neurons, connections) and parameter management. It does not
+ * prescribe a specific network architecture (e.g., fully connected,
+ * convolutional, recurrent).
  * </p>
  *
  * <h2>Responsibilities:</h2>
@@ -24,7 +23,6 @@ import java.util.Set;
  *   <li>Expose the <b>topology</b> of the network in terms of layers and neurons.</li>
  *   <li>Provide access to <b>parameters</b> (weights, biases) for training
  *       and persistence.</li>
- *   <li>Support <b>initialization</b> of parameters through an {@link NeuralNetworkInitializer}.</li>
  *   <li>Inherit evaluation capabilities from {@link EstimationFunction},
  *       such as mapping inputs to outputs.</li>
  * </ul>
@@ -62,8 +60,8 @@ public interface NeuralNetwork extends TrainableFunction {
     /**
      * Returns a specific neuron in the network by its layer and index.
      *
-     * @param l     the layer index (0-based)
-     * @param j     the index of the neuron within the layer (0-based)
+     * @param l         the layer index (0-based)
+     * @param j         the index of the neuron within the layer (0-based)
      * @param classType the class of the neuron to be returned
      * @return the neuron at the specified position
      * @throws IndexOutOfBoundsException if the indices are invalid

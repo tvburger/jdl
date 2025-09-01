@@ -15,13 +15,13 @@ public class AdalineLineMain {
 
     public static void main(String[] args) {
         DataSet dataSet = new StraightLineWithNoise().load();
-        DataSet trainingSet = dataSet.subset(11, dataSet.samples().size());
-        DataSet testSet = dataSet.subset(1, 11);
+        DataSet trainingSet = dataSet.subset(10, dataSet.size());
+        DataSet testSet = dataSet.subset(0, 10);
 
         Adaline adaline = Adaline.create(1, 1);
         ObjectiveFunction objective = Losses.mSE();
         LeastMeanSquares leastMeanSquares = new LeastMeanSquares(0.00001f);
-        ChainedRegime regime = Regimes.chainTop().epochs(200).reportObjective().online().bottomChain();
+        ChainedRegime regime = Regimes.epochs(5).dumpNodes().reportObjective().online();
         Trainer<Adaline> adalineTrainer = Trainer.of(new AdalineInitializer(), objective, leastMeanSquares, regime);
         adalineTrainer.train(adaline, trainingSet);
         NeuralNetworks.dump(adaline);

@@ -33,8 +33,8 @@ import net.tvburger.jdl.model.training.Regime;
 @Strategy(Strategy.Role.CONCRETE)
 public class DumpNodesRegime extends DelegatedRegime {
 
-    private boolean firstTime;
-    private boolean includeInputs;
+    public static final String HP_DUMP_FIRST_TIME = "dumpFirstTime";
+    public static final String HP_DUMP_INPUTS = "dumpInputs";
 
     /**
      * Creates a new regime that dumps node values of the given network during training.
@@ -45,8 +45,8 @@ public class DumpNodesRegime extends DelegatedRegime {
      */
     public DumpNodesRegime(Regime regime, boolean firstTime, boolean includeInputs) {
         super(regime);
-        this.firstTime = firstTime;
-        this.includeInputs = includeInputs;
+        setHyperparameter(HP_DUMP_FIRST_TIME, firstTime);
+        setHyperparameter(HP_DUMP_INPUTS, includeInputs);
     }
 
     /**
@@ -55,7 +55,7 @@ public class DumpNodesRegime extends DelegatedRegime {
      * @return {@code true} if the network is dumped before the first epoch, otherwise {@code false}
      */
     public boolean isFirstTime() {
-        return firstTime;
+        return getHyperparameter(HP_DUMP_FIRST_TIME, Boolean.class);
     }
 
     /**
@@ -64,7 +64,7 @@ public class DumpNodesRegime extends DelegatedRegime {
      * @param firstTime {@code true} to dump before the first epoch, {@code false} otherwise
      */
     public void setFirstTime(boolean firstTime) {
-        this.firstTime = firstTime;
+        setHyperparameter(HP_DUMP_FIRST_TIME, firstTime);
     }
 
     /**
@@ -73,7 +73,7 @@ public class DumpNodesRegime extends DelegatedRegime {
      * @return {@code true} if input nodes are included, {@code false} otherwise
      */
     public boolean isIncludeInputs() {
-        return includeInputs;
+        return getHyperparameter(HP_DUMP_INPUTS, Boolean.class);
     }
 
     /**
@@ -82,7 +82,7 @@ public class DumpNodesRegime extends DelegatedRegime {
      * @param includeInputs {@code true} to include input nodes, {@code false} otherwise
      */
     public void setIncludeInputs(boolean includeInputs) {
-        this.includeInputs = includeInputs;
+        setHyperparameter(HP_DUMP_INPUTS, includeInputs);
     }
 
     /**
@@ -101,7 +101,7 @@ public class DumpNodesRegime extends DelegatedRegime {
      */
     @Override
     public <E extends EstimationFunction> void train(E estimationFunction, DataSet trainingSet, ObjectiveFunction objective, Optimizer<? super E> optimizer) {
-        if (firstTime) {
+        if (isFirstTime()) {
             dumpNodes(estimationFunction);
         }
         regime.train(estimationFunction, trainingSet, objective, optimizer);
@@ -110,7 +110,7 @@ public class DumpNodesRegime extends DelegatedRegime {
 
     private void dumpNodes(EstimationFunction estimationFunction) {
         if (estimationFunction instanceof NeuralNetwork neuralNetwork) {
-            NeuralNetworks.dump(neuralNetwork, includeInputs);
+            NeuralNetworks.dump(neuralNetwork, isIncludeInputs());
         }
     }
 }

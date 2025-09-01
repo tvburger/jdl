@@ -29,13 +29,13 @@
 <span class="source-line-no">016</span><span id="line-16"></span>
 <span class="source-line-no">017</span><span id="line-17">    public static void main(String[] args) {</span>
 <span class="source-line-no">018</span><span id="line-18">        DataSet dataSet = LogicalDataSets.toMinusSet(new LinesAndCircles().load());</span>
-<span class="source-line-no">019</span><span id="line-19">        DataSet trainingSet = dataSet.subset(11, dataSet.samples().size());</span>
-<span class="source-line-no">020</span><span id="line-20">        DataSet testSet = dataSet.subset(1, 11);</span>
+<span class="source-line-no">019</span><span id="line-19">        DataSet trainingSet = dataSet.subset(10, dataSet.size());</span>
+<span class="source-line-no">020</span><span id="line-20">        DataSet testSet = dataSet.subset(0, 10);</span>
 <span class="source-line-no">021</span><span id="line-21"></span>
 <span class="source-line-no">022</span><span id="line-22">        Adaline adaline = Adaline.create(400, 8);</span>
 <span class="source-line-no">023</span><span id="line-23">        ObjectiveFunction objective = Losses.mSE();</span>
 <span class="source-line-no">024</span><span id="line-24">        LeastMeanSquares leastMeanSquares = new LeastMeanSquares(0.01f);</span>
-<span class="source-line-no">025</span><span id="line-25">        ChainedRegime regime = Regimes.chainTop().epochs(100).reportObjective().online().bottomChain();</span>
+<span class="source-line-no">025</span><span id="line-25">        ChainedRegime regime = Regimes.epochs(100).reportObjective().online();</span>
 <span class="source-line-no">026</span><span id="line-26">        Trainer&lt;Adaline&gt; adalineTrainer = Trainer.of(new AdalineInitializer(), objective, leastMeanSquares, regime);</span>
 <span class="source-line-no">027</span><span id="line-27">        adalineTrainer.train(adaline, trainingSet);</span>
 <span class="source-line-no">028</span><span id="line-28"></span>

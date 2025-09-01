@@ -289,4 +289,22 @@ public record DataSet(List<Sample> samples) implements Iterable<DataSet.Sample> 
         }
         return this;
     }
+
+    /**
+     * Returns the number of samples in the data set.
+     *
+     * @return the number of samples in the data set
+     */
+    public int size() {
+        return samples.size();
+    }
+
+    /**
+     * Returns true if there are no samples in the data set
+     *
+     * @return true if empty
+     */
+    public boolean isEmpty() {
+        return samples.isEmpty();
+    }
 }

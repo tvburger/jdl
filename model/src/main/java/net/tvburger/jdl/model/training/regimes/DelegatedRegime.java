@@ -3,9 +3,14 @@ package net.tvburger.jdl.model.training.regimes;
 import net.tvburger.jdl.common.patterns.Decorator;
 import net.tvburger.jdl.model.DataSet;
 import net.tvburger.jdl.model.EstimationFunction;
+import net.tvburger.jdl.model.HyperparameterConfigurable;
 import net.tvburger.jdl.model.training.ObjectiveFunction;
 import net.tvburger.jdl.model.training.Optimizer;
 import net.tvburger.jdl.model.training.Regime;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * An abstract {@link Regime} implementation that delegates all training
@@ -28,7 +33,9 @@ import net.tvburger.jdl.model.training.Regime;
  * </ul>
  */
 @Decorator
-public abstract class DelegatedRegime implements Regime {
+public abstract class DelegatedRegime implements Regime, HyperparameterConfigurable {
+
+    private final Map<String, Object> hyperparameters = new HashMap<>();
 
     /**
      * The regime that receives all delegated training calls.
@@ -45,12 +52,7 @@ public abstract class DelegatedRegime implements Regime {
      *               full dataset via the given {@link Optimizer}.
      */
     protected DelegatedRegime(Regime regime) {
-        this.regime = regime != null ? regime : new Regime() {
-            @Override
-            public <E extends EstimationFunction> void train(E estimationFunction, DataSet trainingSet, ObjectiveFunction objective, Optimizer<? super E> optimizer) {
-                optimizer.optimize(estimationFunction, trainingSet.compatible(estimationFunction), objective);
-            }
-        };
+        this.regime = Objects.requireNonNull(regime);
     }
 
     /**
@@ -63,4 +65,31 @@ public abstract class DelegatedRegime implements Regime {
         return regime;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean hasHyperparameter(String name) {
+        return hyperparameters.containsKey(name) || regime instanceof HyperparameterConfigurable configurable && configurable.hasHyperparameter(name);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Map<String, Object> getHyperparameters() {
+        return hyperparameters;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setHyperparameter(String name, Object value) {
+        if (!hyperparameters.containsKey(name) && regime instanceof HyperparameterConfigurable configurable && configurable.hasHyperparameter(name)) {
+            configurable.setHyperparameter(name, value);
+        } else {
+            hyperparameters.put(name, value);
+        }
+    }
 }

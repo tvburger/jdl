@@ -15,31 +15,92 @@
 <span class="source-line-no">002</span><span id="line-2"></span>
 <span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.model.EstimationFunction;</span>
 <span class="source-line-no">004</span><span id="line-4"></span>
-<span class="source-line-no">005</span><span id="line-5">public interface TrainableFunction extends EstimationFunction {</span>
-<span class="source-line-no">006</span><span id="line-6"></span>
-<span class="source-line-no">007</span><span id="line-7">    default int getParameterCount() {</span>
-<span class="source-line-no">008</span><span id="line-8">        return getParameters().length;</span>
-<span class="source-line-no">009</span><span id="line-9">    }</span>
-<span class="source-line-no">010</span><span id="line-10"></span>
-<span class="source-line-no">011</span><span id="line-11">    float[] getParameters();</span>
-<span class="source-line-no">012</span><span id="line-12"></span>
-<span class="source-line-no">013</span><span id="line-13">    default void setParameters(float[] values) {</span>
-<span class="source-line-no">014</span><span id="line-14">        float[] parameters = getParameters();</span>
-<span class="source-line-no">015</span><span id="line-15">        if (values.length != parameters.length) {</span>
-<span class="source-line-no">016</span><span id="line-16">            throw new IllegalArgumentException();</span>
-<span class="source-line-no">017</span><span id="line-17">        }</span>
-<span class="source-line-no">018</span><span id="line-18">        System.arraycopy(values, 0, parameters, 0, parameters.length);</span>
-<span class="source-line-no">019</span><span id="line-19">    }</span>
-<span class="source-line-no">020</span><span id="line-20"></span>
-<span class="source-line-no">021</span><span id="line-21">    default float getParameter(int p) {</span>
-<span class="source-line-no">022</span><span id="line-22">        return getParameters()[p];</span>
-<span class="source-line-no">023</span><span id="line-23">    }</span>
-<span class="source-line-no">024</span><span id="line-24"></span>
-<span class="source-line-no">025</span><span id="line-25">    default void setParameter(int p, float value) {</span>
-<span class="source-line-no">026</span><span id="line-26">        getParameters()[p] = value;</span>
-<span class="source-line-no">027</span><span id="line-27">    }</span>
-<span class="source-line-no">028</span><span id="line-28"></span>
-<span class="source-line-no">029</span><span id="line-29">}</span>
+<span class="source-line-no">005</span><span id="line-5">/**</span>
+<span class="source-line-no">006</span><span id="line-6"> * A function with trainable parameters that can be estimated and updated.</span>
+<span class="source-line-no">007</span><span id="line-7"> * &lt;p&gt;</span>
+<span class="source-line-no">008</span><span id="line-8"> * Extends {@link EstimationFunction} by adding accessors and mutators for</span>
+<span class="source-line-no">009</span><span id="line-9"> * parameters (biases, weights, coefficients, etc.) used during training.</span>
+<span class="source-line-no">010</span><span id="line-10"> * Provides default convenience methods for reading, writing, and updating</span>
+<span class="source-line-no">011</span><span id="line-11"> * parameters.</span>
+<span class="source-line-no">012</span><span id="line-12"> */</span>
+<span class="source-line-no">013</span><span id="line-13">public interface TrainableFunction extends EstimationFunction {</span>
+<span class="source-line-no">014</span><span id="line-14"></span>
+<span class="source-line-no">015</span><span id="line-15">    /**</span>
+<span class="source-line-no">016</span><span id="line-16">     * Returns the number of trainable parameters of this function.</span>
+<span class="source-line-no">017</span><span id="line-17">     *</span>
+<span class="source-line-no">018</span><span id="line-18">     * @return the number of parameters</span>
+<span class="source-line-no">019</span><span id="line-19">     */</span>
+<span class="source-line-no">020</span><span id="line-20">    default int getParameterCount() {</span>
+<span class="source-line-no">021</span><span id="line-21">        return getParameters().length;</span>
+<span class="source-line-no">022</span><span id="line-22">    }</span>
+<span class="source-line-no">023</span><span id="line-23"></span>
+<span class="source-line-no">024</span><span id="line-24">    /**</span>
+<span class="source-line-no">025</span><span id="line-25">     * Returns the underlying parameter vector for this function.</span>
+<span class="source-line-no">026</span><span id="line-26">     *</span>
+<span class="source-line-no">027</span><span id="line-27">     * @return the array of parameters</span>
+<span class="source-line-no">028</span><span id="line-28">     */</span>
+<span class="source-line-no">029</span><span id="line-29">    float[] getParameters();</span>
+<span class="source-line-no">030</span><span id="line-30"></span>
+<span class="source-line-no">031</span><span id="line-31">    /**</span>
+<span class="source-line-no">032</span><span id="line-32">     * Replaces the parameter vector with the given values.</span>
+<span class="source-line-no">033</span><span id="line-33">     *</span>
+<span class="source-line-no">034</span><span id="line-34">     * @param values the new parameter values</span>
+<span class="source-line-no">035</span><span id="line-35">     * @throws IllegalArgumentException if the array length does not match</span>
+<span class="source-line-no">036</span><span id="line-36">     *                                  {@link #getParameterCount()}</span>
+<span class="source-line-no">037</span><span id="line-37">     */</span>
+<span class="source-line-no">038</span><span id="line-38">    default void setParameters(float[] values) {</span>
+<span class="source-line-no">039</span><span id="line-39">        float[] parameters = getParameters();</span>
+<span class="source-line-no">040</span><span id="line-40">        if (values.length != parameters.length) {</span>
+<span class="source-line-no">041</span><span id="line-41">            throw new IllegalArgumentException();</span>
+<span class="source-line-no">042</span><span id="line-42">        }</span>
+<span class="source-line-no">043</span><span id="line-43">        System.arraycopy(values, 0, parameters, 0, parameters.length);</span>
+<span class="source-line-no">044</span><span id="line-44">    }</span>
+<span class="source-line-no">045</span><span id="line-45"></span>
+<span class="source-line-no">046</span><span id="line-46">    /**</span>
+<span class="source-line-no">047</span><span id="line-47">     * Returns the parameter at the given index.</span>
+<span class="source-line-no">048</span><span id="line-48">     *</span>
+<span class="source-line-no">049</span><span id="line-49">     * @param p index of the parameter</span>
+<span class="source-line-no">050</span><span id="line-50">     * @return the parameter value</span>
+<span class="source-line-no">051</span><span id="line-51">     * @throws ArrayIndexOutOfBoundsException if the index is out of range</span>
+<span class="source-line-no">052</span><span id="line-52">     */</span>
+<span class="source-line-no">053</span><span id="line-53">    default float getParameter(int p) {</span>
+<span class="source-line-no">054</span><span id="line-54">        return getParameters()[p];</span>
+<span class="source-line-no">055</span><span id="line-55">    }</span>
+<span class="source-line-no">056</span><span id="line-56"></span>
+<span class="source-line-no">057</span><span id="line-57">    /**</span>
+<span class="source-line-no">058</span><span id="line-58">     * Sets the parameter at the given index to the specified value.</span>
+<span class="source-line-no">059</span><span id="line-59">     *</span>
+<span class="source-line-no">060</span><span id="line-60">     * @param p     index of the parameter</span>
+<span class="source-line-no">061</span><span id="line-61">     * @param value new value to set</span>
+<span class="source-line-no">062</span><span id="line-62">     * @throws ArrayIndexOutOfBoundsException if the index is out of range</span>
+<span class="source-line-no">063</span><span id="line-63">     */</span>
+<span class="source-line-no">064</span><span id="line-64">    default void setParameter(int p, float value) {</span>
+<span class="source-line-no">065</span><span id="line-65">        getParameters()[p] = value;</span>
+<span class="source-line-no">066</span><span id="line-66">    }</span>
+<span class="source-line-no">067</span><span id="line-67"></span>
+<span class="source-line-no">068</span><span id="line-68">    /**</span>
+<span class="source-line-no">069</span><span id="line-69">     * Adjusts all parameters (except the first one, typically the bias)</span>
+<span class="source-line-no">070</span><span id="line-70">     * by adding the corresponding deltas.</span>
+<span class="source-line-no">071</span><span id="line-71">     *</span>
+<span class="source-line-no">072</span><span id="line-72">     * @param deltas an array of additive updates, aligned with the parameter vector</span>
+<span class="source-line-no">073</span><span id="line-73">     */</span>
+<span class="source-line-no">074</span><span id="line-74">    default void adjustParameters(float[] deltas) {</span>
+<span class="source-line-no">075</span><span id="line-75">        for (int p = 0; p &lt; deltas.length; p++) {</span>
+<span class="source-line-no">076</span><span id="line-76">            adjustParameters(p, deltas[p]);</span>
+<span class="source-line-no">077</span><span id="line-77">        }</span>
+<span class="source-line-no">078</span><span id="line-78">    }</span>
+<span class="source-line-no">079</span><span id="line-79"></span>
+<span class="source-line-no">080</span><span id="line-80">    /**</span>
+<span class="source-line-no">081</span><span id="line-81">     * Adjusts a single parameter by adding the given delta to its current value.</span>
+<span class="source-line-no">082</span><span id="line-82">     *</span>
+<span class="source-line-no">083</span><span id="line-83">     * @param p     index of the parameter</span>
+<span class="source-line-no">084</span><span id="line-84">     * @param delta the increment to add to the parameter value</span>
+<span class="source-line-no">085</span><span id="line-85">     * @throws ArrayIndexOutOfBoundsException if the index is out of range</span>
+<span class="source-line-no">086</span><span id="line-86">     */</span>
+<span class="source-line-no">087</span><span id="line-87">    default void adjustParameters(int p, float delta) {</span>
+<span class="source-line-no">088</span><span id="line-88">        setParameter(p, getParameter(p) + delta);</span>
+<span class="source-line-no">089</span><span id="line-89">    }</span>
+<span class="source-line-no">090</span><span id="line-90">}</span>
 
 
 

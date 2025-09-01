@@ -36,10 +36,11 @@ import java.util.List;
 @Strategy(Strategy.Role.CONCRETE)
 public class ObjectiveReportingRegime extends DelegatedRegime {
 
+    public static final String HP_OBJECTIVE_DUMP = "objectiveDump";
+
     private Float improvement;
     private Float currentLoss;
     private int iteration;
-    private boolean dump;
 
     /**
      * Creates a new reporting regime that wraps the given regime.
@@ -59,7 +60,7 @@ public class ObjectiveReportingRegime extends DelegatedRegime {
      */
     public ObjectiveReportingRegime(Regime regime, boolean dump) {
         super(regime);
-        this.dump = dump;
+        setHyperparameter(HP_OBJECTIVE_DUMP, dump);
     }
 
     /**
@@ -68,7 +69,7 @@ public class ObjectiveReportingRegime extends DelegatedRegime {
      * @return {@code true} if reporting is enabled, {@code false} otherwise
      */
     public boolean isDumpingLossValues() {
-        return dump;
+        return getHyperparameter(HP_OBJECTIVE_DUMP, Boolean.class);
     }
 
     /**
@@ -77,7 +78,7 @@ public class ObjectiveReportingRegime extends DelegatedRegime {
      * @param dump {@code true} to enable reporting, {@code false} to disable
      */
     public void setDumpingLossValues(boolean dump) {
-        this.dump = dump;
+        setHyperparameter(HP_OBJECTIVE_DUMP, dump);
     }
 
     /**
@@ -102,7 +103,7 @@ public class ObjectiveReportingRegime extends DelegatedRegime {
         if (objective != null && iteration == 0) {
             List<Pair<float[], float[]>> batch = trainingSet.samples().stream().map(s -> Pair.of(estimationFunction.estimate(s.features()), s.targetOutputs())).toList();
             previousLoss = objective.calculateLoss(batch);
-            if (dump) {
+            if (isDumpingLossValues()) {
                 System.out.printf("[Measurement %4d] Aggregated loss = %.4f (baseline)%n", iteration, previousLoss);
             }
         } else {
@@ -114,7 +115,7 @@ public class ObjectiveReportingRegime extends DelegatedRegime {
             List<Pair<float[], float[]>> batch = trainingSet.samples().stream().map(s -> Pair.of(estimationFunction.estimate(s.features()), s.targetOutputs())).toList();
             currentLoss = objective.calculateLoss(batch);
             improvement = (previousLoss - currentLoss) / previousLoss * -100f;
-            if (dump) {
+            if (isDumpingLossValues()) {
                 System.out.printf("[Measurement %4d] Aggregated loss = %.4f (%.2f%%)%n", iteration, currentLoss, improvement);
             }
         }

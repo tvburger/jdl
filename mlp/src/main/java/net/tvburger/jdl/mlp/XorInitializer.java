@@ -2,7 +2,7 @@ package net.tvburger.jdl.mlp;
 
 import net.tvburger.jdl.model.nn.NeuralNetwork;
 import net.tvburger.jdl.model.nn.Neuron;
-import net.tvburger.jdl.model.nn.initializers.NeuralNetworkInitializer;
+import net.tvburger.jdl.model.nn.training.initializers.NeuralNetworkInitializer;
 
 public class XorInitializer implements NeuralNetworkInitializer {
 

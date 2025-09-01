@@ -22,15 +22,12 @@ import java.util.List;
  *       (weighted sum + bias → activation function) and also stores a copy
  *       of the input values provided by connected neurons.</li>
  *   <li>The stored inputs can be retrieved via {@link #getStoredInput(int)}.</li>
- *   <li>Stored inputs can be explicitly cleared with
- *       {@link #clearStoredInputs()} to release memory or reset state
- *       between training iterations.</li>
  * </ul>
  */
 @Decorator
 public class LastInputStoredNeuron extends Neuron {
 
-    private float[] storedInputs;
+    private final float[] storedInputs;
 
     /**
      * Constructs a neuron that stores the inputs from its most recent activation.
@@ -41,6 +38,7 @@ public class LastInputStoredNeuron extends Neuron {
      */
     public LastInputStoredNeuron(String name, List<? extends Neuron> inputs, ActivationFunction activationFunction) {
         super(name, inputs, activationFunction);
+        storedInputs = new float[inputs == null ? 0 : inputs.size()];
     }
 
     /**
@@ -49,11 +47,7 @@ public class LastInputStoredNeuron extends Neuron {
      * values from connected neurons.
      */
     public synchronized void activate() {
-        if (isActivated()) {
-            return;
-        }
         super.activate();
-        storedInputs = new float[getInputNodes().size()];
         for (int i = 0; i < getInputNodes().size(); i++) {
             storedInputs[i] = getInputNodes().get(i).getOutput();
         }
@@ -71,13 +65,6 @@ public class LastInputStoredNeuron extends Neuron {
      */
     public float getStoredInput(int d) {
         return storedInputs[validDimension(d) - 1];
-    }
-
-    /**
-     * Clears the stored inputs, releasing memory and resetting state.
-     */
-    public synchronized void clearStoredInputs() {
-        storedInputs = null;
     }
 
 }

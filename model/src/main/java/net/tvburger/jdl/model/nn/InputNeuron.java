@@ -71,4 +71,11 @@ public class InputNeuron extends Neuron {
         activate();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public float getOutput() {
+        return input;
+    }
+
 }
