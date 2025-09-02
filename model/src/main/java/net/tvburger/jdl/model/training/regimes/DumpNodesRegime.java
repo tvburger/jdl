@@ -33,7 +33,13 @@ import net.tvburger.jdl.model.training.Regime;
 @Strategy(Strategy.Role.CONCRETE)
 public class DumpNodesRegime extends DelegatedRegime {
 
+    /**
+     * The hyperparameter name to dump first time
+     */
     public static final String HP_DUMP_FIRST_TIME = "dumpFirstTime";
+    /**
+     * The hyperparameter name to dump inputs
+     */
     public static final String HP_DUMP_INPUTS = "dumpInputs";
 
     /**

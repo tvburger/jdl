@@ -24,14 +24,42 @@ public class XavierInitializer implements NeuralNetworkInitializer {
 
     private final Random random;
 
+    /**
+     * Creates a new Xavier initializer with a default, non-deterministic
+     * random number generator.
+     * <p>
+     * This constructor is suitable when reproducibility is not required.
+     * Each run will produce different initial weights.
+     * </p>
+     */
     public XavierInitializer() {
         this(new Random());
     }
 
+    /**
+     * Creates a new Xavier initializer with a seeded random number generator.
+     * <p>
+     * Using a fixed seed makes the initializer deterministic, ensuring that
+     * the same sequence of random numbers (and thus weight initializations)
+     * is produced across runs.
+     * </p>
+     *
+     * @param seed the seed for the random number generator
+     */
     public XavierInitializer(int seed) {
         this(new Random(seed));
     }
 
+    /**
+     * Creates a new Xavier initializer with the given {@link Random} instance.
+     * <p>
+     * This constructor provides maximum flexibility by allowing the caller to
+     * supply a custom random number generator implementation or one shared with
+     * other components.
+     * </p>
+     *
+     * @param random the random number generator to use
+     */
     public XavierInitializer(Random random) {
         this.random = random;
     }

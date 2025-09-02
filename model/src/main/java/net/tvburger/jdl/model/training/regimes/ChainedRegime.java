@@ -170,6 +170,15 @@ public class ChainedRegime implements Regime, Iterable<Regime> {
         }
     }
 
+    /**
+     * Builder for constructing instances of {@link ChainedRegime}.
+     * <p>
+     * A chained regime allows multiple {@link Regime} strategies to be
+     * combined and executed in sequence. The {@code Builder} provides
+     * a fluent API to assemble the chain and produce an immutable
+     * {@code ChainedRegime} instance.
+     * </p>
+     */
     @net.tvburger.jdl.common.patterns.Builder
     public static class Builder {
 

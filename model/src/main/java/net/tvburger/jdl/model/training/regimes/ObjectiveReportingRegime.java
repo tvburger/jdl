@@ -36,6 +36,9 @@ import java.util.List;
 @Strategy(Strategy.Role.CONCRETE)
 public class ObjectiveReportingRegime extends DelegatedRegime {
 
+    /**
+     * The hyperparameter name to dump the objective
+     */
     public static final String HP_OBJECTIVE_DUMP = "objectiveDump";
 
     private Float improvement;

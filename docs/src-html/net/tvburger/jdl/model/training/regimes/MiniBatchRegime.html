@@ -19,30 +19,68 @@
 <span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.model.training.ObjectiveFunction;</span>
 <span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.model.training.Optimizer;</span>
 <span class="source-line-no">008</span><span id="line-8"></span>
-<span class="source-line-no">009</span><span id="line-9">@Strategy(Strategy.Role.CONCRETE)</span>
-<span class="source-line-no">010</span><span id="line-10">public final class MiniBatchRegime extends DelegatedRegime implements BatchSizeConfigurable {</span>
-<span class="source-line-no">011</span><span id="line-11"></span>
-<span class="source-line-no">012</span><span id="line-12">    /**</span>
-<span class="source-line-no">013</span><span id="line-13">     * Creates a new mini-batch trainer with the given mini-batch size.</span>
-<span class="source-line-no">014</span><span id="line-14">     *</span>
-<span class="source-line-no">015</span><span id="line-15">     * @param batchSize the number of samples per mini-batch (must be &gt; 0)</span>
-<span class="source-line-no">016</span><span id="line-16">     */</span>
-<span class="source-line-no">017</span><span id="line-17">    public MiniBatchRegime(int batchSize) {</span>
-<span class="source-line-no">018</span><span id="line-18">        super(new BatchRegime());</span>
-<span class="source-line-no">019</span><span id="line-19">        setHyperparameter(HP_BATCH_SIZE, batchSize);</span>
-<span class="source-line-no">020</span><span id="line-20">    }</span>
-<span class="source-line-no">021</span><span id="line-21"></span>
-<span class="source-line-no">022</span><span id="line-22">    @Override</span>
-<span class="source-line-no">023</span><span id="line-23">    public &lt;E extends EstimationFunction&gt; void train(E estimationFunction, DataSet trainingSet, ObjectiveFunction objective, Optimizer&lt;? super E&gt; optimizer) {</span>
-<span class="source-line-no">024</span><span id="line-24">        int offset = 0;</span>
-<span class="source-line-no">025</span><span id="line-25">        int trainingSetSize = trainingSet.size();</span>
-<span class="source-line-no">026</span><span id="line-26">        do {</span>
-<span class="source-line-no">027</span><span id="line-27">            int newOffset = Math.min(trainingSetSize, offset + getBatchSize());</span>
-<span class="source-line-no">028</span><span id="line-28">            regime.train(estimationFunction, trainingSet.subset(offset, newOffset), objective, optimizer);</span>
-<span class="source-line-no">029</span><span id="line-29">            offset = newOffset;</span>
-<span class="source-line-no">030</span><span id="line-30">        } while (offset &gt;= trainingSet.size());</span>
-<span class="source-line-no">031</span><span id="line-31">    }</span>
-<span class="source-line-no">032</span><span id="line-32">}</span>
+<span class="source-line-no">009</span><span id="line-9">/**</span>
+<span class="source-line-no">010</span><span id="line-10"> * A training regime that performs &lt;strong&gt;mini-batch training&lt;/strong&gt;.</span>
+<span class="source-line-no">011</span><span id="line-11"> * &lt;p&gt;</span>
+<span class="source-line-no">012</span><span id="line-12"> * In mini-batch training, the dataset is split into contiguous batches</span>
+<span class="source-line-no">013</span><span id="line-13"> * of a fixed size, and each batch is trained sequentially using the</span>
+<span class="source-line-no">014</span><span id="line-14"> * delegated {@link BatchRegime}.</span>
+<span class="source-line-no">015</span><span id="line-15"> * &lt;/p&gt;</span>
+<span class="source-line-no">016</span><span id="line-16"> *</span>
+<span class="source-line-no">017</span><span id="line-17"> * &lt;h2&gt;Behavior&lt;/h2&gt;</span>
+<span class="source-line-no">018</span><span id="line-18"> * &lt;ul&gt;</span>
+<span class="source-line-no">019</span><span id="line-19"> *   &lt;li&gt;The batch size is configurable via {@link BatchSizeConfigurable}.&lt;/li&gt;</span>
+<span class="source-line-no">020</span><span id="line-20"> *   &lt;li&gt;The dataset is partitioned into consecutive mini-batches of that size.&lt;/li&gt;</span>
+<span class="source-line-no">021</span><span id="line-21"> *   &lt;li&gt;Each mini-batch is trained independently by delegating to</span>
+<span class="source-line-no">022</span><span id="line-22"> *       {@link BatchRegime}.&lt;/li&gt;</span>
+<span class="source-line-no">023</span><span id="line-23"> *   &lt;li&gt;No shuffling is performed; batches are taken in dataset order.&lt;/li&gt;</span>
+<span class="source-line-no">024</span><span id="line-24"> * &lt;/ul&gt;</span>
+<span class="source-line-no">025</span><span id="line-25"> *</span>
+<span class="source-line-no">026</span><span id="line-26"> * &lt;h2&gt;Use cases&lt;/h2&gt;</span>
+<span class="source-line-no">027</span><span id="line-27"> * &lt;p&gt;</span>
+<span class="source-line-no">028</span><span id="line-28"> * Mini-batch regimes combine the computational efficiency of batch training</span>
+<span class="source-line-no">029</span><span id="line-29"> * with the convergence stability of stochastic updates, making them the most</span>
+<span class="source-line-no">030</span><span id="line-30"> * commonly used training regime in practice.</span>
+<span class="source-line-no">031</span><span id="line-31"> * &lt;/p&gt;</span>
+<span class="source-line-no">032</span><span id="line-32"> *</span>
+<span class="source-line-no">033</span><span id="line-33"> * @see BatchRegime</span>
+<span class="source-line-no">034</span><span id="line-34"> * @see BatchSizeConfigurable</span>
+<span class="source-line-no">035</span><span id="line-35"> */</span>
+<span class="source-line-no">036</span><span id="line-36">@Strategy(Strategy.Role.CONCRETE)</span>
+<span class="source-line-no">037</span><span id="line-37">public final class MiniBatchRegime extends DelegatedRegime implements BatchSizeConfigurable {</span>
+<span class="source-line-no">038</span><span id="line-38"></span>
+<span class="source-line-no">039</span><span id="line-39">    /**</span>
+<span class="source-line-no">040</span><span id="line-40">     * Creates a new mini-batch regime with the specified mini-batch size.</span>
+<span class="source-line-no">041</span><span id="line-41">     *</span>
+<span class="source-line-no">042</span><span id="line-42">     * @param batchSize the number of samples per mini-batch (must be &amp;gt; 0)</span>
+<span class="source-line-no">043</span><span id="line-43">     */</span>
+<span class="source-line-no">044</span><span id="line-44">    public MiniBatchRegime(int batchSize) {</span>
+<span class="source-line-no">045</span><span id="line-45">        super(new BatchRegime());</span>
+<span class="source-line-no">046</span><span id="line-46">        setHyperparameter(HP_BATCH_SIZE, batchSize);</span>
+<span class="source-line-no">047</span><span id="line-47">    }</span>
+<span class="source-line-no">048</span><span id="line-48"></span>
+<span class="source-line-no">049</span><span id="line-49">    /**</span>
+<span class="source-line-no">050</span><span id="line-50">     * Trains the given estimation function by splitting the dataset into</span>
+<span class="source-line-no">051</span><span id="line-51">     * mini-batches of size {@link #getBatchSize()} and delegating each</span>
+<span class="source-line-no">052</span><span id="line-52">     * batch to the underlying {@link BatchRegime}.</span>
+<span class="source-line-no">053</span><span id="line-53">     *</span>
+<span class="source-line-no">054</span><span id="line-54">     * @param estimationFunction the model or function to train</span>
+<span class="source-line-no">055</span><span id="line-55">     * @param trainingSet        the dataset containing training samples</span>
+<span class="source-line-no">056</span><span id="line-56">     * @param objective          the objective/loss function</span>
+<span class="source-line-no">057</span><span id="line-57">     * @param optimizer          the optimizer used to update parameters</span>
+<span class="source-line-no">058</span><span id="line-58">     * @param &lt;E&gt;                the type of estimation function</span>
+<span class="source-line-no">059</span><span id="line-59">     */</span>
+<span class="source-line-no">060</span><span id="line-60">    @Override</span>
+<span class="source-line-no">061</span><span id="line-61">    public &lt;E extends EstimationFunction&gt; void train(E estimationFunction, DataSet trainingSet, ObjectiveFunction objective, Optimizer&lt;? super E&gt; optimizer) {</span>
+<span class="source-line-no">062</span><span id="line-62">        int offset = 0;</span>
+<span class="source-line-no">063</span><span id="line-63">        int trainingSetSize = trainingSet.size();</span>
+<span class="source-line-no">064</span><span id="line-64">        do {</span>
+<span class="source-line-no">065</span><span id="line-65">            int newOffset = Math.min(trainingSetSize, offset + getBatchSize());</span>
+<span class="source-line-no">066</span><span id="line-66">            regime.train(estimationFunction, trainingSet.subset(offset, newOffset), objective, optimizer);</span>
+<span class="source-line-no">067</span><span id="line-67">            offset = newOffset;</span>
+<span class="source-line-no">068</span><span id="line-68">        } while (offset &gt;= trainingSet.size());</span>
+<span class="source-line-no">069</span><span id="line-69">    }</span>
+<span class="source-line-no">070</span><span id="line-70">}</span>
 
 
 

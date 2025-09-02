@@ -37,38 +37,66 @@
 <span class="source-line-no">024</span><span id="line-24"></span>
 <span class="source-line-no">025</span><span id="line-25">    private final Random random;</span>
 <span class="source-line-no">026</span><span id="line-26"></span>
-<span class="source-line-no">027</span><span id="line-27">    public XavierInitializer() {</span>
-<span class="source-line-no">028</span><span id="line-28">        this(new Random());</span>
-<span class="source-line-no">029</span><span id="line-29">    }</span>
-<span class="source-line-no">030</span><span id="line-30"></span>
-<span class="source-line-no">031</span><span id="line-31">    public XavierInitializer(int seed) {</span>
-<span class="source-line-no">032</span><span id="line-32">        this(new Random(seed));</span>
-<span class="source-line-no">033</span><span id="line-33">    }</span>
-<span class="source-line-no">034</span><span id="line-34"></span>
-<span class="source-line-no">035</span><span id="line-35">    public XavierInitializer(Random random) {</span>
-<span class="source-line-no">036</span><span id="line-36">        this.random = random;</span>
+<span class="source-line-no">027</span><span id="line-27">    /**</span>
+<span class="source-line-no">028</span><span id="line-28">     * Creates a new Xavier initializer with a default, non-deterministic</span>
+<span class="source-line-no">029</span><span id="line-29">     * random number generator.</span>
+<span class="source-line-no">030</span><span id="line-30">     * &lt;p&gt;</span>
+<span class="source-line-no">031</span><span id="line-31">     * This constructor is suitable when reproducibility is not required.</span>
+<span class="source-line-no">032</span><span id="line-32">     * Each run will produce different initial weights.</span>
+<span class="source-line-no">033</span><span id="line-33">     * &lt;/p&gt;</span>
+<span class="source-line-no">034</span><span id="line-34">     */</span>
+<span class="source-line-no">035</span><span id="line-35">    public XavierInitializer() {</span>
+<span class="source-line-no">036</span><span id="line-36">        this(new Random());</span>
 <span class="source-line-no">037</span><span id="line-37">    }</span>
 <span class="source-line-no">038</span><span id="line-38"></span>
 <span class="source-line-no">039</span><span id="line-39">    /**</span>
-<span class="source-line-no">040</span><span id="line-40">     * {@inheritDoc}</span>
-<span class="source-line-no">041</span><span id="line-41">     */</span>
-<span class="source-line-no">042</span><span id="line-42">    @Override</span>
-<span class="source-line-no">043</span><span id="line-43">    public void initialize(NeuralNetwork neuralNetwork, Neuron neuron) {</span>
-<span class="source-line-no">044</span><span id="line-44">        int fanIn = neuron.arity();</span>
-<span class="source-line-no">045</span><span id="line-45">        int fanOut = neuralNetwork.getTargetNeurons(neuron).size();</span>
-<span class="source-line-no">046</span><span id="line-46"></span>
-<span class="source-line-no">047</span><span id="line-47">        float limit = (float) Math.sqrt(6.0f / (fanIn + fanOut));</span>
-<span class="source-line-no">048</span><span id="line-48"></span>
-<span class="source-line-no">049</span><span id="line-49">        for (int d = 1; d &lt;= neuron.arity(); d++) {</span>
-<span class="source-line-no">050</span><span id="line-50">            neuron.setWeight(d, uniform(-limit, limit));</span>
-<span class="source-line-no">051</span><span id="line-51">        }</span>
-<span class="source-line-no">052</span><span id="line-52">        // Bias left unchanged</span>
-<span class="source-line-no">053</span><span id="line-53">    }</span>
-<span class="source-line-no">054</span><span id="line-54"></span>
-<span class="source-line-no">055</span><span id="line-55">    private float uniform(float min, float max) {</span>
-<span class="source-line-no">056</span><span id="line-56">        return min + (max - min) * random.nextFloat();</span>
-<span class="source-line-no">057</span><span id="line-57">    }</span>
-<span class="source-line-no">058</span><span id="line-58">}</span>
+<span class="source-line-no">040</span><span id="line-40">     * Creates a new Xavier initializer with a seeded random number generator.</span>
+<span class="source-line-no">041</span><span id="line-41">     * &lt;p&gt;</span>
+<span class="source-line-no">042</span><span id="line-42">     * Using a fixed seed makes the initializer deterministic, ensuring that</span>
+<span class="source-line-no">043</span><span id="line-43">     * the same sequence of random numbers (and thus weight initializations)</span>
+<span class="source-line-no">044</span><span id="line-44">     * is produced across runs.</span>
+<span class="source-line-no">045</span><span id="line-45">     * &lt;/p&gt;</span>
+<span class="source-line-no">046</span><span id="line-46">     *</span>
+<span class="source-line-no">047</span><span id="line-47">     * @param seed the seed for the random number generator</span>
+<span class="source-line-no">048</span><span id="line-48">     */</span>
+<span class="source-line-no">049</span><span id="line-49">    public XavierInitializer(int seed) {</span>
+<span class="source-line-no">050</span><span id="line-50">        this(new Random(seed));</span>
+<span class="source-line-no">051</span><span id="line-51">    }</span>
+<span class="source-line-no">052</span><span id="line-52"></span>
+<span class="source-line-no">053</span><span id="line-53">    /**</span>
+<span class="source-line-no">054</span><span id="line-54">     * Creates a new Xavier initializer with the given {@link Random} instance.</span>
+<span class="source-line-no">055</span><span id="line-55">     * &lt;p&gt;</span>
+<span class="source-line-no">056</span><span id="line-56">     * This constructor provides maximum flexibility by allowing the caller to</span>
+<span class="source-line-no">057</span><span id="line-57">     * supply a custom random number generator implementation or one shared with</span>
+<span class="source-line-no">058</span><span id="line-58">     * other components.</span>
+<span class="source-line-no">059</span><span id="line-59">     * &lt;/p&gt;</span>
+<span class="source-line-no">060</span><span id="line-60">     *</span>
+<span class="source-line-no">061</span><span id="line-61">     * @param random the random number generator to use</span>
+<span class="source-line-no">062</span><span id="line-62">     */</span>
+<span class="source-line-no">063</span><span id="line-63">    public XavierInitializer(Random random) {</span>
+<span class="source-line-no">064</span><span id="line-64">        this.random = random;</span>
+<span class="source-line-no">065</span><span id="line-65">    }</span>
+<span class="source-line-no">066</span><span id="line-66"></span>
+<span class="source-line-no">067</span><span id="line-67">    /**</span>
+<span class="source-line-no">068</span><span id="line-68">     * {@inheritDoc}</span>
+<span class="source-line-no">069</span><span id="line-69">     */</span>
+<span class="source-line-no">070</span><span id="line-70">    @Override</span>
+<span class="source-line-no">071</span><span id="line-71">    public void initialize(NeuralNetwork neuralNetwork, Neuron neuron) {</span>
+<span class="source-line-no">072</span><span id="line-72">        int fanIn = neuron.arity();</span>
+<span class="source-line-no">073</span><span id="line-73">        int fanOut = neuralNetwork.getTargetNeurons(neuron).size();</span>
+<span class="source-line-no">074</span><span id="line-74"></span>
+<span class="source-line-no">075</span><span id="line-75">        float limit = (float) Math.sqrt(6.0f / (fanIn + fanOut));</span>
+<span class="source-line-no">076</span><span id="line-76"></span>
+<span class="source-line-no">077</span><span id="line-77">        for (int d = 1; d &lt;= neuron.arity(); d++) {</span>
+<span class="source-line-no">078</span><span id="line-78">            neuron.setWeight(d, uniform(-limit, limit));</span>
+<span class="source-line-no">079</span><span id="line-79">        }</span>
+<span class="source-line-no">080</span><span id="line-80">        // Bias left unchanged</span>
+<span class="source-line-no">081</span><span id="line-81">    }</span>
+<span class="source-line-no">082</span><span id="line-82"></span>
+<span class="source-line-no">083</span><span id="line-83">    private float uniform(float min, float max) {</span>
+<span class="source-line-no">084</span><span id="line-84">        return min + (max - min) * random.nextFloat();</span>
+<span class="source-line-no">085</span><span id="line-85">    }</span>
+<span class="source-line-no">086</span><span id="line-86">}</span>
 
 
 
