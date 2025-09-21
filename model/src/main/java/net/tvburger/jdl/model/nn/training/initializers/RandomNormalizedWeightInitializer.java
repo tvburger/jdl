@@ -22,7 +22,7 @@ public class RandomNormalizedWeightInitializer implements NeuralNetworkInitializ
     @Override
     public void initialize(Neuron neuron) {
         for (int d = 1; d <= neuron.arity(); d++) {
-            neuron.setWeight(d, random() / neuron.arity());
+            neuron.setParameter(d, random() / neuron.arity());
         }
     }
 

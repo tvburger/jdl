@@ -29,7 +29,7 @@ public class HeInitializer implements NeuralNetworkInitializer {
 
         for (int d = 1; d <= neuron.arity(); d++) {
             // Gaussian(0, std^2)
-            neuron.setWeight(d, (float) (random.nextGaussian() * std));
+            neuron.setParameter(d, (float) (random.nextGaussian() * std));
         }
         // Bias left unchanged
     }

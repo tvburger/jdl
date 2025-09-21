@@ -33,7 +33,7 @@ public class MultiLayerPerceptron extends DefaultNeuralNetwork {
                         name = "Hidden";
                         activationFunction = hiddenActivationFunction;
                     }
-                    layerNeurons.add(new ActivationsCachedNeuron(name + "(" + layers.size() + "," + i + ")", previousLayer, activationFunction));
+                    layerNeurons.add(ActivationsCachedNeuron.create(name + "(" + layers.size() + "," + i + ")", previousLayer, activationFunction));
                 }
                 layers.add(layerNeurons);
             }

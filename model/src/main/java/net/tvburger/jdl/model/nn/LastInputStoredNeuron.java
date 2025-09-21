@@ -1,7 +1,10 @@
 package net.tvburger.jdl.model.nn;
 
 import net.tvburger.jdl.common.patterns.Decorator;
+import net.tvburger.jdl.model.scalars.LinearCombination;
+import net.tvburger.jdl.model.scalars.NeuronFunction;
 import net.tvburger.jdl.model.scalars.activations.ActivationFunction;
+import net.tvburger.jdl.model.scalars.activations.Activations;
 
 import java.util.List;
 
@@ -27,17 +30,25 @@ import java.util.List;
 @Decorator
 public class LastInputStoredNeuron extends Neuron {
 
+    public static LastInputStoredNeuron create(String name, List<? extends Neuron> inputNodes) {
+        return create(name, inputNodes, Activations.linear());
+    }
+
+    public static LastInputStoredNeuron create(String name, List<? extends Neuron> inputNodes, ActivationFunction activationFunction) {
+        return new LastInputStoredNeuron(name, inputNodes, new NeuronFunction(LinearCombination.create(inputNodes.size()), activationFunction));
+    }
+
     private final float[] storedInputs;
 
     /**
      * Constructs a neuron that stores the inputs from its most recent activation.
      *
-     * @param name               human-readable identifier
-     * @param inputs             input neurons feeding into this neuron
-     * @param activationFunction activation function to apply after weighted sum
+     * @param name           human-readable identifier
+     * @param inputs         input neurons feeding into this neuron
+     * @param neuronFunction the neuron function to compute a forward signal
      */
-    public LastInputStoredNeuron(String name, List<? extends Neuron> inputs, ActivationFunction activationFunction) {
-        super(name, inputs, activationFunction);
+    public LastInputStoredNeuron(String name, List<? extends Neuron> inputs, NeuronFunction neuronFunction) {
+        super(name, inputs, neuronFunction);
         storedInputs = new float[inputs == null ? 0 : inputs.size()];
     }
 
@@ -64,7 +75,7 @@ public class LastInputStoredNeuron extends Neuron {
      * @return the stored input value for the specified dimension
      */
     public float getStoredInput(int d) {
-        return storedInputs[validDimension(d) - 1];
+        return storedInputs[d - 1];
     }
 
 }

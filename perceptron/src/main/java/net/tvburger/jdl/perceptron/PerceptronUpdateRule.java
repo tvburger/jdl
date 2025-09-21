@@ -3,6 +3,7 @@ package net.tvburger.jdl.perceptron;
 import net.tvburger.jdl.common.utils.Floats;
 import net.tvburger.jdl.model.DataSet;
 import net.tvburger.jdl.model.nn.LastInputStoredNeuron;
+import net.tvburger.jdl.model.scalars.NeuronFunction;
 import net.tvburger.jdl.model.training.ObjectiveFunction;
 import net.tvburger.jdl.model.training.Optimizer;
 
@@ -25,9 +26,10 @@ public class PerceptronUpdateRule implements Optimizer.OnlineOnly<Perceptron> {
     }
 
     private void updateParameters(LastInputStoredNeuron neuron, float y) {
-        neuron.adjustBias(y);
+        NeuronFunction neuronFunction = neuron.getNeuronFunction();
+        neuronFunction.adjustParameter(0, y);
         for (int d = 1; d < neuron.arity(); d++) {
-            neuron.adjustWeight(d, y * neuron.getStoredInput(d));
+            neuronFunction.adjustParameter(d, y * neuron.getStoredInput(d));
         }
         System.out.println(neuron);
     }

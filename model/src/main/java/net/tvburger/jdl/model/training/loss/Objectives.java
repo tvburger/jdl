@@ -15,7 +15,7 @@ import net.tvburger.jdl.model.training.ObjectiveFunction;
  * pipelines.
  */
 @StaticUtility
-public final class Losses {
+public final class Objectives {
 
     /**
      * Predefined Mean Squared Error (MSE) objective function.
@@ -61,7 +61,7 @@ public final class Losses {
      */
     private static final ObjectiveFunction bce = ObjectiveFunction.minimize(new MeanError(), new MeanError(), new BinaryCrossEntropy());
 
-    private Losses() {
+    private Objectives() {
     }
 
     /**

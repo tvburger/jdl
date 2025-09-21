@@ -10,8 +10,11 @@
 
     <modules>
         <module>common</module>
+        <module>plots</module>
+        <module>linalg</module>
         <module>model</module>
         <module>datasets</module>
+        <module>linear</module>
         <module>knn</module>
         <module>perceptron</module>
         <module>adaline</module>
@@ -85,34 +88,6 @@
                     </execution>
                 </executions>
             </plugin>
-
-            <!--            &lt;!&ndash; Attach Javadoc jar per module &ndash;&gt;-->
-            <!--            <plugin>-->
-            <!--                <groupId>org.apache.maven.plugins</groupId>-->
-            <!--                <artifactId>maven-javadoc-plugin</artifactId>-->
-            <!--                <version>3.11.3</version>-->
-            <!--                <configuration>-->
-            <!--                    <source>${maven.compiler.release}</source>-->
-            <!--                    <encoding>${project.build.sourceEncoding}</encoding>-->
-            <!--                    &lt;!&ndash; Relax doclint so warnings don't fail builds &ndash;&gt;-->
-            <!--                    <doclint>none</doclint>-->
-            <!--                    <failOnError>false</failOnError>-->
-            <!--            </plugin>-->
-
-            <!--            &lt;!&ndash; Attach Sources jar per module &ndash;&gt;-->
-            <!--            <plugin>-->
-            <!--                <groupId>org.apache.maven.plugins</groupId>-->
-            <!--                <artifactId>maven-source-plugin</artifactId>-->
-            <!--                <version>3.3.1</version>-->
-            <!--                <executions>-->
-            <!--                    <execution>-->
-            <!--                        <id>attach-sources</id>-->
-            <!--                        <goals>-->
-            <!--                            <goal>jar</goal>-->
-            <!--                        </goals>-->
-            <!--                    </execution>-->
-            <!--                </executions>-->
-            <!--            </plugin>-->
         </plugins>
     </build>
 

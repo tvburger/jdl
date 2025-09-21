@@ -6,7 +6,7 @@ import net.tvburger.jdl.datasets.LogicalDataSets;
 import net.tvburger.jdl.model.DataSet;
 import net.tvburger.jdl.model.training.ObjectiveFunction;
 import net.tvburger.jdl.model.training.Trainer;
-import net.tvburger.jdl.model.training.loss.Losses;
+import net.tvburger.jdl.model.training.loss.Objectives;
 import net.tvburger.jdl.model.training.regimes.ChainedRegime;
 import net.tvburger.jdl.model.training.regimes.Regimes;
 
@@ -20,7 +20,7 @@ public class AdalineMain {
         DataSet testSet = dataSet.subset(0, 10);
 
         Adaline adaline = Adaline.create(400, 8);
-        ObjectiveFunction objective = Losses.mSE();
+        ObjectiveFunction objective = Objectives.mSE();
         LeastMeanSquares leastMeanSquares = new LeastMeanSquares(0.01f);
         ChainedRegime regime = Regimes.epochs(100).reportObjective().online();
         Trainer<Adaline> adalineTrainer = Trainer.of(new AdalineInitializer(), objective, leastMeanSquares, regime);

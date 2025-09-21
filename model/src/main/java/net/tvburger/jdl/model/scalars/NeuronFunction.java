@@ -18,9 +18,24 @@ import net.tvburger.jdl.model.scalars.activations.ActivationFunction;
  * training via backpropagation.
  */
 @Strategy(Strategy.Role.CONCRETE)
-public class NeuronFunction extends LinearCombination {
+public class NeuronFunction implements TrainableScalarFunction {
 
+    private final LinearCombination linearCombination;
     private final ActivationFunction activationFunction;
+
+    /**
+     * Creates a new neuron function with the given parameters and activation.
+     * The basis function used in the linear combination is the basis function.
+     * <p>
+     * The parameter array follows the {@link LinearCombination} convention:
+     * index {@code 0} is the bias, indices {@code 1..} are the weights.
+     *
+     * @param dimensions         number of input dimensions
+     * @param activationFunction the non-linear activation function to apply
+     */
+    public static NeuronFunction create(int dimensions, ActivationFunction activationFunction) {
+        return new NeuronFunction(LinearCombination.create(dimensions), activationFunction);
+    }
 
     /**
      * Creates a new neuron function with the given parameters and activation.
@@ -28,11 +43,11 @@ public class NeuronFunction extends LinearCombination {
      * The parameter array follows the {@link LinearCombination} convention:
      * index {@code 0} is the bias, indices {@code 1..} are the weights.
      *
-     * @param parameters         parameter vector (bias + weights)
+     * @param linearCombination  the linear combination to apply to the inputs
      * @param activationFunction the non-linear activation function to apply
      */
-    public NeuronFunction(float[] parameters, ActivationFunction activationFunction) {
-        super(parameters);
+    public NeuronFunction(LinearCombination linearCombination, ActivationFunction activationFunction) {
+        this.linearCombination = linearCombination;
         this.activationFunction = activationFunction;
     }
 
@@ -56,7 +71,7 @@ public class NeuronFunction extends LinearCombination {
      */
     @Override
     public float estimateScalar(float[] inputs) {
-        return activationFunction.activate(super.estimateScalar(inputs));
+        return activationFunction.activate(linearCombination.estimateScalar(inputs));
     }
 
     /**
@@ -93,7 +108,40 @@ public class NeuronFunction extends LinearCombination {
      * @return the gradient vector of the linear function
      */
     public float[] calculateParameterGradients_df_dp(float[] inputs) {
-        return super.calculateParameterGradients(inputs);
+        return linearCombination.calculateParameterGradients(inputs);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int arity() {
+        return linearCombination.arity();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public float[] getParameters() {
+        return linearCombination.getParameters();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        float[] parameters = getParameters();
+        StringBuilder sb = new StringBuilder();
+        sb.append(activationFunction.getClass().getSimpleName());
+        sb.append("(").append(parameters[0] < 0.0f ? "" : '+').append(parameters[0]);
+        for (int i = 1; i < parameters.length && i < 7; i++) {
+            sb.append(':').append(String.format("%.2f", parameters[i]));
+        }
+        if (parameters.length > 7) {
+            sb.append(":...");
+        }
+        return sb.append(')').toString();
+    }
 }

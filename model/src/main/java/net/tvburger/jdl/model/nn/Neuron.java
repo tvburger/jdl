@@ -2,10 +2,12 @@ package net.tvburger.jdl.model.nn;
 
 import net.tvburger.jdl.common.patterns.DomainObject;
 import net.tvburger.jdl.common.patterns.Entity;
+import net.tvburger.jdl.model.scalars.LinearCombination;
 import net.tvburger.jdl.model.scalars.NeuronFunction;
+import net.tvburger.jdl.model.scalars.TrainableScalarFunction;
 import net.tvburger.jdl.model.scalars.activations.ActivationFunction;
+import net.tvburger.jdl.model.scalars.activations.Activations;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -38,11 +40,19 @@ import java.util.List;
  */
 @DomainObject
 @Entity
-public class Neuron extends NeuronFunction {
+public class Neuron implements TrainableScalarFunction {
+
+    public static Neuron create(String name, List<? extends Neuron> inputNodes) {
+        return create(name, inputNodes, Activations.linear());
+    }
+
+    public static Neuron create(String name, List<? extends Neuron> inputNodes, ActivationFunction activationFunction) {
+        return new Neuron(name, inputNodes, new NeuronFunction(LinearCombination.create(inputNodes.size()), activationFunction));
+    }
 
     private final String name;
     private final List<? extends Neuron> inputNodes;
-
+    private final NeuronFunction neuronFunction;
     private final float[] inputValues;
     private float output;
     private boolean activated;
@@ -53,16 +63,15 @@ public class Neuron extends NeuronFunction {
      * The parameter vector is sized as {@code inputs.size() + 1} where index {@code 0} is the bias
      * and indices {@code 1..} are the weights corresponding to the {@code inputNodes} order.
      *
-     * @param name               human-readable identifier for the neuron
-     * @param inputNodes         upstream input neurons in positional order; may be {@code null} for no inputs
-     * @param activationFunction activation applied to the weighted sum
-     * @throws NullPointerException if {@code activationFunction} is {@code null}
+     * @param name           human-readable identifier for the neuron
+     * @param inputNodes     upstream input neurons in positional order; may be {@code null} for no inputs
+     * @param neuronFunction the neuron function to compute a forward signal
      */
-    public Neuron(String name, List<? extends Neuron> inputNodes, ActivationFunction activationFunction) {
-        super(new float[inputNodes == null ? 0 : inputNodes.size() + 1], activationFunction);
+    public Neuron(String name, List<? extends Neuron> inputNodes, NeuronFunction neuronFunction) {
         this.name = name;
         this.inputNodes = inputNodes == null ? List.of() : inputNodes;
         this.inputValues = new float[inputNodes == null ? 0 : inputNodes.size()];
+        this.neuronFunction = neuronFunction;
     }
 
     /**
@@ -84,6 +93,15 @@ public class Neuron extends NeuronFunction {
     }
 
     /**
+     * Returns the neuron function.
+     *
+     * @return the neuron function
+     */
+    public NeuronFunction getNeuronFunction() {
+        return neuronFunction;
+    }
+
+    /**
      * Returns the cached input values used during the most recent {@link #activate()}.
      *
      * @return a snapshot array of input values corresponding to {@link #getInputNodes()}
@@ -100,23 +118,22 @@ public class Neuron extends NeuronFunction {
      * Computes and caches this neuron's output by:
      * <ol>
      *   <li>Reading outputs from {@link #getInputNodes()} into an internal buffer,</li>
-     *   <li>Computing the weighted sum with bias,</li>
-     *   <li>Applying the {@link #getActivationFunction()}.</li>
+     *   <li>Applying the {@link #getNeuronFunction()} ()}.</li>
      * </ol>
      * Subsequent calls are no-ops until {@link #deactivate()} is invoked.
      */
     public synchronized void activate() {
-        if (getParameterCount() == 0) {
+        if (neuronFunction == null || neuronFunction.getParameterCount() == 0) {
             activated = true;
             return;
         }
         if (isActivated()) {
             return;
         }
-        for (int d = 1; d <= arity(); d++) {
+        for (int d = 1; d <= neuronFunction.arity(); d++) {
             inputValues[d - 1] = getInputNodes().get(d - 1).getOutput();
         }
-        output = estimateScalar(inputValues);
+        output = neuronFunction.estimateScalar(inputValues);
         activated = true;
     }
 
@@ -158,21 +175,49 @@ public class Neuron extends NeuronFunction {
     public Float getWeight(Neuron source) {
         for (int d = 1; d <= inputNodes.size(); d++) {
             if (inputNodes.get(d - 1) == source) {
-                return getWeight(d);
+                return neuronFunction.getParameter(d);
             }
         }
         return null;
     }
 
     /**
-     * Returns a concise string representation including name, activation state, last output,
-     * weights, and bias.
-     *
-     * @return a human-readable summary of this neuron
+     * {@inheritDoc}
      */
     @Override
     public String toString() {
-        return name + "{" + activated + ", " + output + "}" + Arrays.toString(getWeights()) + (getBias() >= 0.0 ? "+" : "") + getBias();
+        return name + "{" + activated + ", " + output + "}-" + neuronFunction.toString();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int arity() {
+        return neuronFunction.arity();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public float estimateScalar(float[] inputs) {
+        return neuronFunction.estimateScalar(inputs);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public float[] calculateParameterGradients(float[] inputs) {
+        return neuronFunction.calculateParameterGradients(inputs);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public float[] getParameters() {
+        return neuronFunction.getParameters();
+    }
 }

@@ -117,10 +117,8 @@ public class DefaultNeuralNetwork implements NeuralNetwork {
                 if (neuron instanceof InputNeuron) {
                     continue;
                 }
-                for (int d = 1; d <= neuron.arity(); d++) {
-                    parameters[i++] = neuron.getWeight(d);
-                }
-                parameters[i++] = neuron.getBias();
+                float[] neuronParameters = neuron.getParameters();
+                System.arraycopy(neuronParameters, 0, parameters, i, neuronParameters.length);
             }
         }
         return parameters;

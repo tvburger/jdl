@@ -75,7 +75,7 @@ public class XavierInitializer implements NeuralNetworkInitializer {
         float limit = (float) Math.sqrt(6.0f / (fanIn + fanOut));
 
         for (int d = 1; d <= neuron.arity(); d++) {
-            neuron.setWeight(d, uniform(-limit, limit));
+            neuron.setParameter(d, uniform(-limit, limit));
         }
         // Bias left unchanged
     }

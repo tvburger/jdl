@@ -33,13 +33,13 @@ public class Perceptron extends DefaultNeuralNetwork {
 
         List<Neuron> associationNodes = new ArrayList<>();
         for (int i = 0; i < associations; i++) {
-            associationNodes.add(new Neuron("Association(" + i + ")", randomSelect(sensorNodes), activationFunction));
+            associationNodes.add(new AssociationUnit("Association(" + i + ")", randomSelect(sensorNodes)));
         }
         layers.add(associationNodes);
 
         List<Neuron> responseNodes = new ArrayList<>();
         for (int i = 0; i < responses; i++) {
-            responseNodes.add(new LastInputStoredNeuron("Response(" + i + ")", associationNodes.isEmpty() ? sensorNodes : associationNodes, activationFunction));
+            responseNodes.add(LastInputStoredNeuron.create("Response(" + i + ")", associationNodes.isEmpty() ? sensorNodes : associationNodes, activationFunction));
         }
         layers.add(responseNodes);
         return new Perceptron(layers);

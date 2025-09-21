@@ -25,9 +25,8 @@ public class ConstantInitializer implements NeuralNetworkInitializer {
      */
     @Override
     public void initialize(Neuron neuron) {
-        for (int d = 1; d <= neuron.arity(); d++) {
-            neuron.setWeight(d, constant);
+        for (int p = 0; p < neuron.getParameterCount(); p++) {
+            neuron.setParameter(p, constant);
         }
-        neuron.setBias(constant);
     }
 }

@@ -73,7 +73,7 @@ public interface TrainableFunction extends EstimationFunction {
      */
     default void adjustParameters(float[] deltas) {
         for (int p = 0; p < deltas.length; p++) {
-            adjustParameters(p, deltas[p]);
+            adjustParameter(p, deltas[p]);
         }
     }
 
@@ -84,7 +84,7 @@ public interface TrainableFunction extends EstimationFunction {
      * @param delta the increment to add to the parameter value
      * @throws ArrayIndexOutOfBoundsException if the index is out of range
      */
-    default void adjustParameters(int p, float delta) {
+    default void adjustParameter(int p, float delta) {
         setParameter(p, getParameter(p) + delta);
     }
 }

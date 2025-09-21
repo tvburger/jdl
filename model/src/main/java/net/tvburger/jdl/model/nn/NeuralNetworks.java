@@ -60,7 +60,7 @@ public final class NeuralNetworks {
     }
 
     /**
-     * Returns a map containing the node connections to the next layer with their corresponding weights
+     * Returns a map containing the node connections to the next layer
      *
      * @param layers the layers of a neural network
      * @return the node connections
@@ -69,10 +69,8 @@ public final class NeuralNetworks {
         Map<Neuron, List<Neuron>> connections = new IdentityHashMap<>();
         for (List<? extends Neuron> layer : layers) {
             for (Neuron neuron : layer) {
-                float[] weights = neuron.getWeights();
-                for (int i = 0; i < weights.length; i++) {
-                    Neuron input = neuron.getInputNodes().get(i);
-                    connections.computeIfAbsent(input, k -> new ArrayList<>()).add(neuron);
+                for (Neuron inputNeuron : neuron.getInputNodes()) {
+                    connections.computeIfAbsent(inputNeuron, k -> new ArrayList<>()).add(neuron);
                 }
             }
         }

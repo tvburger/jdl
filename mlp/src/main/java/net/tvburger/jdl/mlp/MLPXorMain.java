@@ -9,13 +9,13 @@ import net.tvburger.jdl.model.nn.training.optimizers.StochasticGradientDescent;
 import net.tvburger.jdl.model.scalars.activations.Activations;
 import net.tvburger.jdl.model.training.ObjectiveFunction;
 import net.tvburger.jdl.model.training.Trainer;
-import net.tvburger.jdl.model.training.loss.Losses;
+import net.tvburger.jdl.model.training.loss.Objectives;
 import net.tvburger.jdl.model.training.regimes.ChainedRegime;
 import net.tvburger.jdl.model.training.regimes.Regimes;
 
 import java.util.Arrays;
 
-public class MLPMain {
+public class MLPXorMain {
 
     public static void main(String[] args) {
         DataSet dataSet = LogicalDataSets.xor().load();
@@ -25,7 +25,7 @@ public class MLPMain {
         MultiLayerPerceptron mlp = MultiLayerPerceptron.create(Activations.sigmoid(), Activations.sigmoid(), 2, 2, 1);
 
         NeuralNetworkInitializer initializer = new XavierInitializer();
-        ObjectiveFunction objective = Losses.bCE();
+        ObjectiveFunction objective = Objectives.bCE();
         StochasticGradientDescent<MultiLayerPerceptron> gradientDescent = new StochasticGradientDescent<>();
         gradientDescent.setLearningRate(0.5f);
         ChainedRegime regime = Regimes.dumpNodes().epochs(10_000).reportObjective().batch();

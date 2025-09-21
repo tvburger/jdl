@@ -1,7 +1,10 @@
 package net.tvburger.jdl.model.nn;
 
 import net.tvburger.jdl.common.patterns.Decorator;
+import net.tvburger.jdl.model.scalars.LinearCombination;
+import net.tvburger.jdl.model.scalars.NeuronFunction;
 import net.tvburger.jdl.model.scalars.activations.ActivationFunction;
+import net.tvburger.jdl.model.scalars.activations.Activations;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -22,6 +25,14 @@ import java.util.List;
  */
 @Decorator
 public class ActivationsCachedNeuron extends Neuron {
+
+    public static ActivationsCachedNeuron create(String name, List<? extends Neuron> inputNodes) {
+        return create(name, inputNodes, Activations.linear());
+    }
+
+    public static ActivationsCachedNeuron create(String name, List<? extends Neuron> inputNodes, ActivationFunction activationFunction) {
+        return new ActivationsCachedNeuron(name, inputNodes, new NeuronFunction(LinearCombination.create(inputNodes.size()), activationFunction));
+    }
 
     /**
      * Represents a single activation of a neuron.
@@ -45,12 +56,12 @@ public class ActivationsCachedNeuron extends Neuron {
     /**
      * Constructs a new neuron with caching capabilities.
      *
-     * @param name               the name of the neuron
-     * @param inputs             the list of input neurons
-     * @param activationFunction the activation function used by this neuron
+     * @param name           the name of the neuron
+     * @param inputs         the list of input neurons
+     * @param neuronFunction the function used by this neuron
      */
-    public ActivationsCachedNeuron(String name, List<? extends Neuron> inputs, ActivationFunction activationFunction) {
-        super(name, inputs, activationFunction);
+    public ActivationsCachedNeuron(String name, List<? extends Neuron> inputs, NeuronFunction neuronFunction) {
+        super(name, inputs, neuronFunction);
     }
 
     /**
@@ -68,7 +79,7 @@ public class ActivationsCachedNeuron extends Neuron {
         super.activate();
         float[] inputValues = getInputValues();
         float output = getOutput();
-        cachedActivations.add(new Activation(inputValues, output, calculateParameterGradients_df_dp(inputValues)));
+        cachedActivations.add(new Activation(inputValues, output, getNeuronFunction().calculateParameterGradients_df_dp(inputValues)));
     }
 
     /**

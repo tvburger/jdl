@@ -86,7 +86,7 @@ public class StochasticGradientDescent<N extends NeuralNetwork> implements Optim
                 float[] parameterCorrections = accumulatedWeightedVotesForParameterCorrections.get(neuron);
                 if (parameterCorrections != null) {
                     for (int p = 0; p < parameterCorrections.length; p++) {
-                        neuron.adjustParameters(p, getLearningRate() * -1 * parameterCorrections[p]);
+                        neuron.adjustParameter(p, getLearningRate() * -1 * parameterCorrections[p]);
                     }
                 }
             }
@@ -113,7 +113,7 @@ public class StochasticGradientDescent<N extends NeuralNetwork> implements Optim
         ActivationsCachedNeuron.Activation activation = outputNode.getCache().removeLast();
 
         // determine error signal for output node
-        float errorSignal = lossGradients[j] * outputNode.getActivationFunction().determineGradientForOutput(activation.output());
+        float errorSignal = lossGradients[j] * outputNode.getNeuronFunction().getActivationFunction().determineGradientForOutput(activation.output());
         errorSignals.put(outputNode, errorSignal); // track error signal for upstream nodes
 
         // cast vote
@@ -126,7 +126,7 @@ public class StochasticGradientDescent<N extends NeuralNetwork> implements Optim
 
         // determine error signal for hidden node using back propagation
         float backPropagation = calculateBackPropagation(neuralNetwork, errorSignals, l, j);
-        float errorSignal = backPropagation * hiddenNode.getActivationFunction().determineGradientForOutput(activation.output());
+        float errorSignal = backPropagation * hiddenNode.getNeuronFunction().getActivationFunction().determineGradientForOutput(activation.output());
         errorSignals.put(hiddenNode, errorSignal);
 
         // cast vote

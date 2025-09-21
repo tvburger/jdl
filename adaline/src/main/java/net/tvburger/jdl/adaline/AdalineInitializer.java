@@ -12,8 +12,8 @@ public class AdalineInitializer implements NeuralNetworkInitializer {
     @Override
     public void initialize(Neuron neuron) {
         for (int d = 1; d <= neuron.arity(); d++) {
-            neuron.setWeight(1, (random.nextFloat() - 0.5f) * 0.01f);
+            neuron.setParameter(d, (random.nextFloat() - 0.5f) * 0.01f);
         }
-        neuron.setBias(0.0f);
+        neuron.setParameter(0, 0.0f);
     }
 }

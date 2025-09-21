@@ -15,11 +15,8 @@ public class PerceptronInitializer implements NeuralNetworkInitializer {
         if (neuron instanceof InputNeuron) {
             return;
         }
-        for (int d = 1; d <= neuron.arity(); d++) {
-            neuron.setWeight(d, random());
-        }
-        if (neuron instanceof AssociationUnit) {
-            neuron.setBias(random());
+        for (int p = 0; p < neuron.getParameterCount(); p++) {
+            neuron.setParameter(p, random());
         }
     }
 

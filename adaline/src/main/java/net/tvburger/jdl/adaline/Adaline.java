@@ -4,7 +4,6 @@ import net.tvburger.jdl.common.utils.Floats;
 import net.tvburger.jdl.model.nn.DefaultNeuralNetwork;
 import net.tvburger.jdl.model.nn.InputNeuron;
 import net.tvburger.jdl.model.nn.Neuron;
-import net.tvburger.jdl.model.scalars.activations.Activations;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +17,7 @@ public class Adaline extends DefaultNeuralNetwork {
         }
         List<Neuron> outputNodes = new ArrayList<>();
         for (int i = 0; i < outputs; i++) {
-            outputNodes.add(new Neuron("Adaline(" + i + ")", inputNodes, Activations.linear()));
+            outputNodes.add(Neuron.create("Adaline(" + i + ")", inputNodes));
         }
         return new Adaline(List.of(inputNodes, outputNodes));
     }
