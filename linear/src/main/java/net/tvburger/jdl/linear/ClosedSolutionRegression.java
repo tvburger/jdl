@@ -14,14 +14,14 @@ import java.util.TreeMap;
 
 public class ClosedSolutionRegression<N extends Number> {
 
-    public static final boolean DEBUG_OUTPUT = false;
+    public boolean DEBUG_OUTPUT = false;
 
     private final SyntheticDataSets.SyntheticDataSet<N> targetFit;
     private final BasisFunction.Generator<N> basisFunctionGenerator;
     private final DataSet<N> trainSet;
     private final Map<String, DataSet<N>> testSets;
 
-    private final Map<Integer, LinearBasisFunctionModel<N>> fitted = new TreeMap<>();
+    protected final Map<Integer, LinearBasisFunctionModel<N>> fitted = new TreeMap<>();
 
     private final Plot errorPlot;
     private final Plot fitPlot;
@@ -56,7 +56,7 @@ public class ClosedSolutionRegression<N extends Number> {
         fitted.put(m, regression);
     }
 
-    private void setOptimalWeights(LinearBasisFunctionModel<N> regression, DataSet<N> trainSet) {
+    protected void setOptimalWeights(LinearBasisFunctionModel<N> regression, DataSet<N> trainSet) {
         JavaNumberTypeSupport<N> typeSupport = regression.getCurrentNumberType();
         if (DEBUG_OUTPUT) {
             System.out.println("Number type = " + typeSupport.name());
@@ -162,7 +162,7 @@ public class ClosedSolutionRegression<N extends Number> {
             N[] parameters = weightsEntry.getValue().getParameters();
             y[i] = 0.0f;
             for (int p = 0; p < parameters.length; p++) {
-                y[i] += supportType.absolute(parameters[i]).floatValue();
+                y[i] += supportType.absolute(parameters[p]).floatValue();
             }
             i++;
         }

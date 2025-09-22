@@ -103,26 +103,26 @@ public class SinusGradientDescentEstimation {
 //        return Pair.of(rme_train, rme);
 //    }
 
-    private static void setOptimalWeights(PolynomialRegression<Float> regression, DataSet<Float> trainSet) {
-        Matrix<Double> designMatrix = Matrices.withDoublePrecision(FeatureMatrices.create(regression.getFeatureExtractor(), trainSet));
-        float[] values = new float[trainSet.size()];
-        for (int i = 0; i < values.length; i++) {
-            values[i] = trainSet.samples().get(i).targetOutputs()[0];
-        }
-        Vector<Double> y = Vectors.withDoublePrecision(Vectors.of(values).transpose());
-        for (int e = 0; e < EPOCHS; e++) {
-            float[] parameters = new float[regression.getParameterCount()];
-            for (int i = 0; i < parameters.length; i++) {
-                parameters[i] = regression.getParameter(i);
-            }
-            Vector<Double> thetas = Vectors.withDoublePrecision(Vectors.of(parameters).transpose());
-            Vector<Double> error = designMatrix.multiply(thetas).substract(y);
-            Vector<Double> adjustment = designMatrix.transpose().multiply(error).multiply(1.0 / trainSet.size()).multiply(LEARNING_RATE);
-            thetas = thetas.substract(adjustment);
-            for (int i = 0; i < parameters.length; i++) {
-                regression.setParameter(i, (float) (double) thetas.get(i + 1));
-            }
-        }
-    }
+//    private static void setOptimalWeights(PolynomialRegression<Float> regression, DataSet<Float> trainSet) {
+//        Matrix<Double> designMatrix = Matrices.withDoublePrecision(FeatureMatrices.create(regression.getFeatureExtractor(), trainSet));
+//        float[] values = new float[trainSet.size()];
+//        for (int i = 0; i < values.length; i++) {
+//            values[i] = trainSet.samples().get(i).targetOutputs()[0];
+//        }
+//        Vector<Double> y = Vectors.withDoublePrecision(Vectors.of(values).transpose());
+//        for (int e = 0; e < EPOCHS; e++) {
+//            float[] parameters = new float[regression.getParameterCount()];
+//            for (int i = 0; i < parameters.length; i++) {
+//                parameters[i] = regression.getParameter(i);
+//            }
+//            Vector<Double> thetas = Vectors.withDoublePrecision(Vectors.of(parameters).transpose());
+//            Vector<Double> error = designMatrix.multiply(thetas).substract(y);
+//            Vector<Double> adjustment = designMatrix.transpose().multiply(error).multiply(1.0 / trainSet.size()).multiply(LEARNING_RATE);
+//            thetas = thetas.substract(adjustment);
+//            for (int i = 0; i < parameters.length; i++) {
+//                regression.setParameter(i, (float) (double) thetas.get(i + 1));
+//            }
+//        }
+//    }
 
 }

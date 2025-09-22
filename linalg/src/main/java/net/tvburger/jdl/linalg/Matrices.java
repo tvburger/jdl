@@ -49,7 +49,7 @@ public final class Matrices {
 
     public static <N extends Number> TypedMatrix<N> identity(int n, JavaNumberTypeSupport<N> support) {
         N[][] values = support.createArrayOfArrays(n, n);
-        for (int i = 0; i < n; n++) {
+        for (int i = 0; i < n; i++) {
             values[i][i] = support.one();
         }
         return new TypedMatrix<>(values, support);

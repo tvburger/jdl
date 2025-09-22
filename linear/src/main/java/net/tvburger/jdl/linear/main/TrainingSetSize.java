@@ -18,7 +18,7 @@ import java.util.Map;
 public class TrainingSetSize {
 
     public static <N extends Number> void main(String[] args) {
-        List<JavaNumberTypeSupport<?>> types = List.of(JavaNumberTypeSupport.DOUBLE, JavaNumberTypeSupport.RATIONAL_BIGINT);
+        List<JavaNumberTypeSupport<?>> types = List.of(JavaNumberTypeSupport.RATIONAL_BIGINT);
 
         Plot fitPlot = new Plot("Fit vs Training Set Size");
         UnaryEstimationFunction<Double> targetFit = SyntheticDataSets.sinus(JavaNumberTypeSupport.DOUBLE).getEstimationFunction();
@@ -55,9 +55,8 @@ public class TrainingSetSize {
 
     public static <N extends Number> ClosedSolutionRegression<N> create(SyntheticDataSets.SyntheticDataSet<N> dataSetGenerator, BasisFunction.Generator<N> basisFunctionGenerator, int trainingSetSize) {
         dataSetGenerator.setRandomSeed(165);
-        dataSetGenerator.setNoiseScale(0.1f);
+        dataSetGenerator.setNoiseScale(0.5f);
         DataSet<N> trainSet = dataSetGenerator.load(trainingSetSize);
-        dataSetGenerator.setNoiseScale(0.1f);
         DataSet<N> testSet = dataSetGenerator.load(1000);
         Map<String, DataSet<N>> testSets = new LinkedHashMap<>();
         testSets.put("Test Set", testSet);

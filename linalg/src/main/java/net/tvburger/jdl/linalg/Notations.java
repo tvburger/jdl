@@ -10,6 +10,8 @@ public final class Notations {
     public static final String PHI = "Φ";
     public static final String PSEUDO_INVERSE = "†";
 
+    public static final String LAMBDA = "λ";
+
     public static String group(String notation) {
         return "(" + notation + ")";
     }
