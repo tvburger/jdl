@@ -26,8 +26,8 @@ public class Adaline extends DefaultNeuralNetwork {
         super(layers);
     }
 
-    public boolean[] classify(float[] inputs) {
-        float[] estimate = estimate(inputs);
+    public boolean[] classify(Float[] inputs) {
+        Float[] estimate = estimate(inputs);
         boolean[] classifications = new boolean[estimate.length];
         for (int i = 0; i < estimate.length; i++) {
             classifications[i] = Floats.greaterThan(estimate[i], 0.0f);

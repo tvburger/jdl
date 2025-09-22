@@ -61,7 +61,7 @@ public class ChainedRegime implements Regime, Iterable<Regime> {
      * @param <E>                the type of estimation function
      */
     @Override
-    public <E extends EstimationFunction> void train(E estimationFunction, DataSet trainingSet, ObjectiveFunction objective, Optimizer<? super E> optimizer) {
+    public <E extends EstimationFunction<Float>> void train(E estimationFunction, DataSet<Float> trainingSet, ObjectiveFunction objective, Optimizer<? super E, Float> optimizer) {
         if (chainedRegimes.isEmpty()) {
             if (optimizer != null) {
                 optimizer.optimize(estimationFunction, trainingSet, objective);
@@ -158,7 +158,7 @@ public class ChainedRegime implements Regime, Iterable<Regime> {
          * to direct optimizer invocation (if non-null).
          */
         @Override
-        public <E extends EstimationFunction> void train(E estimationFunction, DataSet trainingSet, ObjectiveFunction objective, Optimizer<? super E> optimizer) {
+        public <E extends EstimationFunction<Float>> void train(E estimationFunction, DataSet<Float> trainingSet, ObjectiveFunction objective, Optimizer<? super E, Float> optimizer) {
             Regime linkedRegime = getLinkedRegime();
             if (linkedRegime != null) {
                 linkedRegime.train(estimationFunction, trainingSet, objective, optimizer);

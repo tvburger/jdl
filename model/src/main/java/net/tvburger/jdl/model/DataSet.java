@@ -2,10 +2,7 @@ package net.tvburger.jdl.model;
 
 import net.tvburger.jdl.common.patterns.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Represents a data set. A data set consist of samples. A sample has inputs (e.g. features or signals) and
@@ -15,20 +12,20 @@ import java.util.List;
  */
 @DomainObject
 @Composition
-public record DataSet(List<Sample> samples) implements Iterable<DataSet.Sample> {
+public record DataSet<N extends Number>(List<Sample<N>> samples) implements Iterable<DataSet.Sample<N>> {
 
     /**
      * Interface to load a data set.
      */
     @FactoryMethod
-    public interface Loader {
+    public interface Loader<N extends Number> {
 
         /**
          * The loaded data set.
          *
          * @return the loaded data set
          */
-        DataSet load();
+        DataSet<N> load();
 
     }
 
@@ -41,7 +38,7 @@ public record DataSet(List<Sample> samples) implements Iterable<DataSet.Sample> 
      */
     @DomainObject
     @ValueObject
-    public record Sample(float[] features, float[] targetOutputs) {
+    public record Sample<N extends Number>(N[] features, N[] targetOutputs) {
 
         /**
          * Utility method to create a sample
@@ -51,8 +48,8 @@ public record DataSet(List<Sample> samples) implements Iterable<DataSet.Sample> 
          * @return the sample
          */
         @StaticFactory
-        public static DataSet.Sample of(float[] feature, float[] targetOutput) {
-            return new DataSet.Sample(feature, targetOutput);
+        public static <N extends Number> DataSet.Sample<N> of(N[] feature, N[] targetOutput) {
+            return new DataSet.Sample<>(feature, targetOutput);
         }
 
         /**
@@ -98,7 +95,7 @@ public record DataSet(List<Sample> samples) implements Iterable<DataSet.Sample> 
          * @return {@code true} if the dataset matches the function's input/output schema;
          * {@code false} otherwise
          */
-        public boolean isCompatibleWith(EstimationFunction estimationFunction) {
+        public boolean isCompatibleWith(EstimationFunction<N> estimationFunction) {
             return estimationFunction.arity() == featureCount() && estimationFunction.coArity() == targetCount();
         }
 
@@ -109,7 +106,7 @@ public record DataSet(List<Sample> samples) implements Iterable<DataSet.Sample> 
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            Sample sample = (Sample) o;
+            Sample<?> sample = (Sample<?>) o;
             return Arrays.equals(features, sample.features) && Arrays.equals(targetOutputs, sample.targetOutputs);
         }
 
@@ -130,10 +127,11 @@ public record DataSet(List<Sample> samples) implements Iterable<DataSet.Sample> 
      * @param sample the samples to put in the data set
      * @return the data set
      */
+    @SafeVarargs
     @StaticFactory
-    public static DataSet of(Sample... sample) {
+    public static <N extends Number> DataSet<N> of(Sample<N>... sample) {
         if (sample.length > 0) {
-            Sample firstSample = sample[0];
+            Sample<N> firstSample = sample[0];
             for (int i = 1; i < sample.length; i++) {
                 if (firstSample.featureCount() != sample[i].featureCount()
                         || firstSample.targetCount() != sample[i].targetCount()) {
@@ -148,8 +146,8 @@ public record DataSet(List<Sample> samples) implements Iterable<DataSet.Sample> 
      * Creates a new empty data set
      */
     @StaticFactory
-    public static DataSet create() {
-        return new DataSet(new ArrayList<>());
+    public static <N extends Number> DataSet<N> create() {
+        return new DataSet<>(new ArrayList<>());
     }
 
     /**
@@ -161,8 +159,8 @@ public record DataSet(List<Sample> samples) implements Iterable<DataSet.Sample> 
      * @return the new data set containing only a subset of the samples
      * @throws IndexOutOfBoundsException if the indexes are not properly given
      */
-    public DataSet subset(int fromIndex, int toIndex) {
-        return new DataSet(samples.subList(fromIndex, toIndex));
+    public DataSet<N> subset(int fromIndex, int toIndex) {
+        return new DataSet<>(samples.subList(fromIndex, toIndex));
     }
 
     /**
@@ -170,7 +168,7 @@ public record DataSet(List<Sample> samples) implements Iterable<DataSet.Sample> 
      *
      * @param sample the sample to add
      */
-    public void addSample(Sample sample) {
+    public void addSample(Sample<N> sample) {
         if (!samples.isEmpty()) {
             if (sample.featureCount() != samples.getFirst().featureCount()
                     || sample.targetCount() != samples.getFirst().targetCount()) {
@@ -186,8 +184,8 @@ public record DataSet(List<Sample> samples) implements Iterable<DataSet.Sample> 
      * @param features      the inputs for the sample
      * @param targetOutputs the expected outputs for the sample
      */
-    public void addSample(float[] features, float[] targetOutputs) {
-        addSample(DataSet.Sample.of(features, targetOutputs));
+    public void addSample(N[] features, N[] targetOutputs) {
+        addSample(Sample.of(features, targetOutputs));
     }
 
     /**
@@ -195,7 +193,7 @@ public record DataSet(List<Sample> samples) implements Iterable<DataSet.Sample> 
      *
      * @param sample the sample to remove
      */
-    public void removeSample(Sample sample) {
+    public void removeSample(Sample<N> sample) {
         samples.remove(sample);
     }
 
@@ -239,7 +237,7 @@ public record DataSet(List<Sample> samples) implements Iterable<DataSet.Sample> 
      * {@inheritDoc}
      */
     @Override
-    public Iterator<Sample> iterator() {
+    public Iterator<Sample<N>> iterator() {
         return samples().listIterator();
     }
 
@@ -256,7 +254,7 @@ public record DataSet(List<Sample> samples) implements Iterable<DataSet.Sample> 
      * @return {@code true} if the dataset matches the function's input/output schema;
      * {@code false} otherwise
      */
-    public boolean isCompatibleWith(EstimationFunction estimationFunction) {
+    public boolean isCompatibleWith(EstimationFunction<N> estimationFunction) {
         return samples.isEmpty() || samples.getFirst().isCompatibleWith(estimationFunction);
     }
 
@@ -283,7 +281,7 @@ public record DataSet(List<Sample> samples) implements Iterable<DataSet.Sample> 
      * @throws IllegalArgumentException if the dataset is not compatible
      *                                  with the given estimation function
      */
-    public DataSet compatible(EstimationFunction estimationFunction) {
+    public DataSet<N> compatible(EstimationFunction<N> estimationFunction) {
         if (!isCompatibleWith(estimationFunction)) {
             throw new IllegalArgumentException("Incompatible estimation function!");
         }
@@ -306,5 +304,18 @@ public record DataSet(List<Sample> samples) implements Iterable<DataSet.Sample> 
      */
     public boolean isEmpty() {
         return samples.isEmpty();
+    }
+
+    public DataSet<N> resample(int n) {
+        return resample(n, new Random());
+    }
+
+    public DataSet<N> resample(int n, Random random) {
+        List<Sample<N>> resampled = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            resampled.add(samples.get(random.nextInt(0, samples.size())));
+
+        }
+        return new DataSet<>(resampled);
     }
 }

@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model.nn;
 
+import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.patterns.DomainObject;
 import net.tvburger.jdl.common.patterns.Entity;
 import net.tvburger.jdl.model.scalars.LinearCombination;
@@ -40,20 +41,20 @@ import java.util.List;
  */
 @DomainObject
 @Entity
-public class Neuron implements TrainableScalarFunction {
+public class Neuron implements TrainableScalarFunction<Float> {
 
     public static Neuron create(String name, List<? extends Neuron> inputNodes) {
         return create(name, inputNodes, Activations.linear());
     }
 
     public static Neuron create(String name, List<? extends Neuron> inputNodes, ActivationFunction activationFunction) {
-        return new Neuron(name, inputNodes, new NeuronFunction(LinearCombination.create(inputNodes.size()), activationFunction));
+        return new Neuron(name, inputNodes, new NeuronFunction(LinearCombination.create(inputNodes.size(), JavaNumberTypeSupport.FLOAT), activationFunction));
     }
 
     private final String name;
     private final List<? extends Neuron> inputNodes;
     private final NeuronFunction neuronFunction;
-    private final float[] inputValues;
+    private final Float[] inputValues;
     private float output;
     private boolean activated;
 
@@ -70,7 +71,7 @@ public class Neuron implements TrainableScalarFunction {
     public Neuron(String name, List<? extends Neuron> inputNodes, NeuronFunction neuronFunction) {
         this.name = name;
         this.inputNodes = inputNodes == null ? List.of() : inputNodes;
-        this.inputValues = new float[inputNodes == null ? 0 : inputNodes.size()];
+        this.inputValues = new Float[inputNodes == null ? 0 : inputNodes.size()];
         this.neuronFunction = neuronFunction;
     }
 
@@ -107,7 +108,7 @@ public class Neuron implements TrainableScalarFunction {
      * @return a snapshot array of input values corresponding to {@link #getInputNodes()}
      * @throws IllegalStateException if the neuron has not been activated
      */
-    public float[] getInputValues() {
+    public Float[] getInputValues() {
         if (!isActivated()) {
             throw new IllegalStateException("Neuron not activated!");
         }
@@ -189,6 +190,11 @@ public class Neuron implements TrainableScalarFunction {
         return name + "{" + activated + ", " + output + "}-" + neuronFunction.toString();
     }
 
+    @Override
+    public JavaNumberTypeSupport<Float> getCurrentNumberType() {
+        return JavaNumberTypeSupport.FLOAT;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -201,7 +207,7 @@ public class Neuron implements TrainableScalarFunction {
      * {@inheritDoc}
      */
     @Override
-    public float estimateScalar(float[] inputs) {
+    public Float estimateScalar(Float[] inputs) {
         return neuronFunction.estimateScalar(inputs);
     }
 
@@ -209,7 +215,7 @@ public class Neuron implements TrainableScalarFunction {
      * {@inheritDoc}
      */
     @Override
-    public float[] calculateParameterGradients(float[] inputs) {
+    public Float[] calculateParameterGradients(Float[] inputs) {
         return neuronFunction.calculateParameterGradients(inputs);
     }
 
@@ -217,7 +223,7 @@ public class Neuron implements TrainableScalarFunction {
      * {@inheritDoc}
      */
     @Override
-    public float[] getParameters() {
+    public Float[] getParameters() {
         return neuronFunction.getParameters();
     }
 }

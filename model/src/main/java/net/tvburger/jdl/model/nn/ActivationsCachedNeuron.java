@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model.nn;
 
+import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.patterns.Decorator;
 import net.tvburger.jdl.model.scalars.LinearCombination;
 import net.tvburger.jdl.model.scalars.NeuronFunction;
@@ -31,7 +32,7 @@ public class ActivationsCachedNeuron extends Neuron {
     }
 
     public static ActivationsCachedNeuron create(String name, List<? extends Neuron> inputNodes, ActivationFunction activationFunction) {
-        return new ActivationsCachedNeuron(name, inputNodes, new NeuronFunction(LinearCombination.create(inputNodes.size()), activationFunction));
+        return new ActivationsCachedNeuron(name, inputNodes, new NeuronFunction(LinearCombination.create(inputNodes.size(), JavaNumberTypeSupport.FLOAT), activationFunction));
     }
 
     /**
@@ -44,7 +45,7 @@ public class ActivationsCachedNeuron extends Neuron {
      *     <li>{@code parameterGradients_df_dp} – the gradient calculated for this output (useful for learning)</li>
      * </ul>
      */
-    public record Activation(float[] inputs, float output, float[] parameterGradients_df_dp) {
+    public record Activation(Float[] inputs, float output, Float[] parameterGradients_df_dp) {
 
     }
 
@@ -77,7 +78,7 @@ public class ActivationsCachedNeuron extends Neuron {
             return;
         }
         super.activate();
-        float[] inputValues = getInputValues();
+        Float[] inputValues = getInputValues();
         float output = getOutput();
         cachedActivations.add(new Activation(inputValues, output, getNeuronFunction().calculateParameterGradients_df_dp(inputValues)));
     }

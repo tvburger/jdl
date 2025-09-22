@@ -15,9 +15,9 @@ import java.util.Arrays;
 public class AdalineMain {
 
     public static void main(String[] args) {
-        DataSet dataSet = LogicalDataSets.toMinusSet(new LinesAndCircles().load());
-        DataSet trainingSet = dataSet.subset(10, dataSet.size());
-        DataSet testSet = dataSet.subset(0, 10);
+        DataSet<Float> dataSet = LogicalDataSets.toMinusSet(new LinesAndCircles().load());
+        DataSet<Float> trainingSet = dataSet.subset(10, dataSet.size());
+        DataSet<Float> testSet = dataSet.subset(0, 10);
 
         Adaline adaline = Adaline.create(400, 8);
         ObjectiveFunction objective = Objectives.mSE();
@@ -26,7 +26,7 @@ public class AdalineMain {
         Trainer<Adaline> adalineTrainer = Trainer.of(new AdalineInitializer(), objective, leastMeanSquares, regime);
         adalineTrainer.train(adaline, trainingSet);
 
-        for (DataSet.Sample sample : testSet) {
+        for (DataSet.Sample<Float> sample : testSet) {
             boolean[] estimate = adaline.classify(sample.features());
             boolean[] booleans = Floats.toBooleans(sample.targetOutputs());
             if (Arrays.equals(booleans, estimate)) {

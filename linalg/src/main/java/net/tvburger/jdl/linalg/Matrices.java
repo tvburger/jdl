@@ -1,8 +1,14 @@
 package net.tvburger.jdl.linalg;
 
+import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
+
 public final class Matrices {
 
     private Matrices() {
+    }
+
+    public static <N extends Number> TypedMatrix<N> create(N[][] values, JavaNumberTypeSupport<N> typeSupport) {
+        return new TypedMatrix<>(values, typeSupport);
     }
 
     public static TypedMatrix<Double> of(double[]... rows) {
@@ -50,7 +56,7 @@ public final class Matrices {
     }
 
     public static <N extends Number> boolean isIdentity(TypedMatrix<N> matrix) {
-        return isIdentity(matrix, matrix.getTypeSupport());
+        return isIdentity(matrix, matrix.getCurrentNumberType());
     }
 
     public static <N extends Number> boolean isIdentity(Matrix<N> matrix, JavaNumberTypeSupport<N> support) {
@@ -65,6 +71,16 @@ public final class Matrices {
             }
         }
         return true;
+    }
+
+    public static <N extends Number, M extends Number> Matrix<M> convert(Matrix<N> matrix, JavaNumberTypeSupport<M> typeSupport) {
+        M[][] numbers = typeSupport.createArrayOfArrays(matrix.m(), matrix.n());
+        for (int i = 0; i < matrix.m(); i++) {
+            for (int j = 0; j < matrix.n(); j++) {
+                numbers[i][j] = typeSupport.valueOf(matrix.get(i + 1, j + 1).doubleValue());
+            }
+        }
+        return new TypedMatrix<>(numbers, typeSupport);
     }
 
     public static Matrix<Double> withDoublePrecision(Matrix<Float> matrix) {

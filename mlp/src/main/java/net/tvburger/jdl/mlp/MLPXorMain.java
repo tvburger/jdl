@@ -18,9 +18,9 @@ import java.util.Arrays;
 public class MLPXorMain {
 
     public static void main(String[] args) {
-        DataSet dataSet = LogicalDataSets.xor().load();
-        DataSet trainingSet = dataSet;
-        DataSet testSet = dataSet;
+        DataSet<Float> dataSet = LogicalDataSets.xor().load();
+        DataSet<Float> trainingSet = dataSet;
+        DataSet<Float> testSet = dataSet;
 
         MultiLayerPerceptron mlp = MultiLayerPerceptron.create(Activations.sigmoid(), Activations.sigmoid(), 2, 2, 1);
 
@@ -34,8 +34,8 @@ public class MLPXorMain {
 
         NeuralNetworks.dump(mlp);
 
-        for (DataSet.Sample sample : testSet) {
-            float[] estimate = mlp.estimate(sample.features());
+        for (DataSet.Sample<Float> sample : testSet) {
+            Float[] estimate = mlp.estimate(sample.features());
             System.out.println("real = " + Arrays.toString(sample.targetOutputs()) + " vs estimated = " + Arrays.toString(estimate) + " | features " + Arrays.toString(sample.features()));
         }
     }

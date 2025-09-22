@@ -28,14 +28,14 @@ import java.util.Map;
  * </ul>
  *
  * <p><strong>Batch scaling convention:</strong> This class, as written, assumes the provided
- * {@link ObjectiveFunction#calculateGradient_dJ_da(int, float[], float[])} returns
+ * {@link ObjectiveFunction#calculateGradient_dJ_da(int, Float[], Float[])} returns
  * gradients already scaled by the batch size (i.e., mean over the batch). Consequently,
  * parameter updates do not divide by the batch size again on apply.</p>
  *
  * @param <N> a {@link NeuralNetwork} type optimized by this optimizer
  */
 @Strategy(Strategy.Role.CONCRETE)
-public class StochasticGradientDescent<N extends NeuralNetwork> implements Optimizer<N>, LearningRateConfigurable {
+public class StochasticGradientDescent<N extends NeuralNetwork> implements Optimizer<N, Float>, LearningRateConfigurable {
 
     /**
      * Default learning rate used when none is set explicitly.
@@ -67,7 +67,7 @@ public class StochasticGradientDescent<N extends NeuralNetwork> implements Optim
      * @param objective     the objective/loss function providing gradients w.r.t. output activations
      */
     @Override
-    public void optimize(N neuralNetwork, DataSet trainingSet, ObjectiveFunction objective) {
+    public void optimize(N neuralNetwork, DataSet<Float> trainingSet, ObjectiveFunction objective) {
         int batchSize = trainingSet.size();
         if (batchSize == 0) {
             return;
@@ -93,10 +93,10 @@ public class StochasticGradientDescent<N extends NeuralNetwork> implements Optim
         });
     }
 
-    private void voteForParameterCorrections(DataSet.Sample sample, int batchSize, Map<Neuron, float[]> accumulatedWeightedVotesForParameterCorrections, N neuralNetwork, ObjectiveFunction objective) {
+    private void voteForParameterCorrections(DataSet.Sample<Float> sample, int batchSize, Map<Neuron, float[]> accumulatedWeightedVotesForParameterCorrections, N neuralNetwork, ObjectiveFunction objective) {
         Map<Neuron, Float> errorSignals = new IdentityHashMap<>();
-        float[] estimated = neuralNetwork.estimate(sample.features());
-        float[] lossGradients = objective.calculateGradient_dJ_da(1, estimated, sample.targetOutputs());
+        Float[] estimated = neuralNetwork.estimate(sample.features());
+        Float[] lossGradients = objective.calculateGradient_dJ_da(1, estimated, sample.targetOutputs());
         for (int j = 0; j < neuralNetwork.coArity(); j++) {
             voteForOutputNodeParameterCorrections(batchSize, accumulatedWeightedVotesForParameterCorrections, neuralNetwork, lossGradients, errorSignals, j);
         }
@@ -108,7 +108,7 @@ public class StochasticGradientDescent<N extends NeuralNetwork> implements Optim
         }
     }
 
-    private void voteForOutputNodeParameterCorrections(int batchSize, Map<Neuron, float[]> accumulatedWeightedVotesForParameterCorrections, N neuralNetwork, float[] lossGradients, Map<Neuron, Float> errorSignals, int j) {
+    private void voteForOutputNodeParameterCorrections(int batchSize, Map<Neuron, float[]> accumulatedWeightedVotesForParameterCorrections, N neuralNetwork, Float[] lossGradients, Map<Neuron, Float> errorSignals, int j) {
         ActivationsCachedNeuron outputNode = neuralNetwork.getNeuron(neuralNetwork.getDepth(), j, ActivationsCachedNeuron.class);
         ActivationsCachedNeuron.Activation activation = outputNode.getCache().removeLast();
 
@@ -145,7 +145,7 @@ public class StochasticGradientDescent<N extends NeuralNetwork> implements Optim
     }
 
     private void voteForNodeParameterCorrections(int batchSize, Map<Neuron, float[]> accumulatedWeightedVotesForParameterCorrections, float errorSignal, ActivationsCachedNeuron neuron, ActivationsCachedNeuron.Activation activation) {
-        float[] parameterGradients_df_dp = activation.parameterGradients_df_dp();
+        Float[] parameterGradients_df_dp = activation.parameterGradients_df_dp();
         int parameterCount = neuron.getParameterCount();
         float[] votesForNeuron = accumulatedWeightedVotesForParameterCorrections.computeIfAbsent(neuron, k -> new float[parameterCount]);
         for (int p = 0; p < parameterCount; p++) {

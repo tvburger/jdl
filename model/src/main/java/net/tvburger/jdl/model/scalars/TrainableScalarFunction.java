@@ -12,7 +12,7 @@ import net.tvburger.jdl.model.training.TrainableFunction;
  * a way to compute parameter gradients needed for training via backpropagation.
  */
 @Strategy(Strategy.Role.INTERFACE)
-public interface TrainableScalarFunction extends TrainableFunction, ScalarEstimationFunction {
+public interface TrainableScalarFunction<N extends Number> extends TrainableFunction<N>, ScalarEstimationFunction<N> {
 
     /**
      * Calculates the gradients of the scalar function with respect to its
@@ -22,6 +22,6 @@ public interface TrainableScalarFunction extends TrainableFunction, ScalarEstima
      * @return an array of partial derivatives
      * {@code ∂f/∂θ_k} for each parameter θ_k
      */
-    float[] calculateParameterGradients(float[] inputs);
+    N[] calculateParameterGradients(N[] inputs);
 
 }

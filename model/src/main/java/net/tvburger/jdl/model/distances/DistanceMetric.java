@@ -17,6 +17,6 @@ public interface DistanceMetric {
      * @param point2 point2 to compare
      * @return the difference between point1 and point2
      */
-    float distance(float[] point1, float[] point2);
+    float distance(Float[] point1, Float[] point2);
 
 }

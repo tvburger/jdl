@@ -1,16 +1,17 @@
 package net.tvburger.jdl.model;
 
+import net.tvburger.jdl.common.numbers.NumberTypeAgnostic;
 import net.tvburger.jdl.common.patterns.DomainObject;
 import net.tvburger.jdl.common.patterns.Strategy;
 
 /**
- * The {@link #estimate(float[])} method defines the contract for mapping input values
+ * The {@link #estimate(N[])} method defines the contract for mapping input values
  * to output values according to a specific estimation algorithm.
  * Different implementations may use linear, non-linear, or domain-specific (symbolic AI) logic.
  */
 @DomainObject
 @Strategy(Strategy.Role.INTERFACE)
-public interface EstimationFunction {
+public interface EstimationFunction<N extends Number> extends NumberTypeAgnostic<N> {
 
     /**
      * Applies the estimation algorithm to the given input vector.
@@ -18,7 +19,7 @@ public interface EstimationFunction {
      * @param inputs an array of input values (e.g., features, signals)
      * @return an array of output values computed by the estimation function
      */
-    float[] estimate(float[] inputs);
+    N[] estimate(N[] inputs);
 
     /**
      * Returns the <b>arity</b> of this function, i.e. the number of inputs

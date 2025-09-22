@@ -8,8 +8,8 @@ public class LogicalDataSets {
     private LogicalDataSets() {
     }
 
-    public static DataSet toMinusSet(DataSet dataSet) {
-        for (DataSet.Sample sample : dataSet) {
+    public static DataSet<Float> toMinusSet(DataSet<Float> dataSet) {
+        for (DataSet.Sample<Float> sample : dataSet) {
             for (int i = 0; i < sample.featureCount(); i++) {
                 if (Floats.equals(sample.features()[i], 0.0f)) {
                     sample.features()[i] = -1.0f;
@@ -24,7 +24,7 @@ public class LogicalDataSets {
         return dataSet;
     }
 
-    public static DataSet.Loader or() {
+    public static DataSet.Loader<Float> or() {
         return () -> DataSet.of(
                 DataSet.Sample.of(Floats.of(0.0f, 0.0f), Floats.of(0.0f)),
                 DataSet.Sample.of(Floats.of(0.0f, 1.0f), Floats.of(1.0f)),
@@ -32,7 +32,7 @@ public class LogicalDataSets {
                 DataSet.Sample.of(Floats.of(1.0f, 1.0f), Floats.of(1.0f)));
     }
 
-    public static DataSet.Loader and() {
+    public static DataSet.Loader<Float> and() {
         return () -> DataSet.of(
                 DataSet.Sample.of(Floats.of(0.0f, 0.0f), Floats.of(0.0f)),
                 DataSet.Sample.of(Floats.of(0.0f, 1.0f), Floats.of(0.0f)),
@@ -40,7 +40,7 @@ public class LogicalDataSets {
                 DataSet.Sample.of(Floats.of(1.0f, 1.0f), Floats.of(1.0f)));
     }
 
-    public static DataSet.Loader xor() {
+    public static DataSet.Loader<Float> xor() {
         return () -> DataSet.of(
                 DataSet.Sample.of(Floats.of(0.0f, 0.0f), Floats.of(0.0f)),
                 DataSet.Sample.of(Floats.of(0.0f, 1.0f), Floats.of(1.0f)),

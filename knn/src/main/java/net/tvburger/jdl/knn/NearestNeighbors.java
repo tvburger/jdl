@@ -1,5 +1,6 @@
 package net.tvburger.jdl.knn;
 
+import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.utils.Floats;
 import net.tvburger.jdl.common.utils.Pair;
 import net.tvburger.jdl.common.utils.SimpleHolder;
@@ -11,11 +12,11 @@ import java.util.Comparator;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class NearestNeighbors implements EstimationFunction {
+public class NearestNeighbors implements EstimationFunction<Float> {
 
     private final DistanceMetric distanceMetric;
     private final NeighborWeighting neighborWeighting;
-    private DataSet memory;
+    private DataSet<Float> memory;
     private int k;
 
     public NearestNeighbors(int k, DistanceMetric distanceMetric, NeighborWeighting neighborWeighting) {
@@ -24,11 +25,11 @@ public class NearestNeighbors implements EstimationFunction {
         this.k = k;
     }
 
-    public DataSet getMemory() {
+    public DataSet<Float> getMemory() {
         return memory;
     }
 
-    public void setMemory(DataSet memory) {
+    public void setMemory(DataSet<Float> memory) {
         this.memory = memory;
     }
 
@@ -44,7 +45,7 @@ public class NearestNeighbors implements EstimationFunction {
     }
 
     @Override
-    public float[] estimate(float[] inputs) {
+    public Float[] estimate(Float[] inputs) {
         if (k < 0) {
             throw new IllegalStateException("Invalid k set (" + k + ")! Must be positive!");
         }
@@ -55,8 +56,8 @@ public class NearestNeighbors implements EstimationFunction {
             throw new IllegalArgumentException("We have not enough samples!");
         }
         float maxDistance = Float.POSITIVE_INFINITY;
-        Set<Pair<DataSet.Sample, Float>> neighbors = new TreeSet<>(furthestFirst());
-        for (DataSet.Sample sample : memory) {
+        Set<Pair<DataSet.Sample<Float>, Float>> neighbors = new TreeSet<>(furthestFirst());
+        for (DataSet.Sample<Float> sample : memory) {
             float sampleDistance = distanceMetric.distance(sample.features(), inputs);
             if (neighbors.size() < k) {
                 neighbors.add(Pair.of(sample, sampleDistance));
@@ -70,11 +71,11 @@ public class NearestNeighbors implements EstimationFunction {
             }
         }
         SimpleHolder<Float> totalWeights = new SimpleHolder<>(0.0f);
-        float[] estimation = new float[neighbors.iterator().next().left().targetOutputs().length];
+        Float[] estimation = getCurrentNumberType().createArray(neighbors.iterator().next().left().targetOutputs().length);
         neighbors.forEach(p -> {
             float distance = p.right();
             float weight = neighborWeighting.weight(distance);
-            float[] neighborOutputs = p.left().targetOutputs();
+            Float[] neighborOutputs = p.left().targetOutputs();
             totalWeights.adjust(f -> f + weight);
             for (int i = 0; i < estimation.length; i++) {
                 estimation[i] += weight * neighborOutputs[i];
@@ -102,12 +103,17 @@ public class NearestNeighbors implements EstimationFunction {
         return memory.getTargetCount();
     }
 
-    private Comparator<? super Pair<DataSet.Sample, Float>> furthestFirst() {
+    private Comparator<? super Pair<DataSet.Sample<Float>, Float>> furthestFirst() {
         return (p1, p2) ->
                 Floats.equals(p1.right(), p2.right())
                         ? 0
                         : Floats.greaterThan(p1.right(), p2.right())
                         ? -1
                         : 1;
+    }
+
+    @Override
+    public JavaNumberTypeSupport<Float> getCurrentNumberType() {
+        return JavaNumberTypeSupport.FLOAT;
     }
 }

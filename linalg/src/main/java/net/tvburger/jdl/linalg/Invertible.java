@@ -1,6 +1,6 @@
 package net.tvburger.jdl.linalg;
 
-public interface Invertable<T> {
+public interface Invertible<T> {
 
     T invert();
 

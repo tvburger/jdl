@@ -56,7 +56,7 @@ public class InputNeuron extends Neuron {
     }
 
     @Override
-    public float estimateScalar(float[] inputs) {
+    public Float estimateScalar(Float[] inputs) {
         return input;
     }
 

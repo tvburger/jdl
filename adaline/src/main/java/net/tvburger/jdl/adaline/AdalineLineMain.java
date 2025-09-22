@@ -1,5 +1,6 @@
 package net.tvburger.jdl.adaline;
 
+import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.datasets.SyntheticDataSets;
 import net.tvburger.jdl.model.DataSet;
 import net.tvburger.jdl.model.nn.NeuralNetworks;
@@ -14,10 +15,10 @@ import java.util.Arrays;
 public class AdalineLineMain {
 
     public static void main(String[] args) {
-        SyntheticDataSets.SyntheticDataSet syntheticDataSet = SyntheticDataSets.line(7, 3);
-        DataSet dataSet = syntheticDataSet.load();
-        DataSet trainingSet = dataSet.subset(10, dataSet.size());
-        DataSet testSet = dataSet.subset(0, 10);
+        SyntheticDataSets.SyntheticDataSet<Float> syntheticDataSet = SyntheticDataSets.line(7, 3, JavaNumberTypeSupport.FLOAT);
+        DataSet<Float> dataSet = syntheticDataSet.load();
+        DataSet<Float> trainingSet = dataSet.subset(10, dataSet.size());
+        DataSet<Float> testSet = dataSet.subset(0, 10);
 
         Adaline adaline = Adaline.create(1, 1);
         ObjectiveFunction objective = Objectives.mSE();
@@ -27,9 +28,9 @@ public class AdalineLineMain {
         adalineTrainer.train(adaline, trainingSet);
         NeuralNetworks.dump(adaline);
 
-        for (DataSet.Sample sample : testSet) {
-            float[] estimate = adaline.estimate(sample.features());
-            System.out.println("with noise = " + Arrays.toString(sample.targetOutputs()) + " estimated = " + Arrays.toString(estimate) + " real = " + Arrays.toString(syntheticDataSet.targetOutputs(sample.features())));
+        for (DataSet.Sample<Float> sample : testSet) {
+            Float[] estimate = adaline.estimate(sample.features());
+            System.out.println("with noise = " + Arrays.toString(sample.targetOutputs()) + " estimated = " + Arrays.toString(estimate) + " real = " + Arrays.toString(syntheticDataSet.getEstimationFunction().estimate(sample.features())));
         }
     }
 

@@ -32,7 +32,7 @@ import net.tvburger.jdl.model.EstimationFunction;
  */
 @DomainObject
 @Strategy(Strategy.Role.INTERFACE)
-public interface Trainer<E extends EstimationFunction> {
+public interface Trainer<E extends EstimationFunction<Float>> {
 
     /**
      * Returns the initializer used to prepare the estimation function
@@ -40,7 +40,7 @@ public interface Trainer<E extends EstimationFunction> {
      *
      * @return the initializer
      */
-    Initializer<? super E> getInitializer();
+    Initializer<? super E, Float> getInitializer();
 
     /**
      * Sets the initializer used to prepare the estimation function
@@ -48,7 +48,7 @@ public interface Trainer<E extends EstimationFunction> {
      *
      * @param initializer the initializer to set
      */
-    void setInitializer(Initializer<? super E> initializer);
+    void setInitializer(Initializer<? super E, Float> initializer);
 
     /**
      * Returns the objective function used to evaluate and guide training.
@@ -70,7 +70,7 @@ public interface Trainer<E extends EstimationFunction> {
      *
      * @return the optimizer
      */
-    Optimizer<? super E> getOptimizer();
+    Optimizer<? super E, Float> getOptimizer();
 
     /**
      * Sets the optimizer used to update the parameters of the
@@ -78,7 +78,7 @@ public interface Trainer<E extends EstimationFunction> {
      *
      * @param optimizer the optimizer to set
      */
-    void setOptimizer(Optimizer<? super E> optimizer);
+    void setOptimizer(Optimizer<? super E, Float> optimizer);
 
     /**
      * Returns the regime that controls the overall training flow,
@@ -104,7 +104,7 @@ public interface Trainer<E extends EstimationFunction> {
      * @param estimationFunction the model or estimation function to train
      * @param trainingSet        the dataset used for training
      */
-    void train(E estimationFunction, DataSet trainingSet);
+    void train(E estimationFunction, DataSet<Float> trainingSet);
 
     /**
      * Factory method for creating a new {@code Trainer} with the given
@@ -123,11 +123,12 @@ public interface Trainer<E extends EstimationFunction> {
      * @param regime      the training regime to use
      * @return a configured trainer instance
      */
-    static <E extends EstimationFunction> Trainer<E> of(Initializer<? super E> initializer, ObjectiveFunction objective, Optimizer<? super E> optimizer, Regime regime) {
+    static <E extends EstimationFunction<Float>> Trainer<E> of(Initializer<? super E, Float> initializer, ObjectiveFunction objective, Optimizer<? super E, Float> optimizer, Regime regime) {
         TrainerImpl<E> trainer = new TrainerImpl<>();
         trainer.setInitializer(initializer);
         trainer.setObjective(objective);
-        trainer.setOptimizer(optimizer == null ? (e, s, o) -> {} : optimizer);
+        trainer.setOptimizer(optimizer == null ? (e, s, o) -> {
+        } : optimizer);
         trainer.setRegime(regime);
         return trainer;
     }

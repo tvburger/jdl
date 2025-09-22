@@ -27,7 +27,7 @@ import net.tvburger.jdl.model.EstimationFunction;
  */
 @DomainObject
 @Strategy(Strategy.Role.INTERFACE)
-public interface Optimizer<E extends EstimationFunction> {
+public interface Optimizer<E extends EstimationFunction<N>, N extends Number> {
 
     /**
      * An {@link Optimizer} variant that is restricted to online (sample-by-sample)
@@ -49,7 +49,7 @@ public interface Optimizer<E extends EstimationFunction> {
      * @param <E> the type of estimation function being optimized
      */
     @Strategy(Strategy.Role.CONCRETE)
-    interface OnlineOnly<E extends EstimationFunction> extends Optimizer<E> {
+    interface OnlineOnly<E extends EstimationFunction<N>, N extends Number> extends Optimizer<E, N> {
 
         /**
          * Default implementation of batch optimization for {@code OnlineOnly}
@@ -62,7 +62,7 @@ public interface Optimizer<E extends EstimationFunction> {
          *                           and gradients
          */
         @Override
-        default void optimize(E estimationFunction, DataSet trainingSet, ObjectiveFunction objective) {
+        default void optimize(E estimationFunction, DataSet<N> trainingSet, ObjectiveFunction objective) {
             trainingSet.forEach(s -> optimize(estimationFunction, s, objective));
         }
 
@@ -81,7 +81,7 @@ public interface Optimizer<E extends EstimationFunction> {
          * @param objective          the objective function that defines the loss
          *                           and gradients
          */
-        void optimize(E estimationFunction, DataSet.Sample sample, ObjectiveFunction objective);
+        void optimize(E estimationFunction, DataSet.Sample<N> sample, ObjectiveFunction objective);
 
     }
 
@@ -100,6 +100,6 @@ public interface Optimizer<E extends EstimationFunction> {
      * @param objective          the objective function that defines the loss
      *                           and gradients
      */
-    void optimize(E estimationFunction, DataSet trainingSet, ObjectiveFunction objective);
+    void optimize(E estimationFunction, DataSet<N> trainingSet, ObjectiveFunction objective);
 
 }

@@ -1,13 +1,9 @@
 package net.tvburger.jdl.model.scalars;
 
+import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.patterns.Strategy;
-import net.tvburger.jdl.common.utils.Floats;
-import net.tvburger.jdl.model.nn.*;
-import net.tvburger.jdl.model.scalars.activations.Activations;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * A simple linear scalar model of the form:
@@ -20,9 +16,10 @@ import java.util.List;
  * calculation of parameter gradients required for gradient-based training.
  */
 @Strategy(Strategy.Role.CONCRETE)
-public class LinearCombination implements TrainableScalarFunction {
+public class LinearCombination<N extends Number> implements TrainableScalarFunction<N> {
 
-    private final float[] parameters;
+    private final N[] parameters;
+    private final JavaNumberTypeSupport<N> typeSupport;
 
     /**
      * Creates a new {@code LinearCombination} with the specified number of input dimensions.
@@ -33,8 +30,8 @@ public class LinearCombination implements TrainableScalarFunction {
      * @param dimensions number of input features
      * @return a new {@code LinearCombination} instance with zero-initialized parameters
      */
-    public static LinearCombination create(int dimensions) {
-        return new LinearCombination(new float[dimensions + 1]);
+    public static <N extends Number> LinearCombination<N> create(int dimensions, JavaNumberTypeSupport<N> typeSupport) {
+        return new LinearCombination<>(typeSupport.createArray(dimensions + 1), typeSupport);
     }
 
 
@@ -46,8 +43,14 @@ public class LinearCombination implements TrainableScalarFunction {
      *
      * @param parameters parameter vector (bias + weights)
      */
-    public LinearCombination(float[] parameters) {
+    public LinearCombination(N[] parameters, JavaNumberTypeSupport<N> typeSupport) {
         this.parameters = parameters;
+        this.typeSupport = typeSupport;
+    }
+
+    @Override
+    public JavaNumberTypeSupport<N> getCurrentNumberType() {
+        return typeSupport;
     }
 
     /**
@@ -63,13 +66,13 @@ public class LinearCombination implements TrainableScalarFunction {
      * @throws IllegalArgumentException if {@code inputs.length != arity()}
      */
     @Override
-    public float estimateScalar(float[] inputs) {
+    public N estimateScalar(N[] inputs) {
         if (inputs.length != arity()) {
             throw new IllegalArgumentException();
         }
-        float sum = getBias();
+        N sum = getBias();
         for (int d = 1; d <= arity(); d++) {
-            sum += inputs[d - 1] * getWeight(d);
+            sum = typeSupport.add(sum, typeSupport.multiply(inputs[d - 1], getWeight(d)));
         }
         return sum;
     }
@@ -88,9 +91,9 @@ public class LinearCombination implements TrainableScalarFunction {
      * @return the gradient vector (bias gradient followed by weight gradients)
      */
     @Override
-    public float[] calculateParameterGradients(float[] inputs) {
-        float[] gradients = new float[1 + arity()];
-        gradients[0] = 1;
+    public N[] calculateParameterGradients(N[] inputs) {
+        N[] gradients = typeSupport.createArray(1 + arity());
+        gradients[0] = typeSupport.one();
         if (arity() >= 0) System.arraycopy(inputs, 0, gradients, 1, arity());
         return gradients;
     }
@@ -102,7 +105,7 @@ public class LinearCombination implements TrainableScalarFunction {
      * @return the parameter array
      */
     @Override
-    public float[] getParameters() {
+    public N[] getParameters() {
         return parameters;
     }
 
@@ -136,8 +139,8 @@ public class LinearCombination implements TrainableScalarFunction {
      *
      * @return the weight vector
      */
-    public float[] getWeights() {
-        return arity() > 0 ? Arrays.copyOfRange(parameters, 1, arity() + 1) : Floats.EMPTY;
+    public N[] getWeights() {
+        return arity() > 0 ? Arrays.copyOfRange(parameters, 1, arity() + 1) : typeSupport.createArray(0);
     }
 
     /**
@@ -146,7 +149,7 @@ public class LinearCombination implements TrainableScalarFunction {
      * @param weights the new weight vector
      * @throws IllegalArgumentException if the number of weights does not match {@link #arity()}
      */
-    public void setWeights(float[] weights) {
+    public void setWeights(N[] weights) {
         if (weights.length != coArity()) {
             throw new IllegalArgumentException("Invalid number of weights!");
         }
@@ -160,7 +163,7 @@ public class LinearCombination implements TrainableScalarFunction {
      * @return the weight value
      * @throws IllegalArgumentException if {@code d} is out of range
      */
-    public float getWeight(int d) {
+    public N getWeight(int d) {
         return parameters[validDimension(d)];
     }
 
@@ -171,7 +174,7 @@ public class LinearCombination implements TrainableScalarFunction {
      * @param weight the new weight value
      * @throws IllegalArgumentException if {@code d} is out of range
      */
-    public void setWeight(int d, float weight) {
+    public void setWeight(int d, N weight) {
         parameters[validDimension(d)] = weight;
     }
 
@@ -182,8 +185,8 @@ public class LinearCombination implements TrainableScalarFunction {
      * @param delta the adjustment value
      * @throws IllegalArgumentException if {@code d} is out of range
      */
-    public void adjustWeight(int d, float delta) {
-        parameters[validDimension(d)] += delta;
+    public void adjustWeight(int d, N delta) {
+        parameters[validDimension(d)] = typeSupport.add(parameters[d], delta);
     }
 
     /**
@@ -191,8 +194,8 @@ public class LinearCombination implements TrainableScalarFunction {
      *
      * @return the bias value (0.0f if there are no parameters)
      */
-    public float getBias() {
-        return parameters.length == 0 ? 0.0f : parameters[0];
+    public N getBias() {
+        return parameters.length == 0 ? typeSupport.zero() : parameters[0];
     }
 
     /**
@@ -200,7 +203,7 @@ public class LinearCombination implements TrainableScalarFunction {
      *
      * @param bias the new bias value
      */
-    public void setBias(float bias) {
+    public void setBias(N bias) {
         parameters[0] = bias;
     }
 
@@ -209,19 +212,19 @@ public class LinearCombination implements TrainableScalarFunction {
      *
      * @param delta the adjustment value
      */
-    public void adjustBias(float delta) {
-        parameters[0] += delta;
+    public void adjustBias(N delta) {
+        parameters[0] = typeSupport.add(parameters[0], delta);
     }
 
-    public NeuralNetwork toNeuralNetwork() {
-        List<List<? extends Neuron>> neurons = new ArrayList<>();
-        List<InputNeuron> inputNeurons = new ArrayList<>();
-        for (int d = 1; d <= arity(); d++) {
-            inputNeurons.add(new InputNeuron("Input(" + (d - 1) + ")"));
-        }
-        neurons.add(inputNeurons);
-        Neuron outputNeuron = new ActivationsCachedNeuron("Output", inputNeurons, new NeuronFunction(this, Activations.identity()));
-        neurons.add(List.of(outputNeuron));
-        return new DefaultNeuralNetwork(neurons);
-    }
+//    public NeuralNetwork toNeuralNetwork() {
+//        List<List<? extends Neuron>> neurons = new ArrayList<>();
+//        List<InputNeuron> inputNeurons = new ArrayList<>();
+//        for (int d = 1; d <= arity(); d++) {
+//            inputNeurons.add(new InputNeuron("Input(" + (d - 1) + ")"));
+//        }
+//        neurons.add(inputNeurons);
+//        Neuron outputNeuron = new ActivationsCachedNeuron("Output", inputNeurons, new NeuronFunction(this, Activations.identity()));
+//        neurons.add(List.of(outputNeuron));
+//        return new DefaultNeuralNetwork(neurons);
+//    }
 }

@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
 
-public class LinesAndCircles implements DataSet.Loader {
+public class LinesAndCircles implements DataSet.Loader<Float> {
 
     @Override
-    public DataSet load() {
-        List<DataSet.Sample> samples = new ArrayList<>();
+    public DataSet<Float> load() {
+        List<DataSet.Sample<Float>> samples = new ArrayList<>();
         try (Scanner scanner = new Scanner(Objects.requireNonNull(LinesAndCircles.class.getClassLoader().getResourceAsStream("lines-and-circles.csv")))) {
             scanner.nextLine(); // skip header
             while (scanner.hasNextLine()) {
@@ -23,16 +23,16 @@ public class LinesAndCircles implements DataSet.Loader {
                     }
                     float circle = "circle".equals(elements[2]) ? 1.0f : 0.0f;
                     float left = "left".equals(elements[3]) ? 1.0f : 0.0f;
-                    float[] targetOutputs = new float[]{circle, left, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-                    float[] features = new float[400];
+                    Float[] targetOutputs = new Float[]{circle, left, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+                    Float[] features = new Float[400];
                     for (int i = 0; i < 400; i++) {
                         features[i] = "0".equals(elements[i + 4]) ? 0.0f : 1.0f;
                     }
-                    samples.add(new DataSet.Sample(features, targetOutputs));
+                    samples.add(new DataSet.Sample<>(features, targetOutputs));
                 }
             }
         }
-        return new DataSet(samples);
+        return new DataSet<>(samples);
     }
 
 }

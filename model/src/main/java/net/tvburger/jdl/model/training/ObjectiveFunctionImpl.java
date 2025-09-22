@@ -67,12 +67,12 @@ public class ObjectiveFunctionImpl implements ObjectiveFunction {
      * {@inheritDoc}
      */
     @Override
-    public float calculateLoss(List<Pair<float[], float[]>> batch) {
+    public float calculateLoss(List<Pair<Float[], Float[]>> batch) {
         List<Float> sampleLosses = new ArrayList<>(batch.size());
         List<Float> dimensionLosses = new ArrayList<>();
-        for (Pair<float[], float[]> sample : batch) {
-            float[] estimated = sample.left();
-            float[] target = sample.right();
+        for (Pair<Float[], Float[]> sample : batch) {
+            Float[] estimated = sample.left();
+            Float[] target = sample.right();
             int dimensions = estimated.length;
             for (int d = 0; d < dimensions; d++) {
                 dimensionLosses.add(getDimensionLossFunction(d).calculateDimensionLoss(estimated[d], target[d]));
@@ -87,9 +87,9 @@ public class ObjectiveFunctionImpl implements ObjectiveFunction {
      * {@inheritDoc}
      */
     @Override
-    public float[] calculateGradient_dJ_da(int batchSize, float[] estimated, float[] target) {
+    public Float[] calculateGradient_dJ_da(int batchSize, Float[] estimated, Float[] target) {
         int dimensions = target.length;
-        float[] gradients = new float[dimensions];
+        Float[] gradients = new Float[dimensions];
         for (int d = 0; d < dimensions; d++) {
             gradients[d] = batchLossFunction.calculateGradient_dJ_dL(batchSize)
                     * sampleLossFunction.calculateGradient_dL_dl(dimensions)

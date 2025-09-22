@@ -48,7 +48,7 @@ public interface ObjectiveFunction extends LossFunction {
      *              {@code float[]} arrays (estimated vs target)
      * @return the aggregated loss value for the batch
      */
-    float calculateLoss(List<Pair<float[], float[]>> batch);
+    float calculateLoss(List<Pair<Float[], Float[]>> batch);
 
     /**
      * Determines the gradients of the objective function with respect to
@@ -65,7 +65,7 @@ public interface ObjectiveFunction extends LossFunction {
      * @param target    the expected target values for the sample
      * @return an array of gradients, one per dimension of the input
      */
-    float[] calculateGradient_dJ_da(int samples, float[] estimated, float[] target);
+    Float[] calculateGradient_dJ_da(int samples, Float[] estimated, Float[] target);
 
     /**
      * Creates an {@link ObjectiveFunction} that minimizes the loss

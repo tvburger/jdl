@@ -26,7 +26,7 @@ public class EuclideanDistance implements DistanceMetric {
      * @throws IllegalArgumentException if the points are null or have different dimensions
      */
     @Override
-    public float distance(float[] point1, float[] point2) {
+    public float distance(Float[] point1, Float[] point2) {
         if (point1 == null || point2 == null) {
             throw new IllegalArgumentException("Points must not be null.");
         }

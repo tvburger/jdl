@@ -29,7 +29,7 @@ import java.util.Set;
  */
 @DomainObject
 @Entity
-public interface NeuralNetwork extends TrainableFunction {
+public interface NeuralNetwork extends TrainableFunction<Float> {
 
     /**
      * Returns the number of neurons in the given layer.
@@ -106,7 +106,7 @@ public interface NeuralNetwork extends TrainableFunction {
      *
      * @return a flat array of parameters
      */
-    float[] getParameters();
+    Float[] getParameters();
 
     /**
      * Accepts a {@link net.tvburger.jdl.model.nn.NeuronVisitor} to traverse

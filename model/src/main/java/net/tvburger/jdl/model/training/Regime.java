@@ -52,6 +52,6 @@ public interface Regime {
      * @param optimizer          the optimizer used to update the estimation
      *                           function’s parameters based on gradients
      */
-    <E extends EstimationFunction> void train(E estimationFunction, DataSet trainingSet, ObjectiveFunction objective, Optimizer<? super E> optimizer);
+    <E extends EstimationFunction<Float>> void train(E estimationFunction, DataSet<Float> trainingSet, ObjectiveFunction objective, Optimizer<? super E, Float> optimizer);
 
 }

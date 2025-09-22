@@ -52,7 +52,7 @@ public final class EpochRegime extends DelegatedRegime implements EpochConfigura
      * @param <E>                the type of estimation function
      */
     @Override
-    public <E extends EstimationFunction> void train(E estimationFunction, DataSet trainingSet, ObjectiveFunction objective, Optimizer<? super E> optimizer) {
+    public <E extends EstimationFunction<Float>> void train(E estimationFunction, DataSet<Float> trainingSet, ObjectiveFunction objective, Optimizer<? super E, Float> optimizer) {
         for (int i = 0; i < getEpochs(); i++) {
             regime.train(estimationFunction, trainingSet, objective, optimizer);
         }

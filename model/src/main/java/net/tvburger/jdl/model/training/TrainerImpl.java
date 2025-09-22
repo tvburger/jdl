@@ -42,18 +42,18 @@ import net.tvburger.jdl.model.EstimationFunction;
  */
 @Mediator
 @Strategy(Strategy.Role.CONCRETE)
-public class TrainerImpl<E extends EstimationFunction> implements Trainer<E> {
+public class TrainerImpl<E extends EstimationFunction<Float>> implements Trainer<E> {
 
-    private Initializer<? super E> initializer;
+    private Initializer<? super E, Float> initializer;
     private ObjectiveFunction objective;
-    private Optimizer<? super E> optimizer;
+    private Optimizer<? super E, Float> optimizer;
     private Regime regime;
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Initializer<? super E> getInitializer() {
+    public Initializer<? super E, Float> getInitializer() {
         return initializer;
     }
 
@@ -61,7 +61,7 @@ public class TrainerImpl<E extends EstimationFunction> implements Trainer<E> {
      * {@inheritDoc}
      */
     @Override
-    public void setInitializer(Initializer<? super E> initializer) {
+    public void setInitializer(Initializer<? super E, Float> initializer) {
         this.initializer = initializer;
     }
 
@@ -85,7 +85,7 @@ public class TrainerImpl<E extends EstimationFunction> implements Trainer<E> {
      * {@inheritDoc}
      */
     @Override
-    public Optimizer<? super E> getOptimizer() {
+    public Optimizer<? super E, Float> getOptimizer() {
         return optimizer;
     }
 
@@ -93,7 +93,7 @@ public class TrainerImpl<E extends EstimationFunction> implements Trainer<E> {
      * {@inheritDoc}
      */
     @Override
-    public void setOptimizer(Optimizer<? super E> optimizer) {
+    public void setOptimizer(Optimizer<? super E, Float> optimizer) {
         this.optimizer = optimizer;
     }
 
@@ -117,7 +117,7 @@ public class TrainerImpl<E extends EstimationFunction> implements Trainer<E> {
      * {@inheritDoc}
      */
     @Override
-    public void train(E estimationFunction, DataSet trainingSet) {
+    public void train(E estimationFunction, DataSet<Float> trainingSet) {
         if (optimizer == null) {
             throw new IllegalStateException("No optimizer defined!");
         }

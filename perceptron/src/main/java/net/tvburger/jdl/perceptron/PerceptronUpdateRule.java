@@ -9,11 +9,11 @@ import net.tvburger.jdl.model.training.Optimizer;
 
 import java.util.Arrays;
 
-public class PerceptronUpdateRule implements Optimizer.OnlineOnly<Perceptron> {
+public class PerceptronUpdateRule implements Optimizer.OnlineOnly<Perceptron, Float> {
 
     @Override
-    public void optimize(Perceptron perceptron, DataSet.Sample sample, ObjectiveFunction objective) {
-        float[] estimate = perceptron.estimate(sample.features());
+    public void optimize(Perceptron perceptron, DataSet.Sample<Float> sample, ObjectiveFunction objective) {
+        Float[] estimate = perceptron.estimate(sample.features());
         for (int i = 0; i < estimate.length; i++) {
             int sign = Floats.greaterThan(sample.targetOutputs()[i], 0.0f) ? +1 : -1;
             LastInputStoredNeuron neuron = perceptron.getNeuron(2, i, LastInputStoredNeuron.class);

@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model.nn;
 
+import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.patterns.Mediator;
 import net.tvburger.jdl.common.utils.Pair;
 
@@ -109,26 +110,31 @@ public class DefaultNeuralNetwork implements NeuralNetwork {
      * {@inheritDoc}
      */
     @Override
-    public float[] getParameters() {
-        float[] parameters = new float[getParameterCount()];
+    public Float[] getParameters() {
+        Float[] parameters = new Float[getParameterCount()];
         int i = 0;
         for (List<? extends Neuron> layer : layers) {
             for (Neuron neuron : layer) {
                 if (neuron instanceof InputNeuron) {
                     continue;
                 }
-                float[] neuronParameters = neuron.getParameters();
+                Float[] neuronParameters = neuron.getParameters();
                 System.arraycopy(neuronParameters, 0, parameters, i, neuronParameters.length);
             }
         }
         return parameters;
     }
 
+    @Override
+    public JavaNumberTypeSupport<Float> getCurrentNumberType() {
+        return JavaNumberTypeSupport.FLOAT;
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public float[] estimate(float... inputs) {
+    public Float[] estimate(Float... inputs) {
         for (List<? extends Neuron> layer : layers) {
             layer.forEach(Neuron::deactivate);
         }
@@ -139,7 +145,7 @@ public class DefaultNeuralNetwork implements NeuralNetwork {
             layer.forEach(Neuron::activate);
         }
         List<? extends Neuron> outputLayer = layers.get(layers.size() - 1);
-        float[] outputs = new float[outputLayer.size()];
+        Float[] outputs = new Float[outputLayer.size()];
         for (int j = 0; j < outputs.length; j++) {
             outputs[j] = outputLayer.get(j).getOutput();
         }

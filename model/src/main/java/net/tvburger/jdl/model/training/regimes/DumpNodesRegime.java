@@ -106,7 +106,7 @@ public class DumpNodesRegime extends DelegatedRegime {
      * @param <E>                the type of estimation function
      */
     @Override
-    public <E extends EstimationFunction> void train(E estimationFunction, DataSet trainingSet, ObjectiveFunction objective, Optimizer<? super E> optimizer) {
+    public <E extends EstimationFunction<Float>> void train(E estimationFunction, DataSet<Float> trainingSet, ObjectiveFunction objective, Optimizer<? super E, Float> optimizer) {
         if (isFirstTime()) {
             dumpNodes(estimationFunction);
         }
@@ -114,7 +114,7 @@ public class DumpNodesRegime extends DelegatedRegime {
         dumpNodes(estimationFunction);
     }
 
-    private void dumpNodes(EstimationFunction estimationFunction) {
+    private <E extends EstimationFunction<N>, N extends Number> void dumpNodes(E estimationFunction) {
         if (estimationFunction instanceof NeuralNetwork neuralNetwork) {
             NeuralNetworks.dump(neuralNetwork, isIncludeInputs());
         }

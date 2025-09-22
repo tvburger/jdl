@@ -11,17 +11,19 @@ import net.tvburger.jdl.model.EstimationFunction;
  * vector-based interface compatible with {@link EstimationFunction}.
  */
 @Strategy(Strategy.Role.INTERFACE)
-public interface ScalarEstimationFunction extends EstimationFunction {
+public interface ScalarEstimationFunction<N extends Number> extends EstimationFunction<N> {
 
     /**
      * Estimates the output of this function for the given input vector,
      * returning the result as a single-element array.
      *
      * @param inputs the input feature vector
-     * @return a single-element array containing {@link #estimateScalar(float[])}
+     * @return a single-element array containing {@link #estimateScalar(N[])}
      */
-    default float[] estimate(float[] inputs) {
-        return new float[]{estimateScalar(inputs)};
+    default N[] estimate(N[] inputs) {
+        N[] array = getCurrentNumberType().createArray(1);
+        array[0] = estimateScalar(inputs);
+        return array;
     }
 
     /**
@@ -30,7 +32,7 @@ public interface ScalarEstimationFunction extends EstimationFunction {
      * @param inputs the input feature vector
      * @return the scalar output value
      */
-    float estimateScalar(float[] inputs);
+    N estimateScalar(N[] inputs);
 
     /**
      * Returns the number of output values (co-arity) of this function.

@@ -1,5 +1,7 @@
 package net.tvburger.jdl.linalg;
 
+import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
+
 import java.util.Arrays;
 
 public class TypedVector<N extends Number> implements Vector<N> {
@@ -122,18 +124,25 @@ public class TypedVector<N extends Number> implements Vector<N> {
         if (obj == this) {
             return true;
         }
-        if (obj instanceof TypedVector v) {
+        if (obj instanceof TypedVector<?> v) {
             return columnVector == v.columnVector && Arrays.equals(values, v.values);
         } else {
             return false;
         }
     }
 
+    @Override
     public void print() {
         print(null);
     }
 
+    @Override
     public void print(String name) {
         asMatrix().print(name);
+    }
+
+    @Override
+    public JavaNumberTypeSupport<N> getCurrentNumberType() {
+        return typeSupport;
     }
 }

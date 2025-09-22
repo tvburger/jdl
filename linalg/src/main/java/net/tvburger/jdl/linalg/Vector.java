@@ -1,6 +1,8 @@
 package net.tvburger.jdl.linalg;
 
-public interface Vector<N extends Number> extends Transposable<Vector<N>> {
+import net.tvburger.jdl.common.numbers.NumberTypeAgnostic;
+
+public interface Vector<N extends Number> extends Transposable<Vector<N>>, NumberTypeAgnostic<N> {
 
     int getDimensions();
 

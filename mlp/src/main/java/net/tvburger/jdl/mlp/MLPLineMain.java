@@ -1,5 +1,6 @@
 package net.tvburger.jdl.mlp;
 
+import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.datasets.SyntheticDataSets;
 import net.tvburger.jdl.model.DataSet;
 import net.tvburger.jdl.model.nn.NeuralNetworks;
@@ -18,11 +19,11 @@ import java.util.Arrays;
 public class MLPLineMain {
 
     public static void main(String[] args) {
-        SyntheticDataSets.SyntheticDataSet line = SyntheticDataSets.line(0.0f, 1.0f);
+        SyntheticDataSets.SyntheticDataSet<Float> line = SyntheticDataSets.line(0.0f, 1.0f, JavaNumberTypeSupport.FLOAT);
         line.setNoiseScale(0.0f);
-        DataSet dataSet = line.load();
-        DataSet trainingSet = dataSet.subset(10, dataSet.size());
-        DataSet testSet = dataSet.subset(0, 10);
+        DataSet<Float> dataSet = line.load();
+        DataSet<Float> trainingSet = dataSet.subset(10, dataSet.size());
+        DataSet<Float> testSet = dataSet.subset(0, 10);
 
         MultiLayerPerceptron mlp = MultiLayerPerceptron.create(Activations.linear(), Activations.linear(), 1, 1);
 
@@ -36,8 +37,8 @@ public class MLPLineMain {
 
         NeuralNetworks.dump(mlp);
 
-        for (DataSet.Sample sample : testSet) {
-            float[] estimate = mlp.estimate(sample.features());
+        for (DataSet.Sample<Float> sample : testSet) {
+            Float[] estimate = mlp.estimate(sample.features());
             System.out.println("real = " + Arrays.toString(sample.targetOutputs()) + " vs estimated = " + Arrays.toString(estimate) + " | features " + Arrays.toString(sample.features()));
         }
     }

@@ -26,7 +26,7 @@ import net.tvburger.jdl.model.EstimationFunction;
  */
 @DomainObject
 @Strategy(Strategy.Role.INTERFACE)
-public interface Initializer<E extends EstimationFunction> {
+public interface Initializer<E extends EstimationFunction<N>, N extends Number> {
 
     /**
      * Initializes the given estimation function according to the

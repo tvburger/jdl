@@ -1,35 +1,44 @@
 package net.tvburger.jdl.linear.basis;
 
+import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
+import net.tvburger.jdl.common.numbers.NumberTypeAgnostic;
 import net.tvburger.jdl.common.patterns.Strategy;
 
 import java.util.List;
 
 @Strategy(Strategy.Role.INTERFACE)
-public interface BasisFunction {
+public interface BasisFunction<N extends Number> extends NumberTypeAgnostic<N> {
 
-    float apply(float input);
+    N apply(N input);
 
-    interface Generator {
+    interface Generator<N extends Number> extends NumberTypeAgnostic<N> {
 
-        FeatureExtractor generate(int featureCount);
+        FeatureExtractor<N> generate(int featureCount);
 
     }
 
     @Strategy(Strategy.Role.CONCRETE)
-    class FeatureExtractor implements net.tvburger.jdl.linear.FeatureExtractor {
+    class FeatureExtractor<N extends Number> implements net.tvburger.jdl.linear.FeatureExtractor<N> {
 
-        private final List<BasisFunction> basis;
+        private final List<BasisFunction<N>> basis;
+        private final JavaNumberTypeSupport<N> typeSupport;
 
-        public FeatureExtractor(List<BasisFunction> basis) {
+        public FeatureExtractor(List<BasisFunction<N>> basis, JavaNumberTypeSupport<N> typeSupport) {
             this.basis = basis;
+            this.typeSupport = typeSupport;
+        }
+
+        @Override
+        public JavaNumberTypeSupport<N> getTypeSupport() {
+            return typeSupport;
         }
 
         /**
          * {@inheritDoc}
          */
-        public float[] extractFeatures(float input) {
+        public N[] extractFeatures(N input) {
             int m = basis.size();
-            float[] features = new float[m];
+            N[] features = typeSupport.createArray(m);
             for (int i = 0; i < m; i++) {
                 features[i] = basis.get(i).apply(input);
             }

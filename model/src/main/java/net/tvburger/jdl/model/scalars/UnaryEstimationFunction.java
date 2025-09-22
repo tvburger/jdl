@@ -1,16 +1,16 @@
 package net.tvburger.jdl.model.scalars;
 
-public interface UnaryEstimationFunction extends ScalarEstimationFunction {
+public interface UnaryEstimationFunction<N extends Number> extends ScalarEstimationFunction<N> {
 
     @Override
-    default float estimateScalar(float[] inputs) {
+    default N estimateScalar(N[] inputs) {
         if (inputs.length != 1) {
             throw new IllegalArgumentException("Invalid arity!");
         }
         return estimateUnary(inputs[0]);
     }
 
-    float estimateUnary(float input);
+    N estimateUnary(N input);
 
     @Override
     default int arity() {

@@ -58,7 +58,7 @@ public final class MiniBatchRegime extends DelegatedRegime implements BatchSizeC
      * @param <E>                the type of estimation function
      */
     @Override
-    public <E extends EstimationFunction> void train(E estimationFunction, DataSet trainingSet, ObjectiveFunction objective, Optimizer<? super E> optimizer) {
+    public <E extends EstimationFunction<Float>> void train(E estimationFunction, DataSet<Float> trainingSet, ObjectiveFunction objective, Optimizer<? super E, Float> optimizer) {
         int offset = 0;
         int trainingSetSize = trainingSet.size();
         do {

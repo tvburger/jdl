@@ -47,7 +47,7 @@ public final class Floats {
      * @param f the floats to put in the array
      * @return the array
      */
-    public static float[] of(float... f) {
+    public static Float[] of(Float... f) {
         return f;
     }
 
@@ -70,6 +70,14 @@ public final class Floats {
      * @return the corresponding booleans
      */
     public static boolean[] toBooleans(float[] floats) {
+        boolean[] booleans = new boolean[floats.length];
+        for (int i = 0; i < floats.length; i++) {
+            booleans[i] = floats[i] > 0.0f;
+        }
+        return booleans;
+    }
+
+    public static boolean[] toBooleans(Float[] floats) {
         boolean[] booleans = new boolean[floats.length];
         for (int i = 0; i < floats.length; i++) {
             booleans[i] = floats[i] > 0.0f;
