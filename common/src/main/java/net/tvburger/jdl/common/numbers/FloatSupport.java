@@ -3,6 +3,7 @@ package net.tvburger.jdl.common.numbers;
 import net.tvburger.jdl.common.utils.Floats;
 
 import java.util.Arrays;
+import java.util.Comparator;
 
 public final class FloatSupport implements JavaNumberTypeSupport<Float> {
 
@@ -83,5 +84,10 @@ public final class FloatSupport implements JavaNumberTypeSupport<Float> {
     @Override
     public Float valueOf(double value) {
         return (float) value;
+    }
+
+    @Override
+    public Comparator<Float> comparator() {
+        return Float::compare;
     }
 }

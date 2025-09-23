@@ -1,6 +1,7 @@
 package net.tvburger.jdl.common.numbers;
 
 import java.math.BigInteger;
+import java.util.Comparator;
 
 public interface JavaNumberTypeSupport<N> {
 
@@ -59,5 +60,7 @@ public interface JavaNumberTypeSupport<N> {
     }
 
     N valueOf(double value);
+
+    Comparator<N> comparator();
 
 }

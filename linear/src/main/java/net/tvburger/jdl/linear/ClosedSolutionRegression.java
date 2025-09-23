@@ -21,7 +21,7 @@ public class ClosedSolutionRegression<N extends Number> {
     private final DataSet<N> trainSet;
     private final Map<String, DataSet<N>> testSets;
 
-    protected final Map<Integer, LinearBasisFunctionModel<N>> fitted = new TreeMap<>();
+    private final Map<Integer, LinearBasisFunctionModel<N>> fitted = new TreeMap<>();
 
     private final Plot errorPlot;
     private final Plot fitPlot;

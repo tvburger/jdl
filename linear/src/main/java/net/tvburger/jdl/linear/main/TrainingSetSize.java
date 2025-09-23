@@ -20,15 +20,16 @@ public class TrainingSetSize {
     public static <N extends Number> void main(String[] args) {
         List<JavaNumberTypeSupport<?>> types = List.of(JavaNumberTypeSupport.RATIONAL_BIGINT);
 
-        Plot fitPlot = new Plot("Fit vs Training Set Size");
-        UnaryEstimationFunction<Double> targetFit = SyntheticDataSets.sinus(JavaNumberTypeSupport.DOUBLE).getEstimationFunction();
-        fitPlot.plotTargetOutput(targetFit, "Target");
-        fitPlot.display();
-
         Plot mrePlot = new Plot("RME");
         mrePlot.display();
 
-        for (int trainingSetSize = 10; trainingSetSize <= 1000; trainingSetSize += trainingSetSize > 100 ? 100 : 10) {
+        Plot fitPlot = new Plot("Fit vs Training Set Size");
+        UnaryEstimationFunction<Double> targetFit = SyntheticDataSets.sinus(JavaNumberTypeSupport.DOUBLE).getEstimationFunction();
+        fitPlot.plotTargetOutput(targetFit, "Target");
+        fitPlot.setYRange(-2.0, 2.0);
+        fitPlot.display();
+
+        for (int trainingSetSize = 10; trainingSetSize <= 500; trainingSetSize += trainingSetSize > 90 ? 100 : 10) {
             for (JavaNumberTypeSupport<?> type : types) {
                 ClosedSolutionRegression<N> regression = getFittedFunction(type, trainingSetSize);
                 LinearBasisFunctionModel<N> model = regression.getModel(9);
@@ -55,7 +56,7 @@ public class TrainingSetSize {
 
     public static <N extends Number> ClosedSolutionRegression<N> create(SyntheticDataSets.SyntheticDataSet<N> dataSetGenerator, BasisFunction.Generator<N> basisFunctionGenerator, int trainingSetSize) {
         dataSetGenerator.setRandomSeed(165);
-        dataSetGenerator.setNoiseScale(0.5f);
+        dataSetGenerator.setNoiseScale(0.2f);
         DataSet<N> trainSet = dataSetGenerator.load(trainingSetSize);
         DataSet<N> testSet = dataSetGenerator.load(1000);
         Map<String, DataSet<N>> testSets = new LinkedHashMap<>();

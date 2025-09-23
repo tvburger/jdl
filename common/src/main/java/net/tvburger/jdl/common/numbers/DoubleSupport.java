@@ -1,6 +1,7 @@
 package net.tvburger.jdl.common.numbers;
 
 import java.util.Arrays;
+import java.util.Comparator;
 
 public final class DoubleSupport implements JavaNumberTypeSupport<Double> {
 
@@ -82,5 +83,10 @@ public final class DoubleSupport implements JavaNumberTypeSupport<Double> {
     @Override
     public Double valueOf(double value) {
         return value;
+    }
+
+    @Override
+    public Comparator<Double> comparator() {
+        return Double::compare;
     }
 }

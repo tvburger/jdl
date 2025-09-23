@@ -14,30 +14,32 @@ import net.tvburger.jdl.plots.Plot;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class ModelRegularization {
+public class ModelVariance {
 
     public static void main(String[] args) {
-        useNumberType(JavaNumberTypeSupport.RATIONAL_BIGINT, 1, 20, 9, 0);
+        useNumberType(JavaNumberTypeSupport.RATIONAL_BIGINT, 25, 8, 9, 0);
     }
 
-    private static <N extends Number> void useNumberType(JavaNumberTypeSupport<N> typeSupport, int begin, int end, int m, long sleep) {
-        RegularizedClosedSolutionRegression<N> regression = createClosedSolutionFitting(typeSupport);
+    private static <N extends Number> void useNumberType(JavaNumberTypeSupport<N> typeSupport, int count, double regularizationLog10, int m, long sleep) {
+        Plot weightsPlot = new Plot("Total Absolute Weights");
+        weightsPlot.getChart().setXAxisTitle("iteration");
+        weightsPlot.display();
 
         Plot mrePlot = new Plot("RME");
+        mrePlot.getChart().setXAxisTitle("iteration");
         mrePlot.display();
 
-        Plot fitPlot = new Plot("Fit vs Regularization");
-        fitPlot.setYRange(-2, 2);
-        fitPlot.plotTargetOutput(regression.getUnregularizedModel(m), "Overfitted");
+        Plot fitPlot = new Plot("Variance vs Regularization");
         fitPlot.plotTargetOutput(SyntheticDataSets.sinus(typeSupport).getEstimationFunction(), "Target");
+        fitPlot.setYRange(-2.0, 2.0);
         fitPlot.display();
 
         N lambda = typeSupport.one();
         N e = typeSupport.valueOf(10);
-        for (int i = 0; i < begin; i++) {
+        for (int i = 0; i < regularizationLog10; i++) {
             lambda = typeSupport.divide(lambda, e);
         }
-        for (int i = begin; i <= end; i++) {
+        for (int i = 0; i < count; i++) {
             if (sleep > 0) {
                 try {
                     Thread.sleep(sleep);
@@ -45,20 +47,26 @@ public class ModelRegularization {
                 }
             }
 
-            String name = "log10(" + Notations.LAMBDA + ") = -" + i;
-            System.out.println(name + " (N = " + lambda + ")");
+            String name = "log10(" + Notations.LAMBDA + ") = -" + regularizationLog10;
+            System.out.println(i + ": " + name);
+            RegularizedClosedSolutionRegression<N> regression = createClosedSolutionFitting(typeSupport);
             LinearBasisFunctionModel<N> model = regression.fitComplexity(m, lambda);
-            lambda = typeSupport.divide(lambda, e);
 
             fitPlot.plotTargetOutput(model, "Regularized Fit");
             Pair<Float, Map<String, Float>> currentRmes = regression.calculateRMEs(model);
-            mrePlot.addToSeries("Train RME", new float[]{-i}, new float[]{currentRmes.left()});
+            mrePlot.addToSeries("Train RME", new float[]{i}, new float[]{currentRmes.left()});
             for (Map.Entry<String, Float> currentRmeEntry : currentRmes.right().entrySet()) {
-                mrePlot.addToSeries(currentRmeEntry.getKey() + " RME", new float[]{-i}, new float[]{currentRmeEntry.getValue()});
+                mrePlot.addToSeries(currentRmeEntry.getKey() + " RME", new float[]{i}, new float[]{currentRmeEntry.getValue()});
             }
+            float totalWeights = 0.0f;
+            for (int p = 0; p < model.getParameterCount(); p++) {
+                totalWeights += typeSupport.absolute(model.getParameter(p)).floatValue();
+            }
+            weightsPlot.addToSeries("Total Weights", new float[]{i}, new float[]{totalWeights});
             fitPlot.getChart().setTitle(name);
             fitPlot.redraw();
             mrePlot.redraw();
+            weightsPlot.redraw();
         }
     }
 
@@ -69,7 +77,6 @@ public class ModelRegularization {
     }
 
     public static <N extends Number> RegularizedClosedSolutionRegression<N> create(SyntheticDataSets.SyntheticDataSet<N> dataSetGenerator, BasisFunction.Generator<N> basisFunctionGenerator) {
-        dataSetGenerator.setRandomSeed(165);
         dataSetGenerator.setNoiseScale(0.5f);
         DataSet<N> trainSet = dataSetGenerator.load(10);
         DataSet<N> testSet = dataSetGenerator.load(1000);

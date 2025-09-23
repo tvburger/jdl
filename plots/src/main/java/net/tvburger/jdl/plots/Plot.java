@@ -34,6 +34,11 @@ public class Plot implements DataRenderer {
         return chart;
     }
 
+    public void setYRange(double min, double max) {
+        chart.getStyler().setYAxisMin(min);
+        chart.getStyler().setYAxisMax(max);
+    }
+
     public void setSeries(String name, float[] x, float[] y) {
         double[] xd = new double[x.length];
         for (int i = 0; i < xd.length; i++) {

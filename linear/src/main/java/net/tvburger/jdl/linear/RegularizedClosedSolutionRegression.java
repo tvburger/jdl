@@ -1,46 +1,50 @@
 package net.tvburger.jdl.linear;
 
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
-import net.tvburger.jdl.datasets.SyntheticDataSets;
+import net.tvburger.jdl.common.utils.Pair;
 import net.tvburger.jdl.linalg.*;
 import net.tvburger.jdl.linear.basis.BasisFunction;
 import net.tvburger.jdl.model.DataSet;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
-public class RegularizedClosedSolutionRegression<N extends Number> extends ClosedSolutionRegression<N> {
+public class RegularizedClosedSolutionRegression<N extends Number> {
 
-    private float lambda;
+    public boolean DEBUG_OUTPUT = false;
 
-    public RegularizedClosedSolutionRegression(SyntheticDataSets.SyntheticDataSet<N> targetFit, BasisFunction.Generator<N> basisFunctionGenerator, DataSet<N> trainSet, Map<String, DataSet<N>> testSets) {
-        super(targetFit, basisFunctionGenerator, trainSet, testSets);
+    private final Map<Double, LinearBasisFunctionModel<N>> fitted = new TreeMap<>();
+
+    protected final BasisFunction.Generator<N> basisFunctionGenerator;
+    private final DataSet<N> trainSet;
+    private final Map<String, DataSet<N>> testSets;
+
+
+    public RegularizedClosedSolutionRegression(BasisFunction.Generator<N> basisFunctionGenerator, DataSet<N> trainSet, Map<String, DataSet<N>> testSets) {
+        this.basisFunctionGenerator = basisFunctionGenerator;
+        this.trainSet = trainSet;
+        this.testSets = testSets;
     }
 
-    public void setLambda(float lambda) {
-        this.lambda = lambda;
+    public LinearBasisFunctionModel<N> getUnregularizedModel(int m) {
+        LinearBasisFunctionModel<N> regression = LinearBasisFunctionModel.create(m, basisFunctionGenerator);
+        setOptimalWeights(regression, trainSet, basisFunctionGenerator.getCurrentNumberType().zero());
+        return regression;
     }
 
-    public float getLambda() {
-        return lambda;
-    }
-
-    public void fitComplexity(int m) {
-        if (lambda == 0.0f) {
-            lambda = 1e-15f;
+    public LinearBasisFunctionModel<N> fitComplexity(int m, N lambda) {
+        if (!basisFunctionGenerator.getCurrentNumberType().greaterThan(lambda, basisFunctionGenerator.getCurrentNumberType().zero())) {
+            throw new IllegalArgumentException("Lambda must be > 0!");
         }
-        super.fitComplexity(m);
-        LinearBasisFunctionModel<N> regression = fitted.remove(m);
-        int key = (int) Math.log(lambda);
-        System.out.println("Index : " + key);
+        LinearBasisFunctionModel<N> regression = LinearBasisFunctionModel.create(m, basisFunctionGenerator);
+        setOptimalWeights(regression, trainSet, lambda);
+        double key = Math.log10(lambda.doubleValue());
         fitted.put(key, regression);
+        return regression;
     }
 
-    @Override
-    protected void setOptimalWeights(LinearBasisFunctionModel<N> regression, DataSet<N> trainSet) {
-//        if (lambda == 0) {
-//            super.setOptimalWeights(regression, trainSet);
-//            return;
-//        }
+    private void setOptimalWeights(LinearBasisFunctionModel<N> regression, DataSet<N> trainSet, N lambda) {
         JavaNumberTypeSupport<N> typeSupport = regression.getCurrentNumberType();
         if (DEBUG_OUTPUT) {
             System.out.println("Number type = " + typeSupport.name());
@@ -64,7 +68,7 @@ public class RegularizedClosedSolutionRegression<N extends Number> extends Close
         Matrix<N> regularizedInvertedDesignMatrix = transposedDesignMatrix
                 .multiply(designMatrix)
                 .add(Matrices.identity(designMatrix.m(), typeSupport)
-                        .multiply(typeSupport.valueOf(lambda)))
+                        .multiply(lambda))
                 .invert()
                 .multiply(transposedDesignMatrix);
         if (DEBUG_OUTPUT) {
@@ -81,4 +85,22 @@ public class RegularizedClosedSolutionRegression<N extends Number> extends Close
         }
     }
 
+    public Pair<Float, Map<String, Float>> calculateRMEs(LinearBasisFunctionModel<N> model) {
+        float trainRme = calculateRME(trainSet, model);
+        Map<String, Float> testRmes = new LinkedHashMap<>();
+        for (Map.Entry<String, DataSet<N>> testSetEntry : testSets.entrySet()) {
+            testRmes.put(testSetEntry.getKey(), calculateRME(testSetEntry.getValue(), model));
+        }
+        return Pair.of(trainRme, testRmes);
+    }
+
+    private float calculateRME(DataSet<N> dataSet, LinearBasisFunctionModel<N> regression) {
+        float mse = 0.0f;
+        for (DataSet.Sample<N> sample : dataSet) {
+            float estimated = regression.estimateScalar(sample.features()).floatValue();
+            float target = sample.targetOutputs()[0].floatValue();
+            mse += (float) Math.pow(estimated - target, 2) / dataSet.size();
+        }
+        return (float) Math.sqrt(mse);
+    }
 }

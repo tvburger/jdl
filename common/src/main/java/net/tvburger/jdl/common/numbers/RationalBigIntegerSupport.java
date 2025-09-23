@@ -2,6 +2,7 @@ package net.tvburger.jdl.common.numbers;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Comparator;
 
 public final class RationalBigIntegerSupport implements JavaNumberTypeSupport<Rational<BigInteger>> {
 
@@ -149,4 +150,8 @@ public final class RationalBigIntegerSupport implements JavaNumberTypeSupport<Ra
         return numerator == denominator ? ONE : rational(BigInteger.valueOf(numerator), BigInteger.valueOf(denominator));
     }
 
+    @Override
+    public Comparator<Rational<BigInteger>> comparator() {
+        return (o1, o2) -> greaterThan(o1, o2) ? 1 : greaterThan(o2, o1) ? -1 : 0;
+    }
 }

@@ -1,6 +1,7 @@
 package net.tvburger.jdl.common.numbers;
 
 import java.util.Arrays;
+import java.util.Comparator;
 
 public final class RationalLongSupport implements JavaNumberTypeSupport<Rational<Long>> {
 
@@ -152,4 +153,8 @@ public final class RationalLongSupport implements JavaNumberTypeSupport<Rational
         return numerator == denominator ? ONE : rational(numerator, denominator);
     }
 
+    @Override
+    public Comparator<Rational<Long>> comparator() {
+        return (o1, o2) -> greaterThan(o1, o2) ? 1 : greaterThan(o2, o1) ? -1 : 0;
+    }
 }
