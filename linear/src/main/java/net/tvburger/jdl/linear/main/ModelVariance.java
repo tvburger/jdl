@@ -5,9 +5,10 @@ import net.tvburger.jdl.common.utils.Pair;
 import net.tvburger.jdl.datasets.SyntheticDataSets;
 import net.tvburger.jdl.linalg.Notations;
 import net.tvburger.jdl.linear.LinearBasisFunctionModel;
-import net.tvburger.jdl.linear.RegularizedClosedSolutionRegression;
+import net.tvburger.jdl.linear.LinearRegression;
 import net.tvburger.jdl.linear.basis.BasisFunction;
 import net.tvburger.jdl.linear.basis.PolynomialFunction;
+import net.tvburger.jdl.linear.optimizer.L2RegularizedClosedSolutionOptimizer;
 import net.tvburger.jdl.model.DataSet;
 import net.tvburger.jdl.plots.Plot;
 
@@ -49,8 +50,9 @@ public class ModelVariance {
 
             String name = "log10(" + Notations.LAMBDA + ") = -" + regularizationLog10;
             System.out.println(i + ": " + name);
-            RegularizedClosedSolutionRegression<N> regression = createClosedSolutionFitting(typeSupport);
-            LinearBasisFunctionModel<N> model = regression.fitComplexity(m, lambda);
+            LinearRegression<N> regression = createClosedSolutionFitting(typeSupport);
+            ((L2RegularizedClosedSolutionOptimizer<N>) regression.getOptimizer()).setLambda(lambda);
+            LinearBasisFunctionModel<N> model = regression.fitComplexity(m);
 
             fitPlot.plotTargetOutput(model, "Regularized Fit");
             Pair<Float, Map<String, Float>> currentRmes = regression.calculateRMEs(model);
@@ -70,19 +72,19 @@ public class ModelVariance {
         }
     }
 
-    private static <N extends Number> RegularizedClosedSolutionRegression<N> createClosedSolutionFitting(JavaNumberTypeSupport<N> typeSupport) {
+    private static <N extends Number> LinearRegression<N> createClosedSolutionFitting(JavaNumberTypeSupport<N> typeSupport) {
         SyntheticDataSets.SyntheticDataSet<N> dataSetGenerator = SyntheticDataSets.sinus(typeSupport);
         BasisFunction.Generator<N> basisFunctionGenerator = new PolynomialFunction.Generator<>(typeSupport);
         return create(dataSetGenerator, basisFunctionGenerator);
     }
 
-    public static <N extends Number> RegularizedClosedSolutionRegression<N> create(SyntheticDataSets.SyntheticDataSet<N> dataSetGenerator, BasisFunction.Generator<N> basisFunctionGenerator) {
+    public static <N extends Number> LinearRegression<N> create(SyntheticDataSets.SyntheticDataSet<N> dataSetGenerator, BasisFunction.Generator<N> basisFunctionGenerator) {
         dataSetGenerator.setNoiseScale(0.5f);
         DataSet<N> trainSet = dataSetGenerator.load(10);
         DataSet<N> testSet = dataSetGenerator.load(1000);
         Map<String, DataSet<N>> testSets = new LinkedHashMap<>();
         testSets.put("Test Set", testSet);
-        return new RegularizedClosedSolutionRegression<>(basisFunctionGenerator, trainSet, testSets);
+        return new LinearRegression<>(basisFunctionGenerator, trainSet, testSets, new L2RegularizedClosedSolutionOptimizer<>(basisFunctionGenerator.getCurrentNumberType()));
     }
 
 }

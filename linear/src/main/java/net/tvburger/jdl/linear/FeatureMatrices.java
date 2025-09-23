@@ -1,14 +1,18 @@
 package net.tvburger.jdl.linear;
 
+import net.tvburger.jdl.common.patterns.StaticFactory;
+import net.tvburger.jdl.common.patterns.StaticUtility;
 import net.tvburger.jdl.linalg.Matrices;
 import net.tvburger.jdl.linalg.TypedMatrix;
 import net.tvburger.jdl.model.DataSet;
 
+@StaticUtility
 public final class FeatureMatrices {
 
     private FeatureMatrices() {
     }
 
+    @StaticFactory
     public static <N extends Number> TypedMatrix<N> create(FeatureExtractor<N> featureExtractor, DataSet<N> dataSet) {
         N[][] cells = featureExtractor.getTypeSupport().createArrayOfArrays(dataSet.size(), featureExtractor.featureCount() + 1);
         for (int i = 0; i < cells.length; i++) {

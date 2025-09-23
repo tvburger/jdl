@@ -3,10 +3,11 @@ package net.tvburger.jdl.linear.main;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.utils.Pair;
 import net.tvburger.jdl.datasets.SyntheticDataSets;
-import net.tvburger.jdl.linear.ClosedSolutionRegression;
 import net.tvburger.jdl.linear.LinearBasisFunctionModel;
+import net.tvburger.jdl.linear.LinearRegression;
 import net.tvburger.jdl.linear.basis.BasisFunction;
 import net.tvburger.jdl.linear.basis.PolynomialFunction;
+import net.tvburger.jdl.linear.optimizer.ClosedSolutionOptimizer;
 import net.tvburger.jdl.model.DataSet;
 import net.tvburger.jdl.model.scalars.UnaryEstimationFunction;
 import net.tvburger.jdl.plots.Plot;
@@ -31,8 +32,8 @@ public class TrainingSetSize {
 
         for (int trainingSetSize = 10; trainingSetSize <= 500; trainingSetSize += trainingSetSize > 90 ? 100 : 10) {
             for (JavaNumberTypeSupport<?> type : types) {
-                ClosedSolutionRegression<N> regression = getFittedFunction(type, trainingSetSize);
-                LinearBasisFunctionModel<N> model = regression.getModel(9);
+                LinearRegression<N> regression = getFittedFunction(type, trainingSetSize);
+                LinearBasisFunctionModel<N> model = regression.fitComplexity(9);
                 fitPlot.plotTargetOutput(model, "Fit " + type.name());
                 Pair<Float, Map<String, Float>> currentRmes = regression.calculateRMEs(model);
                 mrePlot.addToSeries(type.name() + " Train RME", new float[]{trainingSetSize}, new float[]{currentRmes.left()});
@@ -47,21 +48,21 @@ public class TrainingSetSize {
     }
 
     @SuppressWarnings("unchecked")
-    private static <N extends Number> ClosedSolutionRegression<N> getFittedFunction(JavaNumberTypeSupport<?> typeSupport, int trainingSetSize) {
+    private static <N extends Number> LinearRegression<N> getFittedFunction(JavaNumberTypeSupport<?> typeSupport, int trainingSetSize) {
         JavaNumberTypeSupport<N> typedTypeSupport = (JavaNumberTypeSupport<N>) typeSupport;
         SyntheticDataSets.SyntheticDataSet<N> dataSetGenerator = SyntheticDataSets.sinus(typedTypeSupport);
         BasisFunction.Generator<N> basisFunctionGenerator = new PolynomialFunction.Generator<>(typedTypeSupport);
         return create(dataSetGenerator, basisFunctionGenerator, trainingSetSize);
     }
 
-    public static <N extends Number> ClosedSolutionRegression<N> create(SyntheticDataSets.SyntheticDataSet<N> dataSetGenerator, BasisFunction.Generator<N> basisFunctionGenerator, int trainingSetSize) {
+    public static <N extends Number> LinearRegression<N> create(SyntheticDataSets.SyntheticDataSet<N> dataSetGenerator, BasisFunction.Generator<N> basisFunctionGenerator, int trainingSetSize) {
         dataSetGenerator.setRandomSeed(165);
         dataSetGenerator.setNoiseScale(0.2f);
         DataSet<N> trainSet = dataSetGenerator.load(trainingSetSize);
         DataSet<N> testSet = dataSetGenerator.load(1000);
         Map<String, DataSet<N>> testSets = new LinkedHashMap<>();
         testSets.put("Test Set", testSet);
-        return new ClosedSolutionRegression<>(dataSetGenerator, basisFunctionGenerator, trainSet, testSets);
+        return new LinearRegression<>(basisFunctionGenerator, trainSet, testSets, new ClosedSolutionOptimizer<>(basisFunctionGenerator.getCurrentNumberType()));
     }
 
 }
