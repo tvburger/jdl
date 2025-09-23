@@ -276,8 +276,7 @@ public class TypedMatrix<N extends Number> implements Matrix<N> {
             String symbol = m() == 1 ? "[" : i == 0 ? "┌" : i == m() - 1 ? "└" : "│";
             System.out.print(symbol + " ");
             for (int j = 0; j < n(); j++) {
-//                System.out.printf(" %8.2g", values[i][j].doubleValue());
-                System.out.printf(" %s", values[i][j]);
+                System.out.printf(" %8.2g", values[i][j].doubleValue());
             }
             symbol = m() == 1 ? "]" : i == 0 ? "┐" : i == m() - 1 ? "┘" : "│";
             System.out.println(" " + symbol);

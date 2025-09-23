@@ -14,7 +14,7 @@ import java.util.TreeMap;
 
 public class ClosedSolutionRegression<N extends Number> {
 
-    public boolean DEBUG_OUTPUT = false;
+    public boolean DEBUG_OUTPUT = true;
 
     private final SyntheticDataSets.SyntheticDataSet<N> targetFit;
     private final BasisFunction.Generator<N> basisFunctionGenerator;
@@ -141,7 +141,10 @@ public class ClosedSolutionRegression<N extends Number> {
             }
         }
         for (Map.Entry<Integer, LinearBasisFunctionModel<N>> fittedEntry : fitted.entrySet()) {
-            fitPlot.plotTargetOutput(fittedEntry.getValue(), "Complexity " + fittedEntry.getKey(), n);
+            int m = fittedEntry.getKey();
+            if (m == 0 || m % 2 == 1) {
+                fitPlot.plotTargetOutput(fittedEntry.getValue(), "Complexity " + m, n);
+            }
         }
         if (showTargetFit) {
             fitPlot.plotTargetOutput(targetFit.getEstimationFunction(), "Target Fit", n);

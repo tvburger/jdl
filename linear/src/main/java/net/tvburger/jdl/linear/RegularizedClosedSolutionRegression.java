@@ -12,7 +12,7 @@ import java.util.TreeMap;
 
 public class RegularizedClosedSolutionRegression<N extends Number> {
 
-    public boolean DEBUG_OUTPUT = false;
+    public boolean DEBUG_OUTPUT = true;
 
     private final Map<Double, LinearBasisFunctionModel<N>> fitted = new TreeMap<>();
 
