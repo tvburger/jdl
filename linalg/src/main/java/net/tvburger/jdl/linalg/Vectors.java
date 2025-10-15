@@ -55,4 +55,30 @@ public final class Vectors {
         }
         return new TypedVector<>(floats, vector.isColumnVector(), JavaNumberTypeSupport.FLOAT);
     }
+
+    public static <N extends Number> TypedVector<N> squared(TypedVector<N> vector) {
+        N[] values = vector.getCurrentNumberType().createArray(vector.getDimensions());
+        for (int i = 0; i < values.length; i++) {
+            N v = vector.get(i + 1);
+            values[i] = vector.getCurrentNumberType().multiply(v, v);
+        }
+        return new TypedVector<>(values, vector.isColumnVector(), vector.getCurrentNumberType());
+    }
+
+    public static <N extends Number> TypedVector<N> squareRoot(TypedVector<N> vector) {
+        N[] values = vector.getCurrentNumberType().createArray(vector.getDimensions());
+        for (int i = 0; i < values.length; i++) {
+            N v = vector.get(i + 1);
+            values[i] = vector.getCurrentNumberType().squareRoot(v);
+        }
+        return new TypedVector<>(values, vector.isColumnVector(), vector.getCurrentNumberType());
+    }
+
+    public static <N extends Number> TypedVector<N> divide(TypedVector<N> vector, TypedVector<N> denominator) {
+        N[] values = vector.getCurrentNumberType().createArray(vector.getDimensions());
+        for (int i = 0; i < values.length; i++) {
+            values[i] = vector.getCurrentNumberType().divide(vector.get(i + 1), denominator.get(i + 1));
+        }
+        return new TypedVector<>(values, vector.isColumnVector(), vector.getCurrentNumberType());
+    }
 }

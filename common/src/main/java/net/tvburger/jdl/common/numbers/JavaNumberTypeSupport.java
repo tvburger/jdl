@@ -23,7 +23,7 @@ public interface JavaNumberTypeSupport<N> {
 
     N add(N first, N second);
 
-    default N substract(N first, N second) {
+    default N subtract(N first, N second) {
         return add(first, multiply(minusOne(), second));
     }
 
@@ -61,6 +61,12 @@ public interface JavaNumberTypeSupport<N> {
         return greaterThan(zero(), value);
     }
 
+    default boolean sameSign(N first, N second) {
+        return isZero(first) || isZero(second)
+                || positive(first) && positive(second)
+                || negative(first) && negative(second);
+    }
+
     N squareRoot(N value);
 
     default N absolute(N value) {
@@ -71,4 +77,11 @@ public interface JavaNumberTypeSupport<N> {
 
     Comparator<N> comparator();
 
+    default N max(N first, N second) {
+        return greaterThan(second, first) ? second : first;
+    }
+
+    default N min(N first, N second) {
+        return greaterThan(first, second) ? second : first;
+    }
 }

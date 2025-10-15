@@ -146,7 +146,7 @@ public class TypedMatrix<N extends Number> implements Matrix<N> {
             for (int j = i + 1; j < n; j++) {
                 N factor = typeSupport.divide(a[j][i], a[i][i]);
                 for (int k = i; k < n; k++) {
-                    a[j][k] = typeSupport.substract(a[j][k], typeSupport.multiply(factor, a[i][k]));
+                    a[j][k] = typeSupport.subtract(a[j][k], typeSupport.multiply(factor, a[i][k]));
                 }
             }
         }
@@ -239,7 +239,7 @@ public class TypedMatrix<N extends Number> implements Matrix<N> {
                 if (k != i) {
                     N factor = augmented[k][i];
                     for (int j = 0; j < 2 * n; j++) {
-                        augmented[k][j] = typeSupport.substract(augmented[k][j], typeSupport.multiply(factor, augmented[i][j]));
+                        augmented[k][j] = typeSupport.subtract(augmented[k][j], typeSupport.multiply(factor, augmented[i][j]));
                     }
                 }
             }

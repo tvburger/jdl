@@ -63,7 +63,7 @@ public final class SyntheticDataSets {
 
         public DataSet<N> loadEvenX(float min, float max, int n) {
             List<DataSet.Sample<N>> samples = new ArrayList<>();
-            N range = typeSupport.substract(typeSupport.valueOf(max), typeSupport.valueOf(min));
+            N range = typeSupport.subtract(typeSupport.valueOf(max), typeSupport.valueOf(min));
             N counter = typeSupport.zero();
             N n_min_1 = typeSupport.valueOf(n - 1);
             for (int i = 0; i < n; i++) {

@@ -91,7 +91,7 @@ public class Plot implements DataRenderer {
         float min = 0.0f;
         float max = 1.0f;
         JavaNumberTypeSupport<N> typeSupport = function.getCurrentNumberType();
-        N range = typeSupport.substract(typeSupport.valueOf(max), typeSupport.valueOf(min));
+        N range = typeSupport.subtract(typeSupport.valueOf(max), typeSupport.valueOf(min));
         N counter = typeSupport.zero();
         N n_min_1 = typeSupport.valueOf(n - 1);
         float[] x = new float[n];
