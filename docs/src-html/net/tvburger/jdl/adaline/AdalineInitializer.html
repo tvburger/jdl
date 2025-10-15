@@ -25,9 +25,9 @@
 <span class="source-line-no">012</span><span id="line-12">    @Override</span>
 <span class="source-line-no">013</span><span id="line-13">    public void initialize(Neuron neuron) {</span>
 <span class="source-line-no">014</span><span id="line-14">        for (int d = 1; d &lt;= neuron.arity(); d++) {</span>
-<span class="source-line-no">015</span><span id="line-15">            neuron.setWeight(1, (random.nextFloat() - 0.5f) * 0.01f);</span>
+<span class="source-line-no">015</span><span id="line-15">            neuron.setParameter(d, (random.nextFloat() - 0.5f) * 0.01f);</span>
 <span class="source-line-no">016</span><span id="line-16">        }</span>
-<span class="source-line-no">017</span><span id="line-17">        neuron.setBias(0.0f);</span>
+<span class="source-line-no">017</span><span id="line-17">        neuron.setParameter(0, 0.0f);</span>
 <span class="source-line-no">018</span><span id="line-18">    }</span>
 <span class="source-line-no">019</span><span id="line-19">}</span>
 

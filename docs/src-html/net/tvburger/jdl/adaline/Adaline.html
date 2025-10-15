@@ -17,39 +17,38 @@
 <span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.model.nn.DefaultNeuralNetwork;</span>
 <span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.model.nn.InputNeuron;</span>
 <span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.model.nn.Neuron;</span>
-<span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.model.scalars.activations.Activations;</span>
-<span class="source-line-no">008</span><span id="line-8"></span>
-<span class="source-line-no">009</span><span id="line-9">import java.util.ArrayList;</span>
-<span class="source-line-no">010</span><span id="line-10">import java.util.List;</span>
-<span class="source-line-no">011</span><span id="line-11"></span>
-<span class="source-line-no">012</span><span id="line-12">public class Adaline extends DefaultNeuralNetwork {</span>
-<span class="source-line-no">013</span><span id="line-13"></span>
-<span class="source-line-no">014</span><span id="line-14">    public static Adaline create(int inputs, int outputs) {</span>
-<span class="source-line-no">015</span><span id="line-15">        List&lt;InputNeuron&gt; inputNodes = new ArrayList&lt;&gt;();</span>
-<span class="source-line-no">016</span><span id="line-16">        for (int i = 0; i &lt; inputs; i++) {</span>
-<span class="source-line-no">017</span><span id="line-17">            inputNodes.add(new InputNeuron("Input(" + i + ")"));</span>
-<span class="source-line-no">018</span><span id="line-18">        }</span>
-<span class="source-line-no">019</span><span id="line-19">        List&lt;Neuron&gt; outputNodes = new ArrayList&lt;&gt;();</span>
-<span class="source-line-no">020</span><span id="line-20">        for (int i = 0; i &lt; outputs; i++) {</span>
-<span class="source-line-no">021</span><span id="line-21">            outputNodes.add(new Neuron("Adaline(" + i + ")", inputNodes, Activations.linear()));</span>
-<span class="source-line-no">022</span><span id="line-22">        }</span>
-<span class="source-line-no">023</span><span id="line-23">        return new Adaline(List.of(inputNodes, outputNodes));</span>
-<span class="source-line-no">024</span><span id="line-24">    }</span>
-<span class="source-line-no">025</span><span id="line-25"></span>
-<span class="source-line-no">026</span><span id="line-26">    private Adaline(List&lt;List&lt;? extends Neuron&gt;&gt; layers) {</span>
-<span class="source-line-no">027</span><span id="line-27">        super(layers);</span>
-<span class="source-line-no">028</span><span id="line-28">    }</span>
-<span class="source-line-no">029</span><span id="line-29"></span>
-<span class="source-line-no">030</span><span id="line-30">    public boolean[] classify(float[] inputs) {</span>
-<span class="source-line-no">031</span><span id="line-31">        float[] estimate = estimate(inputs);</span>
-<span class="source-line-no">032</span><span id="line-32">        boolean[] classifications = new boolean[estimate.length];</span>
-<span class="source-line-no">033</span><span id="line-33">        for (int i = 0; i &lt; estimate.length; i++) {</span>
-<span class="source-line-no">034</span><span id="line-34">            classifications[i] = Floats.greaterThan(estimate[i], 0.0f);</span>
-<span class="source-line-no">035</span><span id="line-35">        }</span>
-<span class="source-line-no">036</span><span id="line-36">        return classifications;</span>
-<span class="source-line-no">037</span><span id="line-37">    }</span>
-<span class="source-line-no">038</span><span id="line-38"></span>
-<span class="source-line-no">039</span><span id="line-39">}</span>
+<span class="source-line-no">007</span><span id="line-7"></span>
+<span class="source-line-no">008</span><span id="line-8">import java.util.ArrayList;</span>
+<span class="source-line-no">009</span><span id="line-9">import java.util.List;</span>
+<span class="source-line-no">010</span><span id="line-10"></span>
+<span class="source-line-no">011</span><span id="line-11">public class Adaline extends DefaultNeuralNetwork {</span>
+<span class="source-line-no">012</span><span id="line-12"></span>
+<span class="source-line-no">013</span><span id="line-13">    public static Adaline create(int inputs, int outputs) {</span>
+<span class="source-line-no">014</span><span id="line-14">        List&lt;InputNeuron&gt; inputNodes = new ArrayList&lt;&gt;();</span>
+<span class="source-line-no">015</span><span id="line-15">        for (int i = 0; i &lt; inputs; i++) {</span>
+<span class="source-line-no">016</span><span id="line-16">            inputNodes.add(new InputNeuron("Input(" + i + ")"));</span>
+<span class="source-line-no">017</span><span id="line-17">        }</span>
+<span class="source-line-no">018</span><span id="line-18">        List&lt;Neuron&gt; outputNodes = new ArrayList&lt;&gt;();</span>
+<span class="source-line-no">019</span><span id="line-19">        for (int i = 0; i &lt; outputs; i++) {</span>
+<span class="source-line-no">020</span><span id="line-20">            outputNodes.add(Neuron.create("Adaline(" + i + ")", inputNodes));</span>
+<span class="source-line-no">021</span><span id="line-21">        }</span>
+<span class="source-line-no">022</span><span id="line-22">        return new Adaline(List.of(inputNodes, outputNodes));</span>
+<span class="source-line-no">023</span><span id="line-23">    }</span>
+<span class="source-line-no">024</span><span id="line-24"></span>
+<span class="source-line-no">025</span><span id="line-25">    private Adaline(List&lt;List&lt;? extends Neuron&gt;&gt; layers) {</span>
+<span class="source-line-no">026</span><span id="line-26">        super(layers);</span>
+<span class="source-line-no">027</span><span id="line-27">    }</span>
+<span class="source-line-no">028</span><span id="line-28"></span>
+<span class="source-line-no">029</span><span id="line-29">    public boolean[] classify(Float[] inputs) {</span>
+<span class="source-line-no">030</span><span id="line-30">        Float[] estimate = estimate(inputs);</span>
+<span class="source-line-no">031</span><span id="line-31">        boolean[] classifications = new boolean[estimate.length];</span>
+<span class="source-line-no">032</span><span id="line-32">        for (int i = 0; i &lt; estimate.length; i++) {</span>
+<span class="source-line-no">033</span><span id="line-33">            classifications[i] = Floats.greaterThan(estimate[i], 0.0f);</span>
+<span class="source-line-no">034</span><span id="line-34">        }</span>
+<span class="source-line-no">035</span><span id="line-35">        return classifications;</span>
+<span class="source-line-no">036</span><span id="line-36">    }</span>
+<span class="source-line-no">037</span><span id="line-37"></span>
+<span class="source-line-no">038</span><span id="line-38">}</span>
 
 
 

@@ -64,7 +64,7 @@
 <span class="source-line-no">051</span><span id="line-51">     * @param &lt;E&gt;                the type of estimation function</span>
 <span class="source-line-no">052</span><span id="line-52">     */</span>
 <span class="source-line-no">053</span><span id="line-53">    @Override</span>
-<span class="source-line-no">054</span><span id="line-54">    public &lt;E extends EstimationFunction&gt; void train(E estimationFunction, DataSet trainingSet, ObjectiveFunction objective, Optimizer&lt;? super E&gt; optimizer) {</span>
+<span class="source-line-no">054</span><span id="line-54">    public &lt;E extends EstimationFunction&lt;Float&gt;&gt; void train(E estimationFunction, DataSet&lt;Float&gt; trainingSet, ObjectiveFunction objective, Optimizer&lt;? super E, Float&gt; optimizer) {</span>
 <span class="source-line-no">055</span><span id="line-55">        for (int i = 0; i &lt; trainingSet.size(); i++) {</span>
 <span class="source-line-no">056</span><span id="line-56">            optimizer.optimize(estimationFunction, trainingSet.subset(i, i + 1), objective);</span>
 <span class="source-line-no">057</span><span id="line-57">        }</span>

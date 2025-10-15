@@ -1,10 +1,16 @@
 net.tvburger.jdl
 net.tvburger.jdl.adaline
 net.tvburger.jdl.common
+net.tvburger.jdl.common.numbers
 net.tvburger.jdl.common.patterns
 net.tvburger.jdl.common.utils
 net.tvburger.jdl.datasets
 net.tvburger.jdl.knn
+net.tvburger.jdl.linalg
+net.tvburger.jdl.linear
+net.tvburger.jdl.linear.basis
+net.tvburger.jdl.linear.main
+net.tvburger.jdl.linear.optimizer
 net.tvburger.jdl.mlp
 net.tvburger.jdl.model
 net.tvburger.jdl.model.distances
@@ -20,3 +26,4 @@ net.tvburger.jdl.model.training.loss
 net.tvburger.jdl.model.training.optimizer
 net.tvburger.jdl.model.training.regimes
 net.tvburger.jdl.perceptron
+net.tvburger.jdl.plots

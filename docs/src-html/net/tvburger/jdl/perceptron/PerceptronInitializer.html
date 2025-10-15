@@ -28,18 +28,15 @@
 <span class="source-line-no">015</span><span id="line-15">        if (neuron instanceof InputNeuron) {</span>
 <span class="source-line-no">016</span><span id="line-16">            return;</span>
 <span class="source-line-no">017</span><span id="line-17">        }</span>
-<span class="source-line-no">018</span><span id="line-18">        for (int d = 1; d &lt;= neuron.arity(); d++) {</span>
-<span class="source-line-no">019</span><span id="line-19">            neuron.setWeight(d, random());</span>
+<span class="source-line-no">018</span><span id="line-18">        for (int p = 0; p &lt; neuron.getParameterCount(); p++) {</span>
+<span class="source-line-no">019</span><span id="line-19">            neuron.setParameter(p, random());</span>
 <span class="source-line-no">020</span><span id="line-20">        }</span>
-<span class="source-line-no">021</span><span id="line-21">        if (neuron instanceof AssociationUnit) {</span>
-<span class="source-line-no">022</span><span id="line-22">            neuron.setBias(random());</span>
-<span class="source-line-no">023</span><span id="line-23">        }</span>
-<span class="source-line-no">024</span><span id="line-24">    }</span>
-<span class="source-line-no">025</span><span id="line-25"></span>
-<span class="source-line-no">026</span><span id="line-26">    private float random() {</span>
-<span class="source-line-no">027</span><span id="line-27">        return -1.0f + 2.0f * random.nextFloat();</span>
-<span class="source-line-no">028</span><span id="line-28">    }</span>
-<span class="source-line-no">029</span><span id="line-29">}</span>
+<span class="source-line-no">021</span><span id="line-21">    }</span>
+<span class="source-line-no">022</span><span id="line-22"></span>
+<span class="source-line-no">023</span><span id="line-23">    private float random() {</span>
+<span class="source-line-no">024</span><span id="line-24">        return -1.0f + 2.0f * random.nextFloat();</span>
+<span class="source-line-no">025</span><span id="line-25">    }</span>
+<span class="source-line-no">026</span><span id="line-26">}</span>
 
 
 

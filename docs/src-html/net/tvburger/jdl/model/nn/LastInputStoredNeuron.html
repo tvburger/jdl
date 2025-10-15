@@ -13,74 +13,86 @@
 <div class="source-container">
 <pre><span class="source-line-no">001</span><span id="line-1">package net.tvburger.jdl.model.nn;</span>
 <span class="source-line-no">002</span><span id="line-2"></span>
-<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.patterns.Decorator;</span>
-<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.model.scalars.activations.ActivationFunction;</span>
-<span class="source-line-no">005</span><span id="line-5"></span>
-<span class="source-line-no">006</span><span id="line-6">import java.util.List;</span>
-<span class="source-line-no">007</span><span id="line-7"></span>
-<span class="source-line-no">008</span><span id="line-8">/**</span>
-<span class="source-line-no">009</span><span id="line-9"> * A specialized {@link Neuron} that remembers the input values</span>
-<span class="source-line-no">010</span><span id="line-10"> * from its most recent activation.</span>
-<span class="source-line-no">011</span><span id="line-11"> * &lt;p&gt;</span>
-<span class="source-line-no">012</span><span id="line-12"> * This class extends the basic neuron by capturing and storing the</span>
-<span class="source-line-no">013</span><span id="line-13"> * raw outputs of its input neurons during the forward pass. The stored</span>
-<span class="source-line-no">014</span><span id="line-14"> * inputs do not affect the computation of the neuron’s output but</span>
-<span class="source-line-no">015</span><span id="line-15"> * provide additional visibility or state for downstream processing,</span>
-<span class="source-line-no">016</span><span id="line-16"> * such as training algorithms, debugging, or interpretability tools.</span>
-<span class="source-line-no">017</span><span id="line-17"> * &lt;/p&gt;</span>
-<span class="source-line-no">018</span><span id="line-18"> *</span>
-<span class="source-line-no">019</span><span id="line-19"> * &lt;h2&gt;Behavior&lt;/h2&gt;</span>
-<span class="source-line-no">020</span><span id="line-20"> * &lt;ul&gt;</span>
-<span class="source-line-no">021</span><span id="line-21"> *   &lt;li&gt;On {@link #activate()}, performs the standard neuron computation</span>
-<span class="source-line-no">022</span><span id="line-22"> *       (weighted sum + bias → activation function) and also stores a copy</span>
-<span class="source-line-no">023</span><span id="line-23"> *       of the input values provided by connected neurons.&lt;/li&gt;</span>
-<span class="source-line-no">024</span><span id="line-24"> *   &lt;li&gt;The stored inputs can be retrieved via {@link #getStoredInput(int)}.&lt;/li&gt;</span>
-<span class="source-line-no">025</span><span id="line-25"> * &lt;/ul&gt;</span>
-<span class="source-line-no">026</span><span id="line-26"> */</span>
-<span class="source-line-no">027</span><span id="line-27">@Decorator</span>
-<span class="source-line-no">028</span><span id="line-28">public class LastInputStoredNeuron extends Neuron {</span>
-<span class="source-line-no">029</span><span id="line-29"></span>
-<span class="source-line-no">030</span><span id="line-30">    private final float[] storedInputs;</span>
-<span class="source-line-no">031</span><span id="line-31"></span>
-<span class="source-line-no">032</span><span id="line-32">    /**</span>
-<span class="source-line-no">033</span><span id="line-33">     * Constructs a neuron that stores the inputs from its most recent activation.</span>
-<span class="source-line-no">034</span><span id="line-34">     *</span>
-<span class="source-line-no">035</span><span id="line-35">     * @param name               human-readable identifier</span>
-<span class="source-line-no">036</span><span id="line-36">     * @param inputs             input neurons feeding into this neuron</span>
-<span class="source-line-no">037</span><span id="line-37">     * @param activationFunction activation function to apply after weighted sum</span>
-<span class="source-line-no">038</span><span id="line-38">     */</span>
-<span class="source-line-no">039</span><span id="line-39">    public LastInputStoredNeuron(String name, List&lt;? extends Neuron&gt; inputs, ActivationFunction activationFunction) {</span>
-<span class="source-line-no">040</span><span id="line-40">        super(name, inputs, activationFunction);</span>
-<span class="source-line-no">041</span><span id="line-41">        storedInputs = new float[inputs == null ? 0 : inputs.size()];</span>
-<span class="source-line-no">042</span><span id="line-42">    }</span>
+<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;</span>
+<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.patterns.Decorator;</span>
+<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.model.scalars.LinearCombination;</span>
+<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.model.scalars.NeuronFunction;</span>
+<span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.model.scalars.activations.ActivationFunction;</span>
+<span class="source-line-no">008</span><span id="line-8">import net.tvburger.jdl.model.scalars.activations.Activations;</span>
+<span class="source-line-no">009</span><span id="line-9"></span>
+<span class="source-line-no">010</span><span id="line-10">import java.util.List;</span>
+<span class="source-line-no">011</span><span id="line-11"></span>
+<span class="source-line-no">012</span><span id="line-12">/**</span>
+<span class="source-line-no">013</span><span id="line-13"> * A specialized {@link Neuron} that remembers the input values</span>
+<span class="source-line-no">014</span><span id="line-14"> * from its most recent activation.</span>
+<span class="source-line-no">015</span><span id="line-15"> * &lt;p&gt;</span>
+<span class="source-line-no">016</span><span id="line-16"> * This class extends the basic neuron by capturing and storing the</span>
+<span class="source-line-no">017</span><span id="line-17"> * raw outputs of its input neurons during the forward pass. The stored</span>
+<span class="source-line-no">018</span><span id="line-18"> * inputs do not affect the computation of the neuron’s output but</span>
+<span class="source-line-no">019</span><span id="line-19"> * provide additional visibility or state for downstream processing,</span>
+<span class="source-line-no">020</span><span id="line-20"> * such as training algorithms, debugging, or interpretability tools.</span>
+<span class="source-line-no">021</span><span id="line-21"> * &lt;/p&gt;</span>
+<span class="source-line-no">022</span><span id="line-22"> *</span>
+<span class="source-line-no">023</span><span id="line-23"> * &lt;h2&gt;Behavior&lt;/h2&gt;</span>
+<span class="source-line-no">024</span><span id="line-24"> * &lt;ul&gt;</span>
+<span class="source-line-no">025</span><span id="line-25"> *   &lt;li&gt;On {@link #activate()}, performs the standard neuron computation</span>
+<span class="source-line-no">026</span><span id="line-26"> *       (weighted sum + bias → activation function) and also stores a copy</span>
+<span class="source-line-no">027</span><span id="line-27"> *       of the input values provided by connected neurons.&lt;/li&gt;</span>
+<span class="source-line-no">028</span><span id="line-28"> *   &lt;li&gt;The stored inputs can be retrieved via {@link #getStoredInput(int)}.&lt;/li&gt;</span>
+<span class="source-line-no">029</span><span id="line-29"> * &lt;/ul&gt;</span>
+<span class="source-line-no">030</span><span id="line-30"> */</span>
+<span class="source-line-no">031</span><span id="line-31">@Decorator</span>
+<span class="source-line-no">032</span><span id="line-32">public class LastInputStoredNeuron extends Neuron {</span>
+<span class="source-line-no">033</span><span id="line-33"></span>
+<span class="source-line-no">034</span><span id="line-34">    public static LastInputStoredNeuron create(String name, List&lt;? extends Neuron&gt; inputNodes) {</span>
+<span class="source-line-no">035</span><span id="line-35">        return create(name, inputNodes, Activations.linear());</span>
+<span class="source-line-no">036</span><span id="line-36">    }</span>
+<span class="source-line-no">037</span><span id="line-37"></span>
+<span class="source-line-no">038</span><span id="line-38">    public static LastInputStoredNeuron create(String name, List&lt;? extends Neuron&gt; inputNodes, ActivationFunction activationFunction) {</span>
+<span class="source-line-no">039</span><span id="line-39">        return new LastInputStoredNeuron(name, inputNodes, new NeuronFunction(LinearCombination.create(inputNodes.size(), JavaNumberTypeSupport.FLOAT), activationFunction));</span>
+<span class="source-line-no">040</span><span id="line-40">    }</span>
+<span class="source-line-no">041</span><span id="line-41"></span>
+<span class="source-line-no">042</span><span id="line-42">    private final float[] storedInputs;</span>
 <span class="source-line-no">043</span><span id="line-43"></span>
 <span class="source-line-no">044</span><span id="line-44">    /**</span>
-<span class="source-line-no">045</span><span id="line-45">     * Activates this neuron by performing the normal weighted sum</span>
-<span class="source-line-no">046</span><span id="line-46">     * and activation function, and additionally storing the raw input</span>
-<span class="source-line-no">047</span><span id="line-47">     * values from connected neurons.</span>
-<span class="source-line-no">048</span><span id="line-48">     */</span>
-<span class="source-line-no">049</span><span id="line-49">    public synchronized void activate() {</span>
-<span class="source-line-no">050</span><span id="line-50">        super.activate();</span>
-<span class="source-line-no">051</span><span id="line-51">        for (int i = 0; i &lt; getInputNodes().size(); i++) {</span>
-<span class="source-line-no">052</span><span id="line-52">            storedInputs[i] = getInputNodes().get(i).getOutput();</span>
-<span class="source-line-no">053</span><span id="line-53">        }</span>
+<span class="source-line-no">045</span><span id="line-45">     * Constructs a neuron that stores the inputs from its most recent activation.</span>
+<span class="source-line-no">046</span><span id="line-46">     *</span>
+<span class="source-line-no">047</span><span id="line-47">     * @param name           human-readable identifier</span>
+<span class="source-line-no">048</span><span id="line-48">     * @param inputs         input neurons feeding into this neuron</span>
+<span class="source-line-no">049</span><span id="line-49">     * @param neuronFunction the neuron function to compute a forward signal</span>
+<span class="source-line-no">050</span><span id="line-50">     */</span>
+<span class="source-line-no">051</span><span id="line-51">    public LastInputStoredNeuron(String name, List&lt;? extends Neuron&gt; inputs, NeuronFunction neuronFunction) {</span>
+<span class="source-line-no">052</span><span id="line-52">        super(name, inputs, neuronFunction);</span>
+<span class="source-line-no">053</span><span id="line-53">        storedInputs = new float[inputs == null ? 0 : inputs.size()];</span>
 <span class="source-line-no">054</span><span id="line-54">    }</span>
 <span class="source-line-no">055</span><span id="line-55"></span>
 <span class="source-line-no">056</span><span id="line-56">    /**</span>
-<span class="source-line-no">057</span><span id="line-57">     * Returns the input value that was stored for a specific dimension during the</span>
-<span class="source-line-no">058</span><span id="line-58">     * most recent {@link #activate()} call.</span>
-<span class="source-line-no">059</span><span id="line-59">     * &lt;p&gt;</span>
-<span class="source-line-no">060</span><span id="line-60">     * Dimension indexing is 1-based, where {@code d = 1} refers to the first</span>
-<span class="source-line-no">061</span><span id="line-61">     * input neuron, {@code d = 2} to the second, and so on.</span>
-<span class="source-line-no">062</span><span id="line-62">     *</span>
-<span class="source-line-no">063</span><span id="line-63">     * @param d the input dimension index (1-based)</span>
-<span class="source-line-no">064</span><span id="line-64">     * @return the stored input value for the specified dimension</span>
-<span class="source-line-no">065</span><span id="line-65">     */</span>
-<span class="source-line-no">066</span><span id="line-66">    public float getStoredInput(int d) {</span>
-<span class="source-line-no">067</span><span id="line-67">        return storedInputs[validDimension(d) - 1];</span>
-<span class="source-line-no">068</span><span id="line-68">    }</span>
-<span class="source-line-no">069</span><span id="line-69"></span>
-<span class="source-line-no">070</span><span id="line-70">}</span>
+<span class="source-line-no">057</span><span id="line-57">     * Activates this neuron by performing the normal weighted sum</span>
+<span class="source-line-no">058</span><span id="line-58">     * and activation function, and additionally storing the raw input</span>
+<span class="source-line-no">059</span><span id="line-59">     * values from connected neurons.</span>
+<span class="source-line-no">060</span><span id="line-60">     */</span>
+<span class="source-line-no">061</span><span id="line-61">    public synchronized void activate() {</span>
+<span class="source-line-no">062</span><span id="line-62">        super.activate();</span>
+<span class="source-line-no">063</span><span id="line-63">        for (int i = 0; i &lt; getInputNodes().size(); i++) {</span>
+<span class="source-line-no">064</span><span id="line-64">            storedInputs[i] = getInputNodes().get(i).getOutput();</span>
+<span class="source-line-no">065</span><span id="line-65">        }</span>
+<span class="source-line-no">066</span><span id="line-66">    }</span>
+<span class="source-line-no">067</span><span id="line-67"></span>
+<span class="source-line-no">068</span><span id="line-68">    /**</span>
+<span class="source-line-no">069</span><span id="line-69">     * Returns the input value that was stored for a specific dimension during the</span>
+<span class="source-line-no">070</span><span id="line-70">     * most recent {@link #activate()} call.</span>
+<span class="source-line-no">071</span><span id="line-71">     * &lt;p&gt;</span>
+<span class="source-line-no">072</span><span id="line-72">     * Dimension indexing is 1-based, where {@code d = 1} refers to the first</span>
+<span class="source-line-no">073</span><span id="line-73">     * input neuron, {@code d = 2} to the second, and so on.</span>
+<span class="source-line-no">074</span><span id="line-74">     *</span>
+<span class="source-line-no">075</span><span id="line-75">     * @param d the input dimension index (1-based)</span>
+<span class="source-line-no">076</span><span id="line-76">     * @return the stored input value for the specified dimension</span>
+<span class="source-line-no">077</span><span id="line-77">     */</span>
+<span class="source-line-no">078</span><span id="line-78">    public float getStoredInput(int d) {</span>
+<span class="source-line-no">079</span><span id="line-79">        return storedInputs[d - 1];</span>
+<span class="source-line-no">080</span><span id="line-80">    }</span>
+<span class="source-line-no">081</span><span id="line-81"></span>
+<span class="source-line-no">082</span><span id="line-82">}</span>
 
 
 

@@ -39,7 +39,7 @@
 <span class="source-line-no">026</span><span id="line-26"> */</span>
 <span class="source-line-no">027</span><span id="line-27">@DomainObject</span>
 <span class="source-line-no">028</span><span id="line-28">@Strategy(Strategy.Role.INTERFACE)</span>
-<span class="source-line-no">029</span><span id="line-29">public interface Initializer&lt;E extends EstimationFunction&gt; {</span>
+<span class="source-line-no">029</span><span id="line-29">public interface Initializer&lt;E extends EstimationFunction&lt;N&gt;, N extends Number&gt; {</span>
 <span class="source-line-no">030</span><span id="line-30"></span>
 <span class="source-line-no">031</span><span id="line-31">    /**</span>
 <span class="source-line-no">032</span><span id="line-32">     * Initializes the given estimation function according to the</span>

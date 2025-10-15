@@ -2,6 +2,7 @@ package net.tvburger.jdl.linear.main;
 
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.utils.Pair;
+import net.tvburger.jdl.common.utils.Threads;
 import net.tvburger.jdl.datasets.SyntheticDataSets;
 import net.tvburger.jdl.linalg.Notations;
 import net.tvburger.jdl.linear.LinearBasisFunctionModel;
@@ -41,12 +42,7 @@ public class ModelVariance {
             lambda = typeSupport.divide(lambda, e);
         }
         for (int i = 0; i < count; i++) {
-            if (sleep > 0) {
-                try {
-                    Thread.sleep(sleep);
-                } catch (InterruptedException ignored) {
-                }
-            }
+            Threads.sleepSilently(sleep);
 
             String name = "log10(" + Notations.LAMBDA + ") = -" + regularizationLog10;
             System.out.println(i + ": " + name);

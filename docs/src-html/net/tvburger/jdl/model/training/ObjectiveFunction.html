@@ -61,7 +61,7 @@
 <span class="source-line-no">048</span><span id="line-48">     *              {@code float[]} arrays (estimated vs target)</span>
 <span class="source-line-no">049</span><span id="line-49">     * @return the aggregated loss value for the batch</span>
 <span class="source-line-no">050</span><span id="line-50">     */</span>
-<span class="source-line-no">051</span><span id="line-51">    float calculateLoss(List&lt;Pair&lt;float[], float[]&gt;&gt; batch);</span>
+<span class="source-line-no">051</span><span id="line-51">    float calculateLoss(List&lt;Pair&lt;Float[], Float[]&gt;&gt; batch);</span>
 <span class="source-line-no">052</span><span id="line-52"></span>
 <span class="source-line-no">053</span><span id="line-53">    /**</span>
 <span class="source-line-no">054</span><span id="line-54">     * Determines the gradients of the objective function with respect to</span>
@@ -78,7 +78,7 @@
 <span class="source-line-no">065</span><span id="line-65">     * @param target    the expected target values for the sample</span>
 <span class="source-line-no">066</span><span id="line-66">     * @return an array of gradients, one per dimension of the input</span>
 <span class="source-line-no">067</span><span id="line-67">     */</span>
-<span class="source-line-no">068</span><span id="line-68">    float[] calculateGradient_dJ_da(int samples, float[] estimated, float[] target);</span>
+<span class="source-line-no">068</span><span id="line-68">    Float[] calculateGradient_dJ_da(int samples, Float[] estimated, Float[] target);</span>
 <span class="source-line-no">069</span><span id="line-69"></span>
 <span class="source-line-no">070</span><span id="line-70">    /**</span>
 <span class="source-line-no">071</span><span id="line-71">     * Creates an {@link ObjectiveFunction} that minimizes the loss</span>

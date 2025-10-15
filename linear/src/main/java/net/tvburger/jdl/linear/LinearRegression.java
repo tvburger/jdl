@@ -17,7 +17,6 @@ public class LinearRegression<N extends Number> {
     private final Map<String, DataSet<N>> testSets;
     private final LinearModelOptimizer<N> optimizer;
 
-
     public LinearRegression(BasisFunction.Generator<N> basisFunctionGenerator, DataSet<N> trainSet, Map<String, DataSet<N>> testSets, LinearModelOptimizer<N> optimizer) {
         this.basisFunctionGenerator = basisFunctionGenerator;
         this.trainSet = trainSet;
@@ -52,7 +51,7 @@ public class LinearRegression<N extends Number> {
         return Pair.of(trainRme, testRmes);
     }
 
-    private float calculateRME(DataSet<N> dataSet, LinearBasisFunctionModel<N> regression) {
+    public float calculateRME(DataSet<N> dataSet, LinearBasisFunctionModel<N> regression) {
         float mse = 0.0f;
         for (DataSet.Sample<N> sample : dataSet) {
             float estimated = regression.estimateScalar(sample.features()).floatValue();

@@ -114,10 +114,10 @@
 <span class="source-line-no">101</span><span id="line-101">     * @param &lt;E&gt;                the type of estimation function</span>
 <span class="source-line-no">102</span><span id="line-102">     */</span>
 <span class="source-line-no">103</span><span id="line-103">    @Override</span>
-<span class="source-line-no">104</span><span id="line-104">    public &lt;E extends EstimationFunction&gt; void train(E estimationFunction, DataSet trainingSet, ObjectiveFunction objective, Optimizer&lt;? super E&gt; optimizer) {</span>
+<span class="source-line-no">104</span><span id="line-104">    public &lt;E extends EstimationFunction&lt;Float&gt;&gt; void train(E estimationFunction, DataSet&lt;Float&gt; trainingSet, ObjectiveFunction objective, Optimizer&lt;? super E, Float&gt; optimizer) {</span>
 <span class="source-line-no">105</span><span id="line-105">        Float previousLoss;</span>
 <span class="source-line-no">106</span><span id="line-106">        if (objective != null &amp;&amp; iteration == 0) {</span>
-<span class="source-line-no">107</span><span id="line-107">            List&lt;Pair&lt;float[], float[]&gt;&gt; batch = trainingSet.samples().stream().map(s -&gt; Pair.of(estimationFunction.estimate(s.features()), s.targetOutputs())).toList();</span>
+<span class="source-line-no">107</span><span id="line-107">            List&lt;Pair&lt;Float[], Float[]&gt;&gt; batch = trainingSet.samples().stream().map(s -&gt; Pair.of(estimationFunction.estimate(s.features()), s.targetOutputs())).toList();</span>
 <span class="source-line-no">108</span><span id="line-108">            previousLoss = objective.calculateLoss(batch);</span>
 <span class="source-line-no">109</span><span id="line-109">            if (isDumpingLossValues()) {</span>
 <span class="source-line-no">110</span><span id="line-110">                System.out.printf("[Measurement %4d] Aggregated loss = %.4f (baseline)%n", iteration, previousLoss);</span>
@@ -128,7 +128,7 @@
 <span class="source-line-no">115</span><span id="line-115">        iteration++;</span>
 <span class="source-line-no">116</span><span id="line-116">        regime.train(estimationFunction, trainingSet, objective, optimizer);</span>
 <span class="source-line-no">117</span><span id="line-117">        if (objective != null) {</span>
-<span class="source-line-no">118</span><span id="line-118">            List&lt;Pair&lt;float[], float[]&gt;&gt; batch = trainingSet.samples().stream().map(s -&gt; Pair.of(estimationFunction.estimate(s.features()), s.targetOutputs())).toList();</span>
+<span class="source-line-no">118</span><span id="line-118">            List&lt;Pair&lt;Float[], Float[]&gt;&gt; batch = trainingSet.samples().stream().map(s -&gt; Pair.of(estimationFunction.estimate(s.features()), s.targetOutputs())).toList();</span>
 <span class="source-line-no">119</span><span id="line-119">            currentLoss = objective.calculateLoss(batch);</span>
 <span class="source-line-no">120</span><span id="line-120">            improvement = (previousLoss - currentLoss) / previousLoss * -100f;</span>
 <span class="source-line-no">121</span><span id="line-121">            if (isDumpingLossValues()) {</span>

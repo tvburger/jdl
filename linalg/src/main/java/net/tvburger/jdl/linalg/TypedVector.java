@@ -76,7 +76,7 @@ public class TypedVector<N extends Number> implements Vector<N> {
 
     @Override
     public TypedVector<N> substract(N value) {
-        return add(typeSupport.inverse(value));
+        return add(typeSupport.negate(value));
     }
 
     @Override

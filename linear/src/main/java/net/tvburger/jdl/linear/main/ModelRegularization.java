@@ -2,6 +2,7 @@ package net.tvburger.jdl.linear.main;
 
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.utils.Pair;
+import net.tvburger.jdl.common.utils.Threads;
 import net.tvburger.jdl.datasets.SyntheticDataSets;
 import net.tvburger.jdl.linalg.Notations;
 import net.tvburger.jdl.linear.LinearBasisFunctionModel;
@@ -40,12 +41,7 @@ public class ModelRegularization {
             lambda = typeSupport.divide(lambda, e);
         }
         for (int i = begin; i <= end; i++) {
-            if (sleep > 0) {
-                try {
-                    Thread.sleep(sleep);
-                } catch (InterruptedException ignored) {
-                }
-            }
+            Threads.sleepSilently(sleep);
 
             String name = "log10(" + Notations.LAMBDA + ") = -" + i;
             System.out.println(name + " (N = " + lambda + ")");

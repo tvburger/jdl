@@ -2,6 +2,7 @@ package net.tvburger.jdl.plots;
 
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.utils.Pair;
+import net.tvburger.jdl.common.utils.Threads;
 import net.tvburger.jdl.model.DataSet;
 import net.tvburger.jdl.model.scalars.UnaryEstimationFunction;
 import org.knowm.xchart.SwingWrapper;
@@ -74,6 +75,7 @@ public class Plot implements DataRenderer {
         wrapper.setTitle(chart.getTitle());
         chart.setTitle("");
         wrapper.displayChart();
+        Threads.sleepSilently(1_000);
     }
 
     public <N extends Number> void plotTargetOutput(UnaryEstimationFunction<N> function, String name) {
@@ -115,7 +117,9 @@ public class Plot implements DataRenderer {
     }
 
     public void redraw() {
-        wrapper.repaintChart();
+        if (wrapper != null) {
+            wrapper.repaintChart();
+        }
     }
 
     public void addToSeries(String name, float[] x, float[] y) {

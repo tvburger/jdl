@@ -73,7 +73,7 @@
 <span class="source-line-no">060</span><span id="line-60">    }</span>
 <span class="source-line-no">061</span><span id="line-61"></span>
 <span class="source-line-no">062</span><span id="line-62">    /**</span>
-<span class="source-line-no">063</span><span id="line-63">     * Returns a map containing the node connections to the next layer with their corresponding weights</span>
+<span class="source-line-no">063</span><span id="line-63">     * Returns a map containing the node connections to the next layer</span>
 <span class="source-line-no">064</span><span id="line-64">     *</span>
 <span class="source-line-no">065</span><span id="line-65">     * @param layers the layers of a neural network</span>
 <span class="source-line-no">066</span><span id="line-66">     * @return the node connections</span>
@@ -82,16 +82,14 @@
 <span class="source-line-no">069</span><span id="line-69">        Map&lt;Neuron, List&lt;Neuron&gt;&gt; connections = new IdentityHashMap&lt;&gt;();</span>
 <span class="source-line-no">070</span><span id="line-70">        for (List&lt;? extends Neuron&gt; layer : layers) {</span>
 <span class="source-line-no">071</span><span id="line-71">            for (Neuron neuron : layer) {</span>
-<span class="source-line-no">072</span><span id="line-72">                float[] weights = neuron.getWeights();</span>
-<span class="source-line-no">073</span><span id="line-73">                for (int i = 0; i &lt; weights.length; i++) {</span>
-<span class="source-line-no">074</span><span id="line-74">                    Neuron input = neuron.getInputNodes().get(i);</span>
-<span class="source-line-no">075</span><span id="line-75">                    connections.computeIfAbsent(input, k -&gt; new ArrayList&lt;&gt;()).add(neuron);</span>
-<span class="source-line-no">076</span><span id="line-76">                }</span>
-<span class="source-line-no">077</span><span id="line-77">            }</span>
-<span class="source-line-no">078</span><span id="line-78">        }</span>
-<span class="source-line-no">079</span><span id="line-79">        return connections;</span>
-<span class="source-line-no">080</span><span id="line-80">    }</span>
-<span class="source-line-no">081</span><span id="line-81">}</span>
+<span class="source-line-no">072</span><span id="line-72">                for (Neuron inputNeuron : neuron.getInputNodes()) {</span>
+<span class="source-line-no">073</span><span id="line-73">                    connections.computeIfAbsent(inputNeuron, k -&gt; new ArrayList&lt;&gt;()).add(neuron);</span>
+<span class="source-line-no">074</span><span id="line-74">                }</span>
+<span class="source-line-no">075</span><span id="line-75">            }</span>
+<span class="source-line-no">076</span><span id="line-76">        }</span>
+<span class="source-line-no">077</span><span id="line-77">        return connections;</span>
+<span class="source-line-no">078</span><span id="line-78">    }</span>
+<span class="source-line-no">079</span><span id="line-79">}</span>
 
 
 

@@ -33,11 +33,15 @@ public class Rational<N extends Number> extends Number {
     @Override
     public float floatValue() {
         return (float) doubleValue();
+//        float value = (float) doubleValue();
+//        return value == Float.NaN && numerator.doubleValue() != Double.NaN && denominator.doubleValue() != Double.NaN ? 0.0f : value;
     }
 
     @Override
     public double doubleValue() {
         return numerator.doubleValue() / denominator.doubleValue();
+//        double value = numerator.doubleValue() / denominator.doubleValue();
+//        return value == Double.NaN && numerator.doubleValue() != Double.NaN && denominator.doubleValue() != Double.NaN ? 0.0f : value;
     }
 
     @Override

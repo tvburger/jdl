@@ -32,7 +32,7 @@ public final class Vectors {
         return new TypedVector<>(doubles, false, JavaNumberTypeSupport.DOUBLE);
     }
 
-    public static <N extends Number, M extends Number> TypedVector<M> convert(TypedVector<N> vector, JavaNumberTypeSupport<M> typeSupport) {
+    public static <N extends Number, M extends Number> TypedVector<M> convert(Vector<N> vector, JavaNumberTypeSupport<M> typeSupport) {
         M[] numbers = typeSupport.createArray(vector.getDimensions());
         for (int i = 0; i < vector.getDimensions(); i++) {
             numbers[i] = typeSupport.valueOf(vector.get(i + 1).doubleValue());

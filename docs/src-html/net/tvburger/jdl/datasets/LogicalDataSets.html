@@ -21,8 +21,8 @@
 <span class="source-line-no">008</span><span id="line-8">    private LogicalDataSets() {</span>
 <span class="source-line-no">009</span><span id="line-9">    }</span>
 <span class="source-line-no">010</span><span id="line-10"></span>
-<span class="source-line-no">011</span><span id="line-11">    public static DataSet toMinusSet(DataSet dataSet) {</span>
-<span class="source-line-no">012</span><span id="line-12">        for (DataSet.Sample sample : dataSet) {</span>
+<span class="source-line-no">011</span><span id="line-11">    public static DataSet&lt;Float&gt; toMinusSet(DataSet&lt;Float&gt; dataSet) {</span>
+<span class="source-line-no">012</span><span id="line-12">        for (DataSet.Sample&lt;Float&gt; sample : dataSet) {</span>
 <span class="source-line-no">013</span><span id="line-13">            for (int i = 0; i &lt; sample.featureCount(); i++) {</span>
 <span class="source-line-no">014</span><span id="line-14">                if (Floats.equals(sample.features()[i], 0.0f)) {</span>
 <span class="source-line-no">015</span><span id="line-15">                    sample.features()[i] = -1.0f;</span>
@@ -37,7 +37,7 @@
 <span class="source-line-no">024</span><span id="line-24">        return dataSet;</span>
 <span class="source-line-no">025</span><span id="line-25">    }</span>
 <span class="source-line-no">026</span><span id="line-26"></span>
-<span class="source-line-no">027</span><span id="line-27">    public static DataSet.Loader or() {</span>
+<span class="source-line-no">027</span><span id="line-27">    public static DataSet.Loader&lt;Float&gt; or() {</span>
 <span class="source-line-no">028</span><span id="line-28">        return () -&gt; DataSet.of(</span>
 <span class="source-line-no">029</span><span id="line-29">                DataSet.Sample.of(Floats.of(0.0f, 0.0f), Floats.of(0.0f)),</span>
 <span class="source-line-no">030</span><span id="line-30">                DataSet.Sample.of(Floats.of(0.0f, 1.0f), Floats.of(1.0f)),</span>
@@ -45,7 +45,7 @@
 <span class="source-line-no">032</span><span id="line-32">                DataSet.Sample.of(Floats.of(1.0f, 1.0f), Floats.of(1.0f)));</span>
 <span class="source-line-no">033</span><span id="line-33">    }</span>
 <span class="source-line-no">034</span><span id="line-34"></span>
-<span class="source-line-no">035</span><span id="line-35">    public static DataSet.Loader and() {</span>
+<span class="source-line-no">035</span><span id="line-35">    public static DataSet.Loader&lt;Float&gt; and() {</span>
 <span class="source-line-no">036</span><span id="line-36">        return () -&gt; DataSet.of(</span>
 <span class="source-line-no">037</span><span id="line-37">                DataSet.Sample.of(Floats.of(0.0f, 0.0f), Floats.of(0.0f)),</span>
 <span class="source-line-no">038</span><span id="line-38">                DataSet.Sample.of(Floats.of(0.0f, 1.0f), Floats.of(0.0f)),</span>
@@ -53,7 +53,7 @@
 <span class="source-line-no">040</span><span id="line-40">                DataSet.Sample.of(Floats.of(1.0f, 1.0f), Floats.of(1.0f)));</span>
 <span class="source-line-no">041</span><span id="line-41">    }</span>
 <span class="source-line-no">042</span><span id="line-42"></span>
-<span class="source-line-no">043</span><span id="line-43">    public static DataSet.Loader xor() {</span>
+<span class="source-line-no">043</span><span id="line-43">    public static DataSet.Loader&lt;Float&gt; xor() {</span>
 <span class="source-line-no">044</span><span id="line-44">        return () -&gt; DataSet.of(</span>
 <span class="source-line-no">045</span><span id="line-45">                DataSet.Sample.of(Floats.of(0.0f, 0.0f), Floats.of(0.0f)),</span>
 <span class="source-line-no">046</span><span id="line-46">                DataSet.Sample.of(Floats.of(0.0f, 1.0f), Floats.of(1.0f)),</span>

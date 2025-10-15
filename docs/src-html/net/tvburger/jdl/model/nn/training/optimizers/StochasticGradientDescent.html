@@ -41,14 +41,14 @@
 <span class="source-line-no">028</span><span id="line-28"> * &lt;/ul&gt;</span>
 <span class="source-line-no">029</span><span id="line-29"> *</span>
 <span class="source-line-no">030</span><span id="line-30"> * &lt;p&gt;&lt;strong&gt;Batch scaling convention:&lt;/strong&gt; This class, as written, assumes the provided</span>
-<span class="source-line-no">031</span><span id="line-31"> * {@link ObjectiveFunction#calculateGradient_dJ_da(int, float[], float[])} returns</span>
+<span class="source-line-no">031</span><span id="line-31"> * {@link ObjectiveFunction#calculateGradient_dJ_da(int, Float[], Float[])} returns</span>
 <span class="source-line-no">032</span><span id="line-32"> * gradients already scaled by the batch size (i.e., mean over the batch). Consequently,</span>
 <span class="source-line-no">033</span><span id="line-33"> * parameter updates do not divide by the batch size again on apply.&lt;/p&gt;</span>
 <span class="source-line-no">034</span><span id="line-34"> *</span>
 <span class="source-line-no">035</span><span id="line-35"> * @param &lt;N&gt; a {@link NeuralNetwork} type optimized by this optimizer</span>
 <span class="source-line-no">036</span><span id="line-36"> */</span>
 <span class="source-line-no">037</span><span id="line-37">@Strategy(Strategy.Role.CONCRETE)</span>
-<span class="source-line-no">038</span><span id="line-38">public class StochasticGradientDescent&lt;N extends NeuralNetwork&gt; implements Optimizer&lt;N&gt;, LearningRateConfigurable {</span>
+<span class="source-line-no">038</span><span id="line-38">public class StochasticGradientDescent&lt;N extends NeuralNetwork&gt; implements Optimizer&lt;N, Float&gt;, LearningRateConfigurable {</span>
 <span class="source-line-no">039</span><span id="line-39"></span>
 <span class="source-line-no">040</span><span id="line-40">    /**</span>
 <span class="source-line-no">041</span><span id="line-41">     * Default learning rate used when none is set explicitly.</span>
@@ -80,7 +80,7 @@
 <span class="source-line-no">067</span><span id="line-67">     * @param objective     the objective/loss function providing gradients w.r.t. output activations</span>
 <span class="source-line-no">068</span><span id="line-68">     */</span>
 <span class="source-line-no">069</span><span id="line-69">    @Override</span>
-<span class="source-line-no">070</span><span id="line-70">    public void optimize(N neuralNetwork, DataSet trainingSet, ObjectiveFunction objective) {</span>
+<span class="source-line-no">070</span><span id="line-70">    public void optimize(N neuralNetwork, DataSet&lt;Float&gt; trainingSet, ObjectiveFunction objective) {</span>
 <span class="source-line-no">071</span><span id="line-71">        int batchSize = trainingSet.size();</span>
 <span class="source-line-no">072</span><span id="line-72">        if (batchSize == 0) {</span>
 <span class="source-line-no">073</span><span id="line-73">            return;</span>
@@ -99,17 +99,17 @@
 <span class="source-line-no">086</span><span id="line-86">                float[] parameterCorrections = accumulatedWeightedVotesForParameterCorrections.get(neuron);</span>
 <span class="source-line-no">087</span><span id="line-87">                if (parameterCorrections != null) {</span>
 <span class="source-line-no">088</span><span id="line-88">                    for (int p = 0; p &lt; parameterCorrections.length; p++) {</span>
-<span class="source-line-no">089</span><span id="line-89">                        neuron.adjustParameters(p, getLearningRate() * -1 * parameterCorrections[p]);</span>
+<span class="source-line-no">089</span><span id="line-89">                        neuron.adjustParameter(p, getLearningRate() * -1 * parameterCorrections[p]);</span>
 <span class="source-line-no">090</span><span id="line-90">                    }</span>
 <span class="source-line-no">091</span><span id="line-91">                }</span>
 <span class="source-line-no">092</span><span id="line-92">            }</span>
 <span class="source-line-no">093</span><span id="line-93">        });</span>
 <span class="source-line-no">094</span><span id="line-94">    }</span>
 <span class="source-line-no">095</span><span id="line-95"></span>
-<span class="source-line-no">096</span><span id="line-96">    private void voteForParameterCorrections(DataSet.Sample sample, int batchSize, Map&lt;Neuron, float[]&gt; accumulatedWeightedVotesForParameterCorrections, N neuralNetwork, ObjectiveFunction objective) {</span>
+<span class="source-line-no">096</span><span id="line-96">    private void voteForParameterCorrections(DataSet.Sample&lt;Float&gt; sample, int batchSize, Map&lt;Neuron, float[]&gt; accumulatedWeightedVotesForParameterCorrections, N neuralNetwork, ObjectiveFunction objective) {</span>
 <span class="source-line-no">097</span><span id="line-97">        Map&lt;Neuron, Float&gt; errorSignals = new IdentityHashMap&lt;&gt;();</span>
-<span class="source-line-no">098</span><span id="line-98">        float[] estimated = neuralNetwork.estimate(sample.features());</span>
-<span class="source-line-no">099</span><span id="line-99">        float[] lossGradients = objective.calculateGradient_dJ_da(1, estimated, sample.targetOutputs());</span>
+<span class="source-line-no">098</span><span id="line-98">        Float[] estimated = neuralNetwork.estimate(sample.features());</span>
+<span class="source-line-no">099</span><span id="line-99">        Float[] lossGradients = objective.calculateGradient_dJ_da(1, estimated, sample.targetOutputs());</span>
 <span class="source-line-no">100</span><span id="line-100">        for (int j = 0; j &lt; neuralNetwork.coArity(); j++) {</span>
 <span class="source-line-no">101</span><span id="line-101">            voteForOutputNodeParameterCorrections(batchSize, accumulatedWeightedVotesForParameterCorrections, neuralNetwork, lossGradients, errorSignals, j);</span>
 <span class="source-line-no">102</span><span id="line-102">        }</span>
@@ -121,12 +121,12 @@
 <span class="source-line-no">108</span><span id="line-108">        }</span>
 <span class="source-line-no">109</span><span id="line-109">    }</span>
 <span class="source-line-no">110</span><span id="line-110"></span>
-<span class="source-line-no">111</span><span id="line-111">    private void voteForOutputNodeParameterCorrections(int batchSize, Map&lt;Neuron, float[]&gt; accumulatedWeightedVotesForParameterCorrections, N neuralNetwork, float[] lossGradients, Map&lt;Neuron, Float&gt; errorSignals, int j) {</span>
+<span class="source-line-no">111</span><span id="line-111">    private void voteForOutputNodeParameterCorrections(int batchSize, Map&lt;Neuron, float[]&gt; accumulatedWeightedVotesForParameterCorrections, N neuralNetwork, Float[] lossGradients, Map&lt;Neuron, Float&gt; errorSignals, int j) {</span>
 <span class="source-line-no">112</span><span id="line-112">        ActivationsCachedNeuron outputNode = neuralNetwork.getNeuron(neuralNetwork.getDepth(), j, ActivationsCachedNeuron.class);</span>
 <span class="source-line-no">113</span><span id="line-113">        ActivationsCachedNeuron.Activation activation = outputNode.getCache().removeLast();</span>
 <span class="source-line-no">114</span><span id="line-114"></span>
 <span class="source-line-no">115</span><span id="line-115">        // determine error signal for output node</span>
-<span class="source-line-no">116</span><span id="line-116">        float errorSignal = lossGradients[j] * outputNode.getActivationFunction().determineGradientForOutput(activation.output());</span>
+<span class="source-line-no">116</span><span id="line-116">        float errorSignal = lossGradients[j] * outputNode.getNeuronFunction().getActivationFunction().determineGradientForOutput(activation.output());</span>
 <span class="source-line-no">117</span><span id="line-117">        errorSignals.put(outputNode, errorSignal); // track error signal for upstream nodes</span>
 <span class="source-line-no">118</span><span id="line-118"></span>
 <span class="source-line-no">119</span><span id="line-119">        // cast vote</span>
@@ -139,7 +139,7 @@
 <span class="source-line-no">126</span><span id="line-126"></span>
 <span class="source-line-no">127</span><span id="line-127">        // determine error signal for hidden node using back propagation</span>
 <span class="source-line-no">128</span><span id="line-128">        float backPropagation = calculateBackPropagation(neuralNetwork, errorSignals, l, j);</span>
-<span class="source-line-no">129</span><span id="line-129">        float errorSignal = backPropagation * hiddenNode.getActivationFunction().determineGradientForOutput(activation.output());</span>
+<span class="source-line-no">129</span><span id="line-129">        float errorSignal = backPropagation * hiddenNode.getNeuronFunction().getActivationFunction().determineGradientForOutput(activation.output());</span>
 <span class="source-line-no">130</span><span id="line-130">        errorSignals.put(hiddenNode, errorSignal);</span>
 <span class="source-line-no">131</span><span id="line-131"></span>
 <span class="source-line-no">132</span><span id="line-132">        // cast vote</span>
@@ -158,7 +158,7 @@
 <span class="source-line-no">145</span><span id="line-145">    }</span>
 <span class="source-line-no">146</span><span id="line-146"></span>
 <span class="source-line-no">147</span><span id="line-147">    private void voteForNodeParameterCorrections(int batchSize, Map&lt;Neuron, float[]&gt; accumulatedWeightedVotesForParameterCorrections, float errorSignal, ActivationsCachedNeuron neuron, ActivationsCachedNeuron.Activation activation) {</span>
-<span class="source-line-no">148</span><span id="line-148">        float[] parameterGradients_df_dp = activation.parameterGradients_df_dp();</span>
+<span class="source-line-no">148</span><span id="line-148">        Float[] parameterGradients_df_dp = activation.parameterGradients_df_dp();</span>
 <span class="source-line-no">149</span><span id="line-149">        int parameterCount = neuron.getParameterCount();</span>
 <span class="source-line-no">150</span><span id="line-150">        float[] votesForNeuron = accumulatedWeightedVotesForParameterCorrections.computeIfAbsent(neuron, k -&gt; new float[parameterCount]);</span>
 <span class="source-line-no">151</span><span id="line-151">        for (int p = 0; p &lt; parameterCount; p++) {</span>

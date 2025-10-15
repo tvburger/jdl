@@ -38,7 +38,7 @@ public interface JavaNumberTypeSupport<N> {
     N zero();
 
     default N inverse(N value) {
-        return multiply(minusOne(), value);
+        return divide(one(), value);
     }
 
     default boolean isZero(N value) {
@@ -52,6 +52,14 @@ public interface JavaNumberTypeSupport<N> {
     boolean equals(N first, N second);
 
     boolean greaterThan(N first, N second);
+
+    default boolean positive(N value) {
+        return greaterThan(value, zero());
+    }
+
+    default boolean negative(N value) {
+        return greaterThan(zero(), value);
+    }
 
     N squareRoot(N value);
 

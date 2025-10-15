@@ -74,7 +74,7 @@
 <span class="source-line-no">061</span><span id="line-61">     * @param &lt;E&gt;                the type of estimation function</span>
 <span class="source-line-no">062</span><span id="line-62">     */</span>
 <span class="source-line-no">063</span><span id="line-63">    @Override</span>
-<span class="source-line-no">064</span><span id="line-64">    public &lt;E extends EstimationFunction&gt; void train(E estimationFunction, DataSet trainingSet, ObjectiveFunction objective, Optimizer&lt;? super E&gt; optimizer) {</span>
+<span class="source-line-no">064</span><span id="line-64">    public &lt;E extends EstimationFunction&lt;Float&gt;&gt; void train(E estimationFunction, DataSet&lt;Float&gt; trainingSet, ObjectiveFunction objective, Optimizer&lt;? super E, Float&gt; optimizer) {</span>
 <span class="source-line-no">065</span><span id="line-65">        if (chainedRegimes.isEmpty()) {</span>
 <span class="source-line-no">066</span><span id="line-66">            if (optimizer != null) {</span>
 <span class="source-line-no">067</span><span id="line-67">                optimizer.optimize(estimationFunction, trainingSet, objective);</span>
@@ -171,7 +171,7 @@
 <span class="source-line-no">158</span><span id="line-158">         * to direct optimizer invocation (if non-null).</span>
 <span class="source-line-no">159</span><span id="line-159">         */</span>
 <span class="source-line-no">160</span><span id="line-160">        @Override</span>
-<span class="source-line-no">161</span><span id="line-161">        public &lt;E extends EstimationFunction&gt; void train(E estimationFunction, DataSet trainingSet, ObjectiveFunction objective, Optimizer&lt;? super E&gt; optimizer) {</span>
+<span class="source-line-no">161</span><span id="line-161">        public &lt;E extends EstimationFunction&lt;Float&gt;&gt; void train(E estimationFunction, DataSet&lt;Float&gt; trainingSet, ObjectiveFunction objective, Optimizer&lt;? super E, Float&gt; optimizer) {</span>
 <span class="source-line-no">162</span><span id="line-162">            Regime linkedRegime = getLinkedRegime();</span>
 <span class="source-line-no">163</span><span id="line-163">            if (linkedRegime != null) {</span>
 <span class="source-line-no">164</span><span id="line-164">                linkedRegime.train(estimationFunction, trainingSet, objective, optimizer);</span>

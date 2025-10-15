@@ -38,12 +38,11 @@
 <span class="source-line-no">025</span><span id="line-25">     */</span>
 <span class="source-line-no">026</span><span id="line-26">    @Override</span>
 <span class="source-line-no">027</span><span id="line-27">    public void initialize(Neuron neuron) {</span>
-<span class="source-line-no">028</span><span id="line-28">        for (int d = 1; d &lt;= neuron.arity(); d++) {</span>
-<span class="source-line-no">029</span><span id="line-29">            neuron.setWeight(d, constant);</span>
+<span class="source-line-no">028</span><span id="line-28">        for (int p = 0; p &lt; neuron.getParameterCount(); p++) {</span>
+<span class="source-line-no">029</span><span id="line-29">            neuron.setParameter(p, constant);</span>
 <span class="source-line-no">030</span><span id="line-30">        }</span>
-<span class="source-line-no">031</span><span id="line-31">        neuron.setBias(constant);</span>
-<span class="source-line-no">032</span><span id="line-32">    }</span>
-<span class="source-line-no">033</span><span id="line-33">}</span>
+<span class="source-line-no">031</span><span id="line-31">    }</span>
+<span class="source-line-no">032</span><span id="line-32">}</span>
 
 
 

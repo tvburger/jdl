@@ -11,7 +11,9 @@ import net.tvburger.jdl.linear.optimizer.ClosedSolutionOptimizer;
 import net.tvburger.jdl.model.DataSet;
 import net.tvburger.jdl.plots.Plot;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ModelComplexity {
@@ -39,9 +41,12 @@ public class ModelComplexity {
             }
 
             float weights = 0.0f;
+            List<Float> floats = new ArrayList<>();
             for (N weight : model.getParameters()) {
                 weights += model.getCurrentNumberType().absolute(weight).floatValue();
+                floats.add(weight.floatValue());
             }
+            System.out.println("m = " + m + "; weights: " + floats);
             weightPlot.addToSeries("Total Weights", new float[]{m}, new float[]{weights});
 
             Pair<Float, Map<String, Float>> currentRmes = regression.calculateRMEs(model);

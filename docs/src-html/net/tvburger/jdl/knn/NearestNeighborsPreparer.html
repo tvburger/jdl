@@ -22,7 +22,7 @@
 <span class="source-line-no">009</span><span id="line-9">public class NearestNeighborsPreparer implements Regime {</span>
 <span class="source-line-no">010</span><span id="line-10"></span>
 <span class="source-line-no">011</span><span id="line-11">    @Override</span>
-<span class="source-line-no">012</span><span id="line-12">    public &lt;E extends EstimationFunction&gt; void train(E estimationFunction, DataSet trainingSet, ObjectiveFunction objective, Optimizer&lt;? super E&gt; optimizer) {</span>
+<span class="source-line-no">012</span><span id="line-12">    public &lt;E extends EstimationFunction&lt;Float&gt;&gt; void train(E estimationFunction, DataSet&lt;Float&gt; trainingSet, ObjectiveFunction objective, Optimizer&lt;? super E, Float&gt; optimizer) {</span>
 <span class="source-line-no">013</span><span id="line-13">        if (!(estimationFunction instanceof NearestNeighbors nearestNeighbors)) {</span>
 <span class="source-line-no">014</span><span id="line-14">            throw new IllegalArgumentException("Only works on NearestNeighbors!");</span>
 <span class="source-line-no">015</span><span id="line-15">        }</span>

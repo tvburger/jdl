@@ -88,7 +88,7 @@
 <span class="source-line-no">075</span><span id="line-75">        float limit = (float) Math.sqrt(6.0f / (fanIn + fanOut));</span>
 <span class="source-line-no">076</span><span id="line-76"></span>
 <span class="source-line-no">077</span><span id="line-77">        for (int d = 1; d &lt;= neuron.arity(); d++) {</span>
-<span class="source-line-no">078</span><span id="line-78">            neuron.setWeight(d, uniform(-limit, limit));</span>
+<span class="source-line-no">078</span><span id="line-78">            neuron.setParameter(d, uniform(-limit, limit));</span>
 <span class="source-line-no">079</span><span id="line-79">        }</span>
 <span class="source-line-no">080</span><span id="line-80">        // Bias left unchanged</span>
 <span class="source-line-no">081</span><span id="line-81">    }</span>
