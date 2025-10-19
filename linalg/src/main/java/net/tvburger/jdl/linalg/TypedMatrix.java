@@ -124,7 +124,7 @@ public class TypedMatrix<N extends Number> implements Matrix<N> {
             // Find pivot
             int pivot = i;
             for (int j = i + 1; j < n; j++) {
-                if (typeSupport.greaterThan(typeSupport.absolute(a[j][i]), typeSupport.absolute(a[pivot][i]))) {
+                if (typeSupport.isGreaterThan(typeSupport.absolute(a[j][i]), typeSupport.absolute(a[pivot][i]))) {
                     pivot = j;
                 }
             }

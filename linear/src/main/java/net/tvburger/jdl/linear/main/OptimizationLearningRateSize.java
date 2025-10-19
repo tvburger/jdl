@@ -7,16 +7,17 @@ import net.tvburger.jdl.datasets.SyntheticDataSets;
 import net.tvburger.jdl.linear.LinearRegression;
 import net.tvburger.jdl.linear.basis.BasisFunction;
 import net.tvburger.jdl.linear.basis.PolynomialFunction;
-import net.tvburger.jdl.linear.optimizer.VanillaGradientDescentOptimizer;
-import net.tvburger.jdl.linear.optimizer.IterativeOptimizer;
 import net.tvburger.jdl.model.DataSet;
+import net.tvburger.jdl.model.training.optimizer.GradientDescentOptimizer;
+import net.tvburger.jdl.model.training.optimizer.steps.VanillaGradientDescent;
+import net.tvburger.jdl.model.training.regimes.Regimes;
 import net.tvburger.jdl.plots.Plot;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class OptimizationLearningRateSize {
-
+/*
     public static void main(String[] args) {
         showForOverall();
     }
@@ -89,7 +90,7 @@ public class OptimizationLearningRateSize {
         DataSet<N> testSet = dataSetGenerator.load(10);
         Map<String, DataSet<N>> testSets = new LinkedHashMap<>();
         testSets.put("Test Set", testSet);
-        return new LinearRegression<>(basisFunctionGenerator, trainSet, testSets, new VanillaGradientDescentOptimizer<>(basisFunctionGenerator.getCurrentNumberType()));
+        return new LinearRegression<>(basisFunctionGenerator, trainSet, testSets, new GradientDescentOptimizer<>(new VanillaGradientDescent<>(basisFunctionGenerator.getCurrentNumberType().valueOf(0.1f))), Regimes.batch());
     }
-
+*/
 }

@@ -9,6 +9,7 @@ import net.tvburger.jdl.linear.basis.BasisFunction;
 import net.tvburger.jdl.linear.basis.PolynomialFunction;
 import net.tvburger.jdl.linear.optimizer.ClosedSolutionOptimizer;
 import net.tvburger.jdl.model.DataSet;
+import net.tvburger.jdl.model.training.regimes.Regimes;
 import net.tvburger.jdl.plots.Plot;
 
 import java.util.ArrayList;
@@ -74,7 +75,7 @@ public class ModelComplexity {
         DataSet<N> testSet = dataSetGenerator.load(1000);
         Map<String, DataSet<N>> testSets = new LinkedHashMap<>();
         testSets.put("Test Set", testSet);
-        return new LinearRegression<>(basisFunctionGenerator, trainSet, testSets, new ClosedSolutionOptimizer<>(basisFunctionGenerator.getCurrentNumberType()));
+        return new LinearRegression<>(basisFunctionGenerator, trainSet, testSets, new ClosedSolutionOptimizer<>(basisFunctionGenerator.getCurrentNumberType()), Regimes.oneShot());
     }
 
 }

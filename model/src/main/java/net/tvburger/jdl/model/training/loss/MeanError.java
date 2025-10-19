@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model.training.loss;
 
+import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.patterns.Strategy;
 
 import java.util.List;
@@ -35,46 +36,60 @@ import java.util.List;
  * @see DimensionLossFunction
  */
 @Strategy(Strategy.Role.CONCRETE)
-public class MeanError implements SampleLossFunction, BatchLossFunction {
+public class MeanError<N extends Number> implements SampleLossFunction<N>, BatchLossFunction<N> {
+
+    private final JavaNumberTypeSupport<N> typeSupport;
+
+    public MeanError(JavaNumberTypeSupport<N> typeSupport) {
+        this.typeSupport = typeSupport;
+    }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public float calculateBatchLoss(List<Float> sampleLosses) {
-        float loss = 0.0f;
-        for (Float sampleLoss : sampleLosses) {
-            loss += sampleLoss;
+    public JavaNumberTypeSupport<N> getCurrentNumberType() {
+        return typeSupport;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public N calculateBatchLoss(List<N> sampleLosses) {
+        N loss = typeSupport.zero();
+        for (N sampleLoss : sampleLosses) {
+            loss = typeSupport.add(loss, sampleLoss);
         }
-        return loss / sampleLosses.size();
+        return typeSupport.divide(loss, sampleLosses.size());
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public float calculateGradient_dJ_dL(int batchSize) {
-        return 1.0f / batchSize;
+    public N calculateGradient_dJ_dL(int batchSize) {
+        return typeSupport.divide(typeSupport.one(), batchSize);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public float calculateSampleLoss(List<Float> dimensionLosses) {
-        float loss = 0.0f;
-        for (float dimensionLoss : dimensionLosses) {
-            loss += dimensionLoss;
+    public N calculateSampleLoss(List<N> dimensionLosses) {
+        N loss = typeSupport.zero();
+        for (N dimensionLoss : dimensionLosses) {
+            loss = typeSupport.add(loss, dimensionLoss);
         }
-        return loss / dimensionLosses.size();
+        return typeSupport.divide(loss, dimensionLosses.size());
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public float calculateGradient_dL_dl(int dimensions) {
-        return 1.0f / dimensions;
+    public N calculateGradient_dL_dl(int dimensions) {
+        return typeSupport.divide(typeSupport.one(), dimensions);
     }
 
 }

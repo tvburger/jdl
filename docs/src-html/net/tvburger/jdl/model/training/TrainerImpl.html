@@ -35,7 +35,7 @@
 <span class="source-line-no">022</span><span id="line-22"> * &lt;/p&gt;</span>
 <span class="source-line-no">023</span><span id="line-23"> *</span>
 <span class="source-line-no">024</span><span id="line-24"> * &lt;p&gt;</span>
-<span class="source-line-no">025</span><span id="line-25"> * The {@link #train(EstimationFunction, DataSet)} method follows the</span>
+<span class="source-line-no">025</span><span id="line-25"> * The {@link #train(TrainableFunction, DataSet)} method follows the</span>
 <span class="source-line-no">026</span><span id="line-26"> * canonical training sequence:</span>
 <span class="source-line-no">027</span><span id="line-27"> * &lt;/p&gt;</span>
 <span class="source-line-no">028</span><span id="line-28"> * &lt;ol&gt;</span>
@@ -55,18 +55,18 @@
 <span class="source-line-no">042</span><span id="line-42"> */</span>
 <span class="source-line-no">043</span><span id="line-43">@Mediator</span>
 <span class="source-line-no">044</span><span id="line-44">@Strategy(Strategy.Role.CONCRETE)</span>
-<span class="source-line-no">045</span><span id="line-45">public class TrainerImpl&lt;E extends EstimationFunction&lt;Float&gt;&gt; implements Trainer&lt;E&gt; {</span>
+<span class="source-line-no">045</span><span id="line-45">public class TrainerImpl&lt;E extends TrainableFunction&lt;N&gt;, N extends Number&gt; implements Trainer&lt;E, N&gt; {</span>
 <span class="source-line-no">046</span><span id="line-46"></span>
-<span class="source-line-no">047</span><span id="line-47">    private Initializer&lt;? super E, Float&gt; initializer;</span>
-<span class="source-line-no">048</span><span id="line-48">    private ObjectiveFunction objective;</span>
-<span class="source-line-no">049</span><span id="line-49">    private Optimizer&lt;? super E, Float&gt; optimizer;</span>
+<span class="source-line-no">047</span><span id="line-47">    private Initializer&lt;? super E, N&gt; initializer;</span>
+<span class="source-line-no">048</span><span id="line-48">    private ObjectiveFunction&lt;N&gt; objective;</span>
+<span class="source-line-no">049</span><span id="line-49">    private Optimizer&lt;? super E, N&gt; optimizer;</span>
 <span class="source-line-no">050</span><span id="line-50">    private Regime regime;</span>
 <span class="source-line-no">051</span><span id="line-51"></span>
 <span class="source-line-no">052</span><span id="line-52">    /**</span>
 <span class="source-line-no">053</span><span id="line-53">     * {@inheritDoc}</span>
 <span class="source-line-no">054</span><span id="line-54">     */</span>
 <span class="source-line-no">055</span><span id="line-55">    @Override</span>
-<span class="source-line-no">056</span><span id="line-56">    public Initializer&lt;? super E, Float&gt; getInitializer() {</span>
+<span class="source-line-no">056</span><span id="line-56">    public Initializer&lt;? super E, N&gt; getInitializer() {</span>
 <span class="source-line-no">057</span><span id="line-57">        return initializer;</span>
 <span class="source-line-no">058</span><span id="line-58">    }</span>
 <span class="source-line-no">059</span><span id="line-59"></span>
@@ -74,7 +74,7 @@
 <span class="source-line-no">061</span><span id="line-61">     * {@inheritDoc}</span>
 <span class="source-line-no">062</span><span id="line-62">     */</span>
 <span class="source-line-no">063</span><span id="line-63">    @Override</span>
-<span class="source-line-no">064</span><span id="line-64">    public void setInitializer(Initializer&lt;? super E, Float&gt; initializer) {</span>
+<span class="source-line-no">064</span><span id="line-64">    public void setInitializer(Initializer&lt;? super E, N&gt; initializer) {</span>
 <span class="source-line-no">065</span><span id="line-65">        this.initializer = initializer;</span>
 <span class="source-line-no">066</span><span id="line-66">    }</span>
 <span class="source-line-no">067</span><span id="line-67"></span>
@@ -82,7 +82,7 @@
 <span class="source-line-no">069</span><span id="line-69">     * {@inheritDoc}</span>
 <span class="source-line-no">070</span><span id="line-70">     */</span>
 <span class="source-line-no">071</span><span id="line-71">    @Override</span>
-<span class="source-line-no">072</span><span id="line-72">    public ObjectiveFunction getObjective() {</span>
+<span class="source-line-no">072</span><span id="line-72">    public ObjectiveFunction&lt;N&gt; getObjective() {</span>
 <span class="source-line-no">073</span><span id="line-73">        return objective;</span>
 <span class="source-line-no">074</span><span id="line-74">    }</span>
 <span class="source-line-no">075</span><span id="line-75"></span>
@@ -90,7 +90,7 @@
 <span class="source-line-no">077</span><span id="line-77">     * {@inheritDoc}</span>
 <span class="source-line-no">078</span><span id="line-78">     */</span>
 <span class="source-line-no">079</span><span id="line-79">    @Override</span>
-<span class="source-line-no">080</span><span id="line-80">    public void setObjective(ObjectiveFunction objective) {</span>
+<span class="source-line-no">080</span><span id="line-80">    public void setObjective(ObjectiveFunction&lt;N&gt; objective) {</span>
 <span class="source-line-no">081</span><span id="line-81">        this.objective = objective;</span>
 <span class="source-line-no">082</span><span id="line-82">    }</span>
 <span class="source-line-no">083</span><span id="line-83"></span>
@@ -98,7 +98,7 @@
 <span class="source-line-no">085</span><span id="line-85">     * {@inheritDoc}</span>
 <span class="source-line-no">086</span><span id="line-86">     */</span>
 <span class="source-line-no">087</span><span id="line-87">    @Override</span>
-<span class="source-line-no">088</span><span id="line-88">    public Optimizer&lt;? super E, Float&gt; getOptimizer() {</span>
+<span class="source-line-no">088</span><span id="line-88">    public Optimizer&lt;? super E, N&gt; getOptimizer() {</span>
 <span class="source-line-no">089</span><span id="line-89">        return optimizer;</span>
 <span class="source-line-no">090</span><span id="line-90">    }</span>
 <span class="source-line-no">091</span><span id="line-91"></span>
@@ -106,7 +106,7 @@
 <span class="source-line-no">093</span><span id="line-93">     * {@inheritDoc}</span>
 <span class="source-line-no">094</span><span id="line-94">     */</span>
 <span class="source-line-no">095</span><span id="line-95">    @Override</span>
-<span class="source-line-no">096</span><span id="line-96">    public void setOptimizer(Optimizer&lt;? super E, Float&gt; optimizer) {</span>
+<span class="source-line-no">096</span><span id="line-96">    public void setOptimizer(Optimizer&lt;? super E, N&gt; optimizer) {</span>
 <span class="source-line-no">097</span><span id="line-97">        this.optimizer = optimizer;</span>
 <span class="source-line-no">098</span><span id="line-98">    }</span>
 <span class="source-line-no">099</span><span id="line-99"></span>
@@ -130,7 +130,7 @@
 <span class="source-line-no">117</span><span id="line-117">     * {@inheritDoc}</span>
 <span class="source-line-no">118</span><span id="line-118">     */</span>
 <span class="source-line-no">119</span><span id="line-119">    @Override</span>
-<span class="source-line-no">120</span><span id="line-120">    public void train(E estimationFunction, DataSet&lt;Float&gt; trainingSet) {</span>
+<span class="source-line-no">120</span><span id="line-120">    public void train(E estimationFunction, DataSet&lt;N&gt; trainingSet) {</span>
 <span class="source-line-no">121</span><span id="line-121">        if (optimizer == null) {</span>
 <span class="source-line-no">122</span><span id="line-122">            throw new IllegalStateException("No optimizer defined!");</span>
 <span class="source-line-no">123</span><span id="line-123">        }</span>

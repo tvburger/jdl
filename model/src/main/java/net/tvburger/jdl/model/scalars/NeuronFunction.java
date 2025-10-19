@@ -52,6 +52,10 @@ public class NeuronFunction implements TrainableScalarFunction<Float> {
         this.activationFunction = activationFunction;
     }
 
+    public LinearCombination<Float> getLinearCombination() {
+        return linearCombination;
+    }
+
     /**
      * Returns the activation function applied to the weighted sum.
      *
@@ -76,20 +80,20 @@ public class NeuronFunction implements TrainableScalarFunction<Float> {
     }
 
     /**
-     * Calculates the gradients of the output with respect to all parameters,
+     * Calculates the parameterGradients of the output with respect to all parameters,
      * including the effect of the activation function.
      * <p>
      * Concretely:
      * <ul>
      *   <li>First calls {@link #calculateParameterGradients_df_dp(Float[])}
-     *       to compute gradients of the pre-activation linear function
+     *       to compute parameterGradients of the pre-activation linear function
      *       (bias + weighted inputs).</li>
      *   <li>Then multiplies each gradient by the derivative of the activation
      *       function evaluated at the current output.</li>
      * </ul>
      *
      * @param inputs the input feature vector
-     * @return the gradient vector (bias gradient followed by weight gradients)
+     * @return the gradient vector (bias gradient followed by weight parameterGradients)
      */
     public Float[] calculateParameterGradients(Float[] inputs) {
         Float[] gradients = calculateParameterGradients_df_dp(inputs);
@@ -101,7 +105,7 @@ public class NeuronFunction implements TrainableScalarFunction<Float> {
     }
 
     /**
-     * Calculates the parameter gradients of the underlying linear combination
+     * Calculates the parameter parameterGradients of the underlying linear combination
      * (pre-activation function). This is equivalent to
      * {@link LinearCombination#calculateParameterGradients(Number[])}.
      *

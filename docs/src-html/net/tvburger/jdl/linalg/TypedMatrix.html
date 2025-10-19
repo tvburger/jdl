@@ -137,7 +137,7 @@
 <span class="source-line-no">124</span><span id="line-124">            // Find pivot</span>
 <span class="source-line-no">125</span><span id="line-125">            int pivot = i;</span>
 <span class="source-line-no">126</span><span id="line-126">            for (int j = i + 1; j &lt; n; j++) {</span>
-<span class="source-line-no">127</span><span id="line-127">                if (typeSupport.greaterThan(typeSupport.absolute(a[j][i]), typeSupport.absolute(a[pivot][i]))) {</span>
+<span class="source-line-no">127</span><span id="line-127">                if (typeSupport.isGreaterThan(typeSupport.absolute(a[j][i]), typeSupport.absolute(a[pivot][i]))) {</span>
 <span class="source-line-no">128</span><span id="line-128">                    pivot = j;</span>
 <span class="source-line-no">129</span><span id="line-129">                }</span>
 <span class="source-line-no">130</span><span id="line-130">            }</span>
@@ -159,7 +159,7 @@
 <span class="source-line-no">146</span><span id="line-146">            for (int j = i + 1; j &lt; n; j++) {</span>
 <span class="source-line-no">147</span><span id="line-147">                N factor = typeSupport.divide(a[j][i], a[i][i]);</span>
 <span class="source-line-no">148</span><span id="line-148">                for (int k = i; k &lt; n; k++) {</span>
-<span class="source-line-no">149</span><span id="line-149">                    a[j][k] = typeSupport.substract(a[j][k], typeSupport.multiply(factor, a[i][k]));</span>
+<span class="source-line-no">149</span><span id="line-149">                    a[j][k] = typeSupport.subtract(a[j][k], typeSupport.multiply(factor, a[i][k]));</span>
 <span class="source-line-no">150</span><span id="line-150">                }</span>
 <span class="source-line-no">151</span><span id="line-151">            }</span>
 <span class="source-line-no">152</span><span id="line-152">        }</span>
@@ -252,7 +252,7 @@
 <span class="source-line-no">239</span><span id="line-239">                if (k != i) {</span>
 <span class="source-line-no">240</span><span id="line-240">                    N factor = augmented[k][i];</span>
 <span class="source-line-no">241</span><span id="line-241">                    for (int j = 0; j &lt; 2 * n; j++) {</span>
-<span class="source-line-no">242</span><span id="line-242">                        augmented[k][j] = typeSupport.substract(augmented[k][j], typeSupport.multiply(factor, augmented[i][j]));</span>
+<span class="source-line-no">242</span><span id="line-242">                        augmented[k][j] = typeSupport.subtract(augmented[k][j], typeSupport.multiply(factor, augmented[i][j]));</span>
 <span class="source-line-no">243</span><span id="line-243">                    }</span>
 <span class="source-line-no">244</span><span id="line-244">                }</span>
 <span class="source-line-no">245</span><span id="line-245">            }</span>

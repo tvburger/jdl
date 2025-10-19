@@ -7,12 +7,13 @@ import net.tvburger.jdl.common.utils.SimpleHolder;
 import net.tvburger.jdl.model.DataSet;
 import net.tvburger.jdl.model.EstimationFunction;
 import net.tvburger.jdl.model.distances.DistanceMetric;
+import net.tvburger.jdl.model.training.TrainableFunction;
 
 import java.util.Comparator;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class NearestNeighbors implements EstimationFunction<Float> {
+public class NearestNeighbors implements TrainableFunction<Float> {
 
     private final DistanceMetric distanceMetric;
     private final NeighborWeighting neighborWeighting;
@@ -115,5 +116,10 @@ public class NearestNeighbors implements EstimationFunction<Float> {
     @Override
     public JavaNumberTypeSupport<Float> getCurrentNumberType() {
         return JavaNumberTypeSupport.FLOAT;
+    }
+
+    @Override
+    public Float[] getParameters() {
+        return new Float[0];
     }
 }

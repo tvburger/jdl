@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model.training.loss;
 
+import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.patterns.Decorator;
 import net.tvburger.jdl.common.patterns.Strategy;
 
@@ -26,10 +27,11 @@ import java.util.List;
  */
 @Decorator
 @Strategy(Strategy.Role.CONCRETE)
-public class ScaledError implements DimensionLossFunction, SampleLossFunction, BatchLossFunction {
+public class ScaledError<N extends Number> implements DimensionLossFunction<N>, SampleLossFunction<N>, BatchLossFunction<N> {
 
-    private final float scale;
-    private final LossFunction lossFunction;
+    private final JavaNumberTypeSupport<N> typeSupport;
+    private final N scale;
+    private final LossFunction<N> lossFunction;
 
     /**
      * Creates a new {@code ScaledError} that decorates the given
@@ -38,7 +40,8 @@ public class ScaledError implements DimensionLossFunction, SampleLossFunction, B
      * @param scale        the factor by which to scale the computed loss values
      * @param lossFunction the underlying {@link LossFunction} to decorate
      */
-    public ScaledError(float scale, LossFunction lossFunction) {
+    public ScaledError(JavaNumberTypeSupport<N> typeSupport, N scale, LossFunction<N> lossFunction) {
+        this.typeSupport = typeSupport;
         this.scale = scale;
         this.lossFunction = lossFunction;
     }
@@ -47,47 +50,55 @@ public class ScaledError implements DimensionLossFunction, SampleLossFunction, B
      * {@inheritDoc}
      */
     @Override
-    public float calculateBatchLoss(List<Float> sampleLosses) {
-        return ((BatchLossFunction) lossFunction).calculateBatchLoss(sampleLosses) * scale;
+    public N calculateBatchLoss(List<N> sampleLosses) {
+        return typeSupport.multiply(((BatchLossFunction<N>) lossFunction).calculateBatchLoss(sampleLosses), scale);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public float calculateGradient_dJ_dL(int batchSize) {
-        return ((BatchLossFunction) lossFunction).calculateGradient_dJ_dL(batchSize) * scale;
+    public N calculateGradient_dJ_dL(int batchSize) {
+        return typeSupport.multiply(((BatchLossFunction<N>) lossFunction).calculateGradient_dJ_dL(batchSize), scale);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public float calculateDimensionLoss(float estimated, float target) {
-        return ((DimensionLossFunction) lossFunction).calculateDimensionLoss(estimated, target) * scale;
+    public N calculateDimensionLoss(N estimated, N target) {
+        return typeSupport.multiply(((DimensionLossFunction<N>) lossFunction).calculateDimensionLoss(estimated, target), scale);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public float calculateGradient_dl_da(float estimated, float target) {
-        return ((DimensionLossFunction) lossFunction).calculateGradient_dl_da(estimated, target) * scale;
+    public N calculateGradient_dl_da(N estimated, N target) {
+        return typeSupport.multiply(((DimensionLossFunction<N>) lossFunction).calculateGradient_dl_da(estimated, target), scale);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public float calculateSampleLoss(List<Float> dimensionLosses) {
-        return ((SampleLossFunction) lossFunction).calculateSampleLoss(dimensionLosses) * scale;
+    public N calculateSampleLoss(List<N> dimensionLosses) {
+        return typeSupport.multiply(((SampleLossFunction<N>) lossFunction).calculateSampleLoss(dimensionLosses), scale);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public float calculateGradient_dL_dl(int dimensions) {
-        return ((SampleLossFunction) lossFunction).calculateGradient_dL_dl(dimensions) * scale;
+    public N calculateGradient_dL_dl(int dimensions) {
+        return typeSupport.multiply(((SampleLossFunction<N>) lossFunction).calculateGradient_dL_dl(dimensions), scale);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public JavaNumberTypeSupport<N> getCurrentNumberType() {
+        return typeSupport;
     }
 }

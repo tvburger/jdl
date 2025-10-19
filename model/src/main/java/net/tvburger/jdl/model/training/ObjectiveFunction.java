@@ -7,9 +7,11 @@ import net.tvburger.jdl.model.training.loss.BatchLossFunction;
 import net.tvburger.jdl.model.training.loss.DimensionLossFunction;
 import net.tvburger.jdl.model.training.loss.LossFunction;
 import net.tvburger.jdl.model.training.loss.SampleLossFunction;
+import net.tvburger.jdl.model.training.regularization.ExplicitRegularization;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Represents an objective function that extends the concept of a
@@ -18,7 +20,7 @@ import java.util.List;
  *
  * <p>
  * An {@code ObjectiveFunction} defines how the overall loss is calculated
- * across a batch of samples, as well as how the gradients are determined
+ * across a batch of samples, as well as how the parameterGradients are determined
  * for optimization algorithms (e.g., stochastic gradient descent).
  * </p>
  *
@@ -31,7 +33,7 @@ import java.util.List;
  */
 @DomainObject
 @Strategy(Strategy.Role.INTERFACE)
-public interface ObjectiveFunction extends LossFunction {
+public interface ObjectiveFunction<N extends Number> extends LossFunction<N> {
 
     /**
      * Calculates the loss for a batch of samples.
@@ -48,10 +50,16 @@ public interface ObjectiveFunction extends LossFunction {
      *              {@code float[]} arrays (estimated vs target)
      * @return the aggregated loss value for the batch
      */
-    float calculateLoss(List<Pair<Float[], Float[]>> batch);
+    N calculateLossWithoutRegularizationPenalty(List<Pair<N[], N[]>> batch);
+
+    default N calculateLoss(List<Pair<N[], N[]>> batch, N[] parameters) {
+        return getCurrentNumberType().add(calculateLossWithoutRegularizationPenalty(batch), calculateRegularizationPenalty(parameters));
+    }
+
+    N calculateRegularizationPenalty(N[] parameters);
 
     /**
-     * Determines the gradients of the objective function with respect to
+     * Determines the parameterGradients of the objective function with respect to
      * the estimated values, for a single sample.
      *
      * <p>
@@ -63,9 +71,17 @@ public interface ObjectiveFunction extends LossFunction {
      * @param samples   the total number of samples in the batch
      * @param estimated the predicted values for a sample
      * @param target    the expected target values for the sample
-     * @return an array of gradients, one per dimension of the input
+     * @return an array of parameterGradients, one per dimension of the input
      */
-    Float[] calculateGradient_dJ_da(int samples, Float[] estimated, Float[] target);
+    N[] calculateGradient_dJ_da(int samples, N[] estimated, N[] target);
+
+    N regularizedGradient(N parameter);
+
+    boolean isOptimization();
+
+    default boolean isMinimization() {
+        return !isOptimization();
+    }
 
     /**
      * Creates an {@link ObjectiveFunction} that minimizes the loss
@@ -96,8 +112,16 @@ public interface ObjectiveFunction extends LossFunction {
      *                               loss at the individual dimension level
      * @return a composed {@link ObjectiveFunction} that minimizes loss
      */
-    static ObjectiveFunction minimize(BatchLossFunction batchLossFunction, SampleLossFunction sampleLossFunction, DimensionLossFunction... dimensionLossFunctions) {
-        return new ObjectiveFunctionImpl(batchLossFunction, sampleLossFunction, Arrays.asList(dimensionLossFunctions));
+    @SafeVarargs
+    static <N extends Number> ObjectiveFunction<N> minimize(BatchLossFunction<N> batchLossFunction, SampleLossFunction<N> sampleLossFunction, DimensionLossFunction<N>... dimensionLossFunctions) {
+        return new ObjectiveFunctionImpl<>(batchLossFunction, sampleLossFunction, Arrays.asList(dimensionLossFunctions), false);
     }
 
+    void addRegularization(ExplicitRegularization<N> regularization);
+
+    void removeRegularization(ExplicitRegularization<N> regularization);
+
+    Set<ExplicitRegularization<N>> getRegularizations();
+
 }
+

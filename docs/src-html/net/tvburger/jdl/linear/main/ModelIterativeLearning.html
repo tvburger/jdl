@@ -15,90 +15,110 @@
 <span class="source-line-no">002</span><span id="line-2"></span>
 <span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;</span>
 <span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.utils.Pair;</span>
-<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.common.utils.Threads;</span>
-<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.datasets.SyntheticDataSets;</span>
-<span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.linear.LinearRegression;</span>
-<span class="source-line-no">008</span><span id="line-8">import net.tvburger.jdl.linear.basis.BasisFunction;</span>
-<span class="source-line-no">009</span><span id="line-9">import net.tvburger.jdl.linear.basis.PolynomialFunction;</span>
-<span class="source-line-no">010</span><span id="line-10">import net.tvburger.jdl.linear.optimizer.*;</span>
-<span class="source-line-no">011</span><span id="line-11">import net.tvburger.jdl.model.DataSet;</span>
-<span class="source-line-no">012</span><span id="line-12">import net.tvburger.jdl.plots.Plot;</span>
-<span class="source-line-no">013</span><span id="line-13"></span>
-<span class="source-line-no">014</span><span id="line-14">import java.util.*;</span>
-<span class="source-line-no">015</span><span id="line-15"></span>
-<span class="source-line-no">016</span><span id="line-16">public class ModelIterativeLearning {</span>
-<span class="source-line-no">017</span><span id="line-17"></span>
-<span class="source-line-no">018</span><span id="line-18">    @SuppressWarnings("unchecked")</span>
-<span class="source-line-no">019</span><span id="line-19">    public static &lt;O extends LinearModelOptimizer&lt;N&gt; &amp; IterativeOptimizer&lt;N&gt;, N extends Number&gt; void main(String[] args) {</span>
-<span class="source-line-no">020</span><span id="line-20">        JavaNumberTypeSupport&lt;N&gt; numberTypeSupport = (JavaNumberTypeSupport&lt;N&gt;) JavaNumberTypeSupport.DOUBLE;</span>
-<span class="source-line-no">021</span><span id="line-21">        float lambda1 = 0.001f;</span>
-<span class="source-line-no">022</span><span id="line-22">        float lambda2 = 0.000001f;</span>
-<span class="source-line-no">023</span><span id="line-23"></span>
-<span class="source-line-no">024</span><span id="line-24">        VanillaGradientDescentOptimizer&lt;N&gt; gd = new VanillaGradientDescentOptimizer&lt;&gt;(numberTypeSupport);</span>
-<span class="source-line-no">025</span><span id="line-25">        VanillaGradientDescentOptimizer&lt;N&gt; l1 = new VanillaGradientDescentOptimizer&lt;&gt;(numberTypeSupport);</span>
-<span class="source-line-no">026</span><span id="line-26">        l1.setInterceptor(new L1Regularization&lt;&gt;(numberTypeSupport.valueOf(lambda1)));</span>
-<span class="source-line-no">027</span><span id="line-27">        VanillaGradientDescentOptimizer&lt;N&gt; net = new VanillaGradientDescentOptimizer&lt;&gt;(numberTypeSupport);</span>
-<span class="source-line-no">028</span><span id="line-28">        net.setInterceptor(new ElasticNet&lt;&gt;(numberTypeSupport.valueOf(lambda1), numberTypeSupport.valueOf(lambda2)));</span>
-<span class="source-line-no">029</span><span id="line-29"></span>
-<span class="source-line-no">030</span><span id="line-30">        Map&lt;String, O&gt; optimizers = Map.of("L1", (O) l1, "vanilla", (O) gd, "net", (O) net);</span>
-<span class="source-line-no">031</span><span id="line-31">        for (Map.Entry&lt;String, O&gt; optimizerEntry : optimizers.entrySet()) {</span>
-<span class="source-line-no">032</span><span id="line-32">            showForNumberType(numberTypeSupport, optimizerEntry.getKey(), optimizerEntry.getValue(), 10_000_000, 0.1f, 9, 0);</span>
-<span class="source-line-no">033</span><span id="line-33">        }</span>
-<span class="source-line-no">034</span><span id="line-34">    }</span>
+<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.common.utils.SimpleHolder;</span>
+<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.common.utils.Threads;</span>
+<span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.datasets.SyntheticDataSets;</span>
+<span class="source-line-no">008</span><span id="line-8">import net.tvburger.jdl.linear.LinearBasisFunctionModel;</span>
+<span class="source-line-no">009</span><span id="line-9">import net.tvburger.jdl.linear.LinearRegression;</span>
+<span class="source-line-no">010</span><span id="line-10">import net.tvburger.jdl.linear.basis.BasisFunction;</span>
+<span class="source-line-no">011</span><span id="line-11">import net.tvburger.jdl.linear.basis.PolynomialFunction;</span>
+<span class="source-line-no">012</span><span id="line-12">import net.tvburger.jdl.linear.optimizer.LinearBasisFunctionModelDecomposer;</span>
+<span class="source-line-no">013</span><span id="line-13">import net.tvburger.jdl.model.DataSet;</span>
+<span class="source-line-no">014</span><span id="line-14">import net.tvburger.jdl.model.scalars.LinearCombination;</span>
+<span class="source-line-no">015</span><span id="line-15">import net.tvburger.jdl.model.training.Optimizer;</span>
+<span class="source-line-no">016</span><span id="line-16">import net.tvburger.jdl.model.training.Regime;</span>
+<span class="source-line-no">017</span><span id="line-17">import net.tvburger.jdl.model.training.TrainableFunction;</span>
+<span class="source-line-no">018</span><span id="line-18">import net.tvburger.jdl.model.training.optimizer.GradientDescentOptimizer;</span>
+<span class="source-line-no">019</span><span id="line-19">import net.tvburger.jdl.model.training.optimizer.UpdateStep;</span>
+<span class="source-line-no">020</span><span id="line-20">import net.tvburger.jdl.model.training.optimizer.steps.VanillaGradientDescent;</span>
+<span class="source-line-no">021</span><span id="line-21">import net.tvburger.jdl.model.training.regimes.ChainedRegime;</span>
+<span class="source-line-no">022</span><span id="line-22">import net.tvburger.jdl.model.training.regimes.EpochRegime;</span>
+<span class="source-line-no">023</span><span id="line-23">import net.tvburger.jdl.model.training.regimes.Regimes;</span>
+<span class="source-line-no">024</span><span id="line-24">import net.tvburger.jdl.model.training.regularization.ExplicitRegularization;</span>
+<span class="source-line-no">025</span><span id="line-25">import net.tvburger.jdl.model.training.regularization.RegularizationFactory;</span>
+<span class="source-line-no">026</span><span id="line-26">import net.tvburger.jdl.model.training.regularization.Regularizations;</span>
+<span class="source-line-no">027</span><span id="line-27">import net.tvburger.jdl.plots.Plot;</span>
+<span class="source-line-no">028</span><span id="line-28"></span>
+<span class="source-line-no">029</span><span id="line-29">import java.util.Arrays;</span>
+<span class="source-line-no">030</span><span id="line-30">import java.util.LinkedHashMap;</span>
+<span class="source-line-no">031</span><span id="line-31">import java.util.Map;</span>
+<span class="source-line-no">032</span><span id="line-32">import java.util.Set;</span>
+<span class="source-line-no">033</span><span id="line-33"></span>
+<span class="source-line-no">034</span><span id="line-34">public class ModelIterativeLearning {</span>
 <span class="source-line-no">035</span><span id="line-35"></span>
-<span class="source-line-no">036</span><span id="line-36">    private static &lt;O extends LinearModelOptimizer&lt;N&gt; &amp; IterativeOptimizer&lt;N&gt;, N extends Number&gt; void showForNumberType(JavaNumberTypeSupport&lt;N&gt; typeSupport, String title, O optimizer, int epochs, float learningRate, int m, long sleep) {</span>
-<span class="source-line-no">037</span><span id="line-37">        LinearRegression&lt;N&gt; regression = createClosedSolutionFitting(typeSupport, optimizer);</span>
-<span class="source-line-no">038</span><span id="line-38"></span>
-<span class="source-line-no">039</span><span id="line-39">        Plot mrePlot = new Plot("RME " + title + "; lr=" + learningRate + " m=" + m);</span>
-<span class="source-line-no">040</span><span id="line-40">        mrePlot.display();</span>
-<span class="source-line-no">041</span><span id="line-41"></span>
-<span class="source-line-no">042</span><span id="line-42">        Plot fitPlot = new Plot("Fit " + title + "; lr=" + learningRate + " m=" + m);</span>
-<span class="source-line-no">043</span><span id="line-43">        fitPlot.setYRange(-2, 2);</span>
-<span class="source-line-no">044</span><span id="line-44">        fitPlot.plotDataSet(regression.getTrainSet(), "Train Set");</span>
-<span class="source-line-no">045</span><span id="line-45">        fitPlot.display();</span>
+<span class="source-line-no">036</span><span id="line-36">    @SuppressWarnings("unchecked")</span>
+<span class="source-line-no">037</span><span id="line-37">    public static &lt;N extends Number&gt; void main(String[] args) {</span>
+<span class="source-line-no">038</span><span id="line-38">        JavaNumberTypeSupport&lt;N&gt; numberTypeSupport = (JavaNumberTypeSupport&lt;N&gt;) JavaNumberTypeSupport.DOUBLE;</span>
+<span class="source-line-no">039</span><span id="line-39">        N learningRate = numberTypeSupport.valueOf(0.9f);</span>
+<span class="source-line-no">040</span><span id="line-40">        int epochs = 10_000_000;</span>
+<span class="source-line-no">041</span><span id="line-41">        int m = 9; // model complexity</span>
+<span class="source-line-no">042</span><span id="line-42"></span>
+<span class="source-line-no">043</span><span id="line-43">        VanillaGradientDescent&lt;N&gt; vanilla = new VanillaGradientDescent&lt;&gt;(learningRate);</span>
+<span class="source-line-no">044</span><span id="line-44">        showForNumberType(numberTypeSupport, "Vanilla", createOptimizer(vanilla), Set.of(), epochs, m);</span>
+<span class="source-line-no">045</span><span id="line-45">    }</span>
 <span class="source-line-no">046</span><span id="line-46"></span>
-<span class="source-line-no">047</span><span id="line-47">        Plot weightPlot = new Plot("Absolute sum of weights " + title + "; lr=" + learningRate + " m=" + m);</span>
-<span class="source-line-no">048</span><span id="line-48">        weightPlot.display();</span>
-<span class="source-line-no">049</span><span id="line-49"></span>
-<span class="source-line-no">050</span><span id="line-50">        optimizer.setLearningRate(learningRate);</span>
-<span class="source-line-no">051</span><span id="line-51">        optimizer.setEpochs(epochs);</span>
-<span class="source-line-no">052</span><span id="line-52">        optimizer.setEpochCompletionListener(</span>
-<span class="source-line-no">053</span><span id="line-53">                IterativeOptimizer.sample(250, (epoch, model, trainSet, o) -&gt; {</span>
-<span class="source-line-no">054</span><span id="line-54">                    Pair&lt;Float, Map&lt;String, Float&gt;&gt; currentRmes = regression.calculateRMEs(model);</span>
-<span class="source-line-no">055</span><span id="line-55">                    mrePlot.addToSeries("Train RME", new float[]{epoch}, new float[]{currentRmes.left()});</span>
-<span class="source-line-no">056</span><span id="line-56">                    for (Map.Entry&lt;String, Float&gt; currentRmeEntry : currentRmes.right().entrySet()) {</span>
-<span class="source-line-no">057</span><span id="line-57">                        mrePlot.addToSeries(currentRmeEntry.getKey() + " RME", new float[]{epoch}, new float[]{currentRmeEntry.getValue()});</span>
-<span class="source-line-no">058</span><span id="line-58">                    }</span>
-<span class="source-line-no">059</span><span id="line-59">                    mrePlot.redraw();</span>
-<span class="source-line-no">060</span><span id="line-60">                    weightPlot.addToSeries("Total Weights", new float[]{epoch}, new float[]{(float) (Arrays.stream(model.getParameters()).mapToDouble(p -&gt; model.getCurrentNumberType().absolute(p).doubleValue()).sum())});</span>
-<span class="source-line-no">061</span><span id="line-61">                    weightPlot.redraw();</span>
-<span class="source-line-no">062</span><span id="line-62">                    fitPlot.plotTargetOutput(model, "Fit");</span>
-<span class="source-line-no">063</span><span id="line-63">                    fitPlot.redraw();</span>
-<span class="source-line-no">064</span><span id="line-64">                    if (epoch == epochs || true) {</span>
-<span class="source-line-no">065</span><span id="line-65">                        System.out.println(title + ": " + Arrays.toString(model.getParameters()));</span>
-<span class="source-line-no">066</span><span id="line-66">                    }</span>
-<span class="source-line-no">067</span><span id="line-67">                    Threads.sleepSilently(sleep);</span>
-<span class="source-line-no">068</span><span id="line-68">                }));</span>
-<span class="source-line-no">069</span><span id="line-69">        Threads.runAsynchronously(() -&gt; regression.fitComplexity(m));</span>
-<span class="source-line-no">070</span><span id="line-70">    }</span>
-<span class="source-line-no">071</span><span id="line-71"></span>
-<span class="source-line-no">072</span><span id="line-72">    private static &lt;N extends Number&gt; LinearRegression&lt;N&gt; createClosedSolutionFitting(JavaNumberTypeSupport&lt;N&gt; typeSupport, LinearModelOptimizer&lt;N&gt; optimizer) {</span>
-<span class="source-line-no">073</span><span id="line-73">        SyntheticDataSets.SyntheticDataSet&lt;N&gt; dataSetGenerator = SyntheticDataSets.sinus(typeSupport);</span>
-<span class="source-line-no">074</span><span id="line-74">        BasisFunction.Generator&lt;N&gt; basisFunctionGenerator = new PolynomialFunction.Generator&lt;&gt;(typeSupport);</span>
-<span class="source-line-no">075</span><span id="line-75">        return create(dataSetGenerator, basisFunctionGenerator, optimizer);</span>
-<span class="source-line-no">076</span><span id="line-76">    }</span>
-<span class="source-line-no">077</span><span id="line-77"></span>
-<span class="source-line-no">078</span><span id="line-78">    public static &lt;N extends Number&gt; LinearRegression&lt;N&gt; create(SyntheticDataSets.SyntheticDataSet&lt;N&gt; dataSetGenerator, BasisFunction.Generator&lt;N&gt; basisFunctionGenerator, LinearModelOptimizer&lt;N&gt; optimizer) {</span>
-<span class="source-line-no">079</span><span id="line-79">        dataSetGenerator.setRandomSeed(165);</span>
-<span class="source-line-no">080</span><span id="line-80">        dataSetGenerator.setNoiseScale(0.5f);</span>
-<span class="source-line-no">081</span><span id="line-81">        DataSet&lt;N&gt; trainSet = dataSetGenerator.load(10);</span>
-<span class="source-line-no">082</span><span id="line-82">        DataSet&lt;N&gt; testSet = dataSetGenerator.load(10);</span>
-<span class="source-line-no">083</span><span id="line-83">        Map&lt;String, DataSet&lt;N&gt;&gt; testSets = new LinkedHashMap&lt;&gt;();</span>
-<span class="source-line-no">084</span><span id="line-84">        testSets.put("Test Set", testSet);</span>
-<span class="source-line-no">085</span><span id="line-85">        return new LinearRegression&lt;&gt;(basisFunctionGenerator, trainSet, testSets, optimizer);</span>
-<span class="source-line-no">086</span><span id="line-86">    }</span>
-<span class="source-line-no">087</span><span id="line-87"></span>
-<span class="source-line-no">088</span><span id="line-88">}</span>
+<span class="source-line-no">047</span><span id="line-47">    private static &lt;N extends Number&gt; Optimizer&lt;LinearBasisFunctionModel&lt;N&gt;, N&gt; createOptimizer(UpdateStep&lt;LinearCombination&lt;N&gt;, N&gt; updateStep) {</span>
+<span class="source-line-no">048</span><span id="line-48">        LinearBasisFunctionModelDecomposer&lt;N&gt; decomposer = new LinearBasisFunctionModelDecomposer&lt;&gt;();</span>
+<span class="source-line-no">049</span><span id="line-49">        return new GradientDescentOptimizer&lt;&gt;(decomposer, updateStep);</span>
+<span class="source-line-no">050</span><span id="line-50">    }</span>
+<span class="source-line-no">051</span><span id="line-51"></span>
+<span class="source-line-no">052</span><span id="line-52">    private static &lt;N extends Number&gt; void showForNumberType(JavaNumberTypeSupport&lt;N&gt; typeSupport, String title, Optimizer&lt;LinearBasisFunctionModel&lt;N&gt;, N&gt; optimizer, Set&lt;ExplicitRegularization&lt;N&gt;&gt; regularizations, int epochs, int m) {</span>
+<span class="source-line-no">053</span><span id="line-53">        Plot mrePlot = new Plot("RME " + title);</span>
+<span class="source-line-no">054</span><span id="line-54">        Plot fitPlot = new Plot("Fit " + title);</span>
+<span class="source-line-no">055</span><span id="line-55">        Plot weightPlot = new Plot("Absolute sum of weights " + title);</span>
+<span class="source-line-no">056</span><span id="line-56">        SimpleHolder&lt;LinearRegression&lt;N&gt;&gt; regressionHolder = SimpleHolder.create();</span>
+<span class="source-line-no">057</span><span id="line-57"></span>
+<span class="source-line-no">058</span><span id="line-58">        ChainedRegime regime = Regimes.epochs(epochs, EpochRegime.sample(250, new EpochRegime.EpochCompletionListener() {</span>
+<span class="source-line-no">059</span><span id="line-59">            @SuppressWarnings("unchecked")</span>
+<span class="source-line-no">060</span><span id="line-60">            @Override</span>
+<span class="source-line-no">061</span><span id="line-61">            public &lt;M extends Number&gt; void epochCompleted(EpochRegime epochRegime, int currentEpoch, TrainableFunction&lt;M&gt; model, DataSet&lt;M&gt; trainingSet, Optimizer&lt;? extends TrainableFunction&lt;M&gt;, M&gt; optimizer) {</span>
+<span class="source-line-no">062</span><span id="line-62">                LinearBasisFunctionModel&lt;N&gt; linearBasisFunctionModel = (LinearBasisFunctionModel&lt;N&gt;) model;</span>
+<span class="source-line-no">063</span><span id="line-63">                Pair&lt;Float, Map&lt;String, Float&gt;&gt; currentRmes = regressionHolder.get().calculateRMEs(linearBasisFunctionModel);</span>
+<span class="source-line-no">064</span><span id="line-64">                mrePlot.addToSeries("Train RME", new float[]{currentEpoch}, new float[]{currentRmes.left()});</span>
+<span class="source-line-no">065</span><span id="line-65">                for (Map.Entry&lt;String, Float&gt; currentRmeEntry : currentRmes.right().entrySet()) {</span>
+<span class="source-line-no">066</span><span id="line-66">                    mrePlot.addToSeries(currentRmeEntry.getKey() + " RME", new float[]{currentEpoch}, new float[]{currentRmeEntry.getValue()});</span>
+<span class="source-line-no">067</span><span id="line-67">                }</span>
+<span class="source-line-no">068</span><span id="line-68">                mrePlot.redraw();</span>
+<span class="source-line-no">069</span><span id="line-69">                weightPlot.addToSeries("Total Weights", new float[]{currentEpoch}, new float[]{(float) (Arrays.stream(model.getParameters()).mapToDouble(p -&gt; model.getCurrentNumberType().absolute(p).doubleValue()).sum())});</span>
+<span class="source-line-no">070</span><span id="line-70">                weightPlot.redraw();</span>
+<span class="source-line-no">071</span><span id="line-71">                fitPlot.plotTargetOutput(linearBasisFunctionModel, "Fit");</span>
+<span class="source-line-no">072</span><span id="line-72">                fitPlot.redraw();</span>
+<span class="source-line-no">073</span><span id="line-73">                if (currentEpoch == epochs) {</span>
+<span class="source-line-no">074</span><span id="line-74">                    System.out.println(title + ": " + Arrays.toString(model.getParameters()));</span>
+<span class="source-line-no">075</span><span id="line-75">                }</span>
+<span class="source-line-no">076</span><span id="line-76">            }</span>
+<span class="source-line-no">077</span><span id="line-77">        })).batch();</span>
+<span class="source-line-no">078</span><span id="line-78">        LinearRegression&lt;N&gt; regression = createIterativeTrainedRegression(typeSupport, optimizer, regime);</span>
+<span class="source-line-no">079</span><span id="line-79">        regressionHolder.set(regression);</span>
+<span class="source-line-no">080</span><span id="line-80"></span>
+<span class="source-line-no">081</span><span id="line-81">        mrePlot.display();</span>
+<span class="source-line-no">082</span><span id="line-82"></span>
+<span class="source-line-no">083</span><span id="line-83">        fitPlot.setYRange(-2, 2);</span>
+<span class="source-line-no">084</span><span id="line-84">        fitPlot.plotDataSet(regression.getTrainSet(), "Train Set");</span>
+<span class="source-line-no">085</span><span id="line-85">        fitPlot.display();</span>
+<span class="source-line-no">086</span><span id="line-86"></span>
+<span class="source-line-no">087</span><span id="line-87">        weightPlot.display();</span>
+<span class="source-line-no">088</span><span id="line-88"></span>
+<span class="source-line-no">089</span><span id="line-89">        Threads.runAsynchronously(() -&gt; regression.fitComplexity(m, regularizations));</span>
+<span class="source-line-no">090</span><span id="line-90">    }</span>
+<span class="source-line-no">091</span><span id="line-91"></span>
+<span class="source-line-no">092</span><span id="line-92">    private static &lt;N extends Number&gt; LinearRegression&lt;N&gt; createIterativeTrainedRegression(JavaNumberTypeSupport&lt;N&gt; typeSupport, Optimizer&lt;LinearBasisFunctionModel&lt;N&gt;, N&gt; optimizer, Regime regime) {</span>
+<span class="source-line-no">093</span><span id="line-93">        SyntheticDataSets.SyntheticDataSet&lt;N&gt; dataSetGenerator = SyntheticDataSets.sinus(typeSupport);</span>
+<span class="source-line-no">094</span><span id="line-94">        BasisFunction.Generator&lt;N&gt; basisFunctionGenerator = new PolynomialFunction.Generator&lt;&gt;(typeSupport);</span>
+<span class="source-line-no">095</span><span id="line-95">        return create(dataSetGenerator, basisFunctionGenerator, optimizer, regime);</span>
+<span class="source-line-no">096</span><span id="line-96">    }</span>
+<span class="source-line-no">097</span><span id="line-97"></span>
+<span class="source-line-no">098</span><span id="line-98">    public static &lt;N extends Number&gt; LinearRegression&lt;N&gt; create(SyntheticDataSets.SyntheticDataSet&lt;N&gt; dataSetGenerator, BasisFunction.Generator&lt;N&gt; basisFunctionGenerator, Optimizer&lt;LinearBasisFunctionModel&lt;N&gt;, N&gt; optimizer, Regime regime) {</span>
+<span class="source-line-no">099</span><span id="line-99">        dataSetGenerator.setRandomSeed(165);</span>
+<span class="source-line-no">100</span><span id="line-100">        dataSetGenerator.setNoiseScale(0.5f);</span>
+<span class="source-line-no">101</span><span id="line-101">        DataSet&lt;N&gt; trainSet = dataSetGenerator.load(10);</span>
+<span class="source-line-no">102</span><span id="line-102">        DataSet&lt;N&gt; testSet = dataSetGenerator.load(10);</span>
+<span class="source-line-no">103</span><span id="line-103">        Map&lt;String, DataSet&lt;N&gt;&gt; testSets = new LinkedHashMap&lt;&gt;();</span>
+<span class="source-line-no">104</span><span id="line-104">        testSets.put("Test Set", testSet);</span>
+<span class="source-line-no">105</span><span id="line-105">        return new LinearRegression&lt;&gt;(basisFunctionGenerator, trainSet, testSets, optimizer, regime);</span>
+<span class="source-line-no">106</span><span id="line-106">    }</span>
+<span class="source-line-no">107</span><span id="line-107"></span>
+<span class="source-line-no">108</span><span id="line-108">}</span>
 
 
 

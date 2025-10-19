@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model.training.loss;
 
+import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.patterns.Strategy;
 
 import java.util.List;
@@ -27,16 +28,22 @@ import java.util.List;
  * outputs or samples is desired, rather than a normalized mean value.
  */
 @Strategy(Strategy.Role.CONCRETE)
-public class SummedError implements SampleLossFunction, BatchLossFunction {
+public class SummedError<N extends Number> implements SampleLossFunction<N>, BatchLossFunction<N> {
+
+    private final JavaNumberTypeSupport<N> typeSupport;
+
+    public SummedError(JavaNumberTypeSupport<N> typeSupport) {
+        this.typeSupport = typeSupport;
+    }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public float calculateBatchLoss(List<Float> sampleLosses) {
-        float loss = 0.0f;
-        for (float sampleLoss : sampleLosses) {
-            loss += sampleLoss;
+    public N calculateBatchLoss(List<N> sampleLosses) {
+        N loss = typeSupport.zero();
+        for (N sampleLoss : sampleLosses) {
+            loss = typeSupport.add(loss, sampleLoss);
         }
         return loss;
     }
@@ -45,18 +52,18 @@ public class SummedError implements SampleLossFunction, BatchLossFunction {
      * {@inheritDoc}
      */
     @Override
-    public float calculateGradient_dJ_dL(int batchSize) {
-        return 1.0f;
+    public N calculateGradient_dJ_dL(int batchSize) {
+        return typeSupport.one();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public float calculateSampleLoss(List<Float> dimensionLosses) {
-        float loss = 0.0f;
-        for (float dimensionLoss : dimensionLosses) {
-            loss += dimensionLoss;
+    public N calculateSampleLoss(List<N> dimensionLosses) {
+        N loss = typeSupport.zero();
+        for (N dimensionLoss : dimensionLosses) {
+            loss = typeSupport.add(loss, dimensionLoss);
         }
         return loss;
     }
@@ -65,8 +72,15 @@ public class SummedError implements SampleLossFunction, BatchLossFunction {
      * {@inheritDoc}
      */
     @Override
-    public float calculateGradient_dL_dl(int dimensions) {
-        return 1.0f;
+    public N calculateGradient_dL_dl(int dimensions) {
+        return typeSupport.one();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public JavaNumberTypeSupport<N> getCurrentNumberType() {
+        return typeSupport;
+    }
 }

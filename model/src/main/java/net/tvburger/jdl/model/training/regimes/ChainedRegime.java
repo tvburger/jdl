@@ -3,15 +3,12 @@ package net.tvburger.jdl.model.training.regimes;
 import net.tvburger.jdl.common.patterns.Proxy;
 import net.tvburger.jdl.common.patterns.Strategy;
 import net.tvburger.jdl.model.DataSet;
-import net.tvburger.jdl.model.EstimationFunction;
 import net.tvburger.jdl.model.training.ObjectiveFunction;
 import net.tvburger.jdl.model.training.Optimizer;
 import net.tvburger.jdl.model.training.Regime;
+import net.tvburger.jdl.model.training.TrainableFunction;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
 
 /**
@@ -61,13 +58,29 @@ public class ChainedRegime implements Regime, Iterable<Regime> {
      * @param <E>                the type of estimation function
      */
     @Override
-    public <E extends EstimationFunction<Float>> void train(E estimationFunction, DataSet<Float> trainingSet, ObjectiveFunction objective, Optimizer<? super E, Float> optimizer) {
+    public <E extends TrainableFunction<N>, N extends Number> void train(E estimationFunction, DataSet<N> trainingSet, ObjectiveFunction<N> objective, Optimizer<? super E, N> optimizer) {
+        train(estimationFunction, trainingSet, objective, optimizer, (Integer) null);
+    }
+
+    public <E extends TrainableFunction<N>, N extends Number> void train(E estimationFunction, DataSet<N> trainingSet, ObjectiveFunction<N> objective, Optimizer<? super E, N> optimizer, int step) {
+        train(estimationFunction, trainingSet, objective, optimizer, (Integer) step);
+    }
+
+    private <E extends TrainableFunction<N>, N extends Number> void train(E estimationFunction, DataSet<N> trainingSet, ObjectiveFunction<N> objective, Optimizer<? super E, N> optimizer, Integer step) {
         if (chainedRegimes.isEmpty()) {
             if (optimizer != null) {
-                optimizer.optimize(estimationFunction, trainingSet, objective);
+                if (step == null) {
+                    throw new IllegalStateException("No step specified, can't call optimizer!");
+                } else {
+                    optimizer.optimize(estimationFunction, trainingSet, objective, step);
+                }
             }
         } else {
-            chainedRegimes.getLast().train(estimationFunction, trainingSet, objective, optimizer);
+            if (step == null) {
+                chainedRegimes.getLast().train(estimationFunction, trainingSet, objective, optimizer);
+            } else {
+                chainedRegimes.getLast().train(estimationFunction, trainingSet, objective, optimizer, step);
+            }
         }
     }
 
@@ -158,13 +171,30 @@ public class ChainedRegime implements Regime, Iterable<Regime> {
          * to direct optimizer invocation (if non-null).
          */
         @Override
-        public <E extends EstimationFunction<Float>> void train(E estimationFunction, DataSet<Float> trainingSet, ObjectiveFunction objective, Optimizer<? super E, Float> optimizer) {
+        public <E extends TrainableFunction<N>, N extends Number> void train(E estimationFunction, DataSet<N> trainingSet, ObjectiveFunction<N> objective, Optimizer<? super E, N> optimizer) {
+            train(estimationFunction, trainingSet, objective, optimizer, (Integer) null);
+        }
+
+        @Override
+        public <E extends TrainableFunction<N>, N extends Number> void train(E estimationFunction, DataSet<N> trainingSet, ObjectiveFunction<N> objective, Optimizer<? super E, N> optimizer, int step) {
+            train(estimationFunction, trainingSet, objective, optimizer, (Integer) step);
+        }
+
+        private <E extends TrainableFunction<N>, N extends Number> void train(E estimationFunction, DataSet<N> trainingSet, ObjectiveFunction<N> objective, Optimizer<? super E, N> optimizer, Integer step) {
             Regime linkedRegime = getLinkedRegime();
             if (linkedRegime != null) {
-                linkedRegime.train(estimationFunction, trainingSet, objective, optimizer);
+                if (step == null) {
+                    linkedRegime.train(estimationFunction, trainingSet, objective, optimizer);
+                } else {
+                    linkedRegime.train(estimationFunction, trainingSet, objective, optimizer, step);
+                }
             } else {
                 if (optimizer != null) {
-                    optimizer.optimize(estimationFunction, trainingSet, objective);
+                    if (step == null) {
+                        throw new IllegalStateException("No step specified, can't call optimizer!");
+                    } else {
+                        optimizer.optimize(estimationFunction, trainingSet, objective, step);
+                    }
                 }
             }
         }
@@ -212,13 +242,13 @@ public class ChainedRegime implements Regime, Iterable<Regime> {
         }
 
         /**
-         * Adds an {@link OnlineRegime} decorator around the current target.
+         * Adds an {@link StochasticRegime} decorator around the current target.
          *
          * @return this builder (for fluent chaining)
-         * @see OnlineRegime
+         * @see StochasticRegime
          */
-        public final ChainedRegime online() {
-            return chainRegime(new OnlineRegime()).build();
+        public final ChainedRegime stochastic() {
+            return chainRegime(new StochasticRegime()).build();
         }
 
         /**
@@ -261,6 +291,12 @@ public class ChainedRegime implements Regime, Iterable<Regime> {
          */
         public final Builder epochs(int epochs) {
             return chainRegime(new EpochRegime(targetRegime, epochs));
+        }
+
+        public final Builder epochs(int epochs, EpochRegime.EpochCompletionListener... listeners) {
+            EpochRegime epochRegime = new EpochRegime(targetRegime, epochs);
+            Arrays.stream(listeners).forEach(epochRegime::addEpochCompletionListener);
+            return chainRegime(epochRegime);
         }
 
         /**

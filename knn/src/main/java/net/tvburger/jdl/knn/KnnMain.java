@@ -18,7 +18,7 @@ public class KnnMain {
         DataSet<Float> trainingSet = dataSet.subset(10, dataSet.size());
         DataSet<Float> validationSet = dataSet.subset(0, 10);
         NearestNeighborsPreparer regime = new NearestNeighborsPreparer();
-        Trainer<NearestNeighbors> nearestNeighborsTrainer = Trainer.of(null, null, null, regime);
+        Trainer<NearestNeighbors, Float> nearestNeighborsTrainer = Trainer.of(null, null, null, regime);
         nearestNeighborsTrainer.train(nearestNeighbors, trainingSet);
 
         for (DataSet.Sample<Float> sample : validationSet) {

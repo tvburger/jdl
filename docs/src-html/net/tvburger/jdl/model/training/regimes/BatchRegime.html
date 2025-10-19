@@ -15,17 +15,17 @@
 <span class="source-line-no">002</span><span id="line-2"></span>
 <span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.patterns.Strategy;</span>
 <span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.model.DataSet;</span>
-<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.model.EstimationFunction;</span>
-<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.model.training.ObjectiveFunction;</span>
-<span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.model.training.Optimizer;</span>
-<span class="source-line-no">008</span><span id="line-8">import net.tvburger.jdl.model.training.Regime;</span>
+<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.model.training.ObjectiveFunction;</span>
+<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.model.training.Optimizer;</span>
+<span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.model.training.Regime;</span>
+<span class="source-line-no">008</span><span id="line-8">import net.tvburger.jdl.model.training.TrainableFunction;</span>
 <span class="source-line-no">009</span><span id="line-9"></span>
 <span class="source-line-no">010</span><span id="line-10">/**</span>
 <span class="source-line-no">011</span><span id="line-11"> * A training regime that performs classic &lt;strong&gt;batch training&lt;/strong&gt;.</span>
 <span class="source-line-no">012</span><span id="line-12"> * &lt;p&gt;</span>
 <span class="source-line-no">013</span><span id="line-13"> * In batch training, the optimizer is applied once to the entire training set</span>
 <span class="source-line-no">014</span><span id="line-14"> * in a single call. This is equivalent to full-batch gradient descent, where</span>
-<span class="source-line-no">015</span><span id="line-15"> * all samples are used together to compute gradients and update parameters.</span>
+<span class="source-line-no">015</span><span id="line-15"> * all samples are used together to compute parameterGradients and update parameters.</span>
 <span class="source-line-no">016</span><span id="line-16"> * &lt;/p&gt;</span>
 <span class="source-line-no">017</span><span id="line-17"> *</span>
 <span class="source-line-no">018</span><span id="line-18"> * &lt;h2&gt;Behavior&lt;/h2&gt;</span>
@@ -57,8 +57,8 @@
 <span class="source-line-no">044</span><span id="line-44">     * @param &lt;E&gt;                the type of estimation function being trained</span>
 <span class="source-line-no">045</span><span id="line-45">     */</span>
 <span class="source-line-no">046</span><span id="line-46">    @Override</span>
-<span class="source-line-no">047</span><span id="line-47">    public &lt;E extends EstimationFunction&lt;Float&gt;&gt; void train(E estimationFunction, DataSet&lt;Float&gt; trainingSet, ObjectiveFunction objective, Optimizer&lt;? super E, Float&gt; optimizer) {</span>
-<span class="source-line-no">048</span><span id="line-48">        optimizer.optimize(estimationFunction, trainingSet, objective);</span>
+<span class="source-line-no">047</span><span id="line-47">    public &lt;E extends TrainableFunction&lt;N&gt;, N extends Number&gt; void train(E estimationFunction, DataSet&lt;N&gt; trainingSet, ObjectiveFunction&lt;N&gt; objective, Optimizer&lt;? super E, N&gt; optimizer, int step) {</span>
+<span class="source-line-no">048</span><span id="line-48">        optimizer.optimize(estimationFunction, trainingSet, objective, step);</span>
 <span class="source-line-no">049</span><span id="line-49">    }</span>
 <span class="source-line-no">050</span><span id="line-50">}</span>
 

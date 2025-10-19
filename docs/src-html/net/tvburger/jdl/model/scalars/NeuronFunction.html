@@ -65,105 +65,109 @@
 <span class="source-line-no">052</span><span id="line-52">        this.activationFunction = activationFunction;</span>
 <span class="source-line-no">053</span><span id="line-53">    }</span>
 <span class="source-line-no">054</span><span id="line-54"></span>
-<span class="source-line-no">055</span><span id="line-55">    /**</span>
-<span class="source-line-no">056</span><span id="line-56">     * Returns the activation function applied to the weighted sum.</span>
-<span class="source-line-no">057</span><span id="line-57">     *</span>
-<span class="source-line-no">058</span><span id="line-58">     * @return the activation function</span>
-<span class="source-line-no">059</span><span id="line-59">     */</span>
-<span class="source-line-no">060</span><span id="line-60">    public ActivationFunction getActivationFunction() {</span>
-<span class="source-line-no">061</span><span id="line-61">        return activationFunction;</span>
-<span class="source-line-no">062</span><span id="line-62">    }</span>
-<span class="source-line-no">063</span><span id="line-63"></span>
-<span class="source-line-no">064</span><span id="line-64">    /**</span>
-<span class="source-line-no">065</span><span id="line-65">     * Estimates the scalar output by first computing the weighted sum</span>
-<span class="source-line-no">066</span><span id="line-66">     * (via {@link LinearCombination#estimateScalar(Number[])})</span>
-<span class="source-line-no">067</span><span id="line-67">     * and then applying the activation function.</span>
-<span class="source-line-no">068</span><span id="line-68">     *</span>
-<span class="source-line-no">069</span><span id="line-69">     * @param inputs the input feature vector</span>
-<span class="source-line-no">070</span><span id="line-70">     * @return the activated scalar output</span>
-<span class="source-line-no">071</span><span id="line-71">     * @throws IllegalArgumentException if {@code inputs.length != arity()}</span>
-<span class="source-line-no">072</span><span id="line-72">     */</span>
-<span class="source-line-no">073</span><span id="line-73">    @Override</span>
-<span class="source-line-no">074</span><span id="line-74">    public Float estimateScalar(Float[] inputs) {</span>
-<span class="source-line-no">075</span><span id="line-75">        return activationFunction.activate(linearCombination.estimateScalar(inputs));</span>
-<span class="source-line-no">076</span><span id="line-76">    }</span>
-<span class="source-line-no">077</span><span id="line-77"></span>
-<span class="source-line-no">078</span><span id="line-78">    /**</span>
-<span class="source-line-no">079</span><span id="line-79">     * Calculates the gradients of the output with respect to all parameters,</span>
-<span class="source-line-no">080</span><span id="line-80">     * including the effect of the activation function.</span>
-<span class="source-line-no">081</span><span id="line-81">     * &lt;p&gt;</span>
-<span class="source-line-no">082</span><span id="line-82">     * Concretely:</span>
-<span class="source-line-no">083</span><span id="line-83">     * &lt;ul&gt;</span>
-<span class="source-line-no">084</span><span id="line-84">     *   &lt;li&gt;First calls {@link #calculateParameterGradients_df_dp(Float[])}</span>
-<span class="source-line-no">085</span><span id="line-85">     *       to compute gradients of the pre-activation linear function</span>
-<span class="source-line-no">086</span><span id="line-86">     *       (bias + weighted inputs).&lt;/li&gt;</span>
-<span class="source-line-no">087</span><span id="line-87">     *   &lt;li&gt;Then multiplies each gradient by the derivative of the activation</span>
-<span class="source-line-no">088</span><span id="line-88">     *       function evaluated at the current output.&lt;/li&gt;</span>
-<span class="source-line-no">089</span><span id="line-89">     * &lt;/ul&gt;</span>
-<span class="source-line-no">090</span><span id="line-90">     *</span>
-<span class="source-line-no">091</span><span id="line-91">     * @param inputs the input feature vector</span>
-<span class="source-line-no">092</span><span id="line-92">     * @return the gradient vector (bias gradient followed by weight gradients)</span>
-<span class="source-line-no">093</span><span id="line-93">     */</span>
-<span class="source-line-no">094</span><span id="line-94">    public Float[] calculateParameterGradients(Float[] inputs) {</span>
-<span class="source-line-no">095</span><span id="line-95">        Float[] gradients = calculateParameterGradients_df_dp(inputs);</span>
-<span class="source-line-no">096</span><span id="line-96">        float activationGradient = activationFunction.determineGradientForOutput(estimateScalar(inputs));</span>
-<span class="source-line-no">097</span><span id="line-97">        for (int p = 0; p &lt; gradients.length; p++) {</span>
-<span class="source-line-no">098</span><span id="line-98">            gradients[p] *= activationGradient;</span>
-<span class="source-line-no">099</span><span id="line-99">        }</span>
-<span class="source-line-no">100</span><span id="line-100">        return gradients;</span>
-<span class="source-line-no">101</span><span id="line-101">    }</span>
-<span class="source-line-no">102</span><span id="line-102"></span>
-<span class="source-line-no">103</span><span id="line-103">    /**</span>
-<span class="source-line-no">104</span><span id="line-104">     * Calculates the parameter gradients of the underlying linear combination</span>
-<span class="source-line-no">105</span><span id="line-105">     * (pre-activation function). This is equivalent to</span>
-<span class="source-line-no">106</span><span id="line-106">     * {@link LinearCombination#calculateParameterGradients(Number[])}.</span>
-<span class="source-line-no">107</span><span id="line-107">     *</span>
-<span class="source-line-no">108</span><span id="line-108">     * @param inputs the input feature vector</span>
-<span class="source-line-no">109</span><span id="line-109">     * @return the gradient vector of the linear function</span>
-<span class="source-line-no">110</span><span id="line-110">     */</span>
-<span class="source-line-no">111</span><span id="line-111">    public Float[] calculateParameterGradients_df_dp(Float[] inputs) {</span>
-<span class="source-line-no">112</span><span id="line-112">        return linearCombination.calculateParameterGradients(inputs);</span>
-<span class="source-line-no">113</span><span id="line-113">    }</span>
-<span class="source-line-no">114</span><span id="line-114"></span>
-<span class="source-line-no">115</span><span id="line-115">    @Override</span>
-<span class="source-line-no">116</span><span id="line-116">    public JavaNumberTypeSupport&lt;Float&gt; getCurrentNumberType() {</span>
-<span class="source-line-no">117</span><span id="line-117">        return JavaNumberTypeSupport.FLOAT;</span>
-<span class="source-line-no">118</span><span id="line-118">    }</span>
-<span class="source-line-no">119</span><span id="line-119"></span>
-<span class="source-line-no">120</span><span id="line-120">    /**</span>
-<span class="source-line-no">121</span><span id="line-121">     * {@inheritDoc}</span>
-<span class="source-line-no">122</span><span id="line-122">     */</span>
-<span class="source-line-no">123</span><span id="line-123">    @Override</span>
-<span class="source-line-no">124</span><span id="line-124">    public int arity() {</span>
-<span class="source-line-no">125</span><span id="line-125">        return linearCombination.arity();</span>
-<span class="source-line-no">126</span><span id="line-126">    }</span>
-<span class="source-line-no">127</span><span id="line-127"></span>
-<span class="source-line-no">128</span><span id="line-128">    /**</span>
-<span class="source-line-no">129</span><span id="line-129">     * {@inheritDoc}</span>
-<span class="source-line-no">130</span><span id="line-130">     */</span>
-<span class="source-line-no">131</span><span id="line-131">    @Override</span>
-<span class="source-line-no">132</span><span id="line-132">    public Float[] getParameters() {</span>
-<span class="source-line-no">133</span><span id="line-133">        return linearCombination.getParameters();</span>
-<span class="source-line-no">134</span><span id="line-134">    }</span>
-<span class="source-line-no">135</span><span id="line-135"></span>
-<span class="source-line-no">136</span><span id="line-136">    /**</span>
-<span class="source-line-no">137</span><span id="line-137">     * {@inheritDoc}</span>
-<span class="source-line-no">138</span><span id="line-138">     */</span>
-<span class="source-line-no">139</span><span id="line-139">    @Override</span>
-<span class="source-line-no">140</span><span id="line-140">    public String toString() {</span>
-<span class="source-line-no">141</span><span id="line-141">        Float[] parameters = getParameters();</span>
-<span class="source-line-no">142</span><span id="line-142">        StringBuilder sb = new StringBuilder();</span>
-<span class="source-line-no">143</span><span id="line-143">        sb.append(activationFunction.getClass().getSimpleName());</span>
-<span class="source-line-no">144</span><span id="line-144">        sb.append("(").append(parameters[0] &lt; 0.0f ? "" : '+').append(parameters[0]);</span>
-<span class="source-line-no">145</span><span id="line-145">        for (int i = 1; i &lt; parameters.length &amp;&amp; i &lt; 7; i++) {</span>
-<span class="source-line-no">146</span><span id="line-146">            sb.append(':').append(String.format("%.2f", parameters[i]));</span>
-<span class="source-line-no">147</span><span id="line-147">        }</span>
-<span class="source-line-no">148</span><span id="line-148">        if (parameters.length &gt; 7) {</span>
-<span class="source-line-no">149</span><span id="line-149">            sb.append(":...");</span>
-<span class="source-line-no">150</span><span id="line-150">        }</span>
-<span class="source-line-no">151</span><span id="line-151">        return sb.append(')').toString();</span>
-<span class="source-line-no">152</span><span id="line-152">    }</span>
-<span class="source-line-no">153</span><span id="line-153">}</span>
+<span class="source-line-no">055</span><span id="line-55">    public LinearCombination&lt;Float&gt; getLinearCombination() {</span>
+<span class="source-line-no">056</span><span id="line-56">        return linearCombination;</span>
+<span class="source-line-no">057</span><span id="line-57">    }</span>
+<span class="source-line-no">058</span><span id="line-58"></span>
+<span class="source-line-no">059</span><span id="line-59">    /**</span>
+<span class="source-line-no">060</span><span id="line-60">     * Returns the activation function applied to the weighted sum.</span>
+<span class="source-line-no">061</span><span id="line-61">     *</span>
+<span class="source-line-no">062</span><span id="line-62">     * @return the activation function</span>
+<span class="source-line-no">063</span><span id="line-63">     */</span>
+<span class="source-line-no">064</span><span id="line-64">    public ActivationFunction getActivationFunction() {</span>
+<span class="source-line-no">065</span><span id="line-65">        return activationFunction;</span>
+<span class="source-line-no">066</span><span id="line-66">    }</span>
+<span class="source-line-no">067</span><span id="line-67"></span>
+<span class="source-line-no">068</span><span id="line-68">    /**</span>
+<span class="source-line-no">069</span><span id="line-69">     * Estimates the scalar output by first computing the weighted sum</span>
+<span class="source-line-no">070</span><span id="line-70">     * (via {@link LinearCombination#estimateScalar(Number[])})</span>
+<span class="source-line-no">071</span><span id="line-71">     * and then applying the activation function.</span>
+<span class="source-line-no">072</span><span id="line-72">     *</span>
+<span class="source-line-no">073</span><span id="line-73">     * @param inputs the input feature vector</span>
+<span class="source-line-no">074</span><span id="line-74">     * @return the activated scalar output</span>
+<span class="source-line-no">075</span><span id="line-75">     * @throws IllegalArgumentException if {@code inputs.length != arity()}</span>
+<span class="source-line-no">076</span><span id="line-76">     */</span>
+<span class="source-line-no">077</span><span id="line-77">    @Override</span>
+<span class="source-line-no">078</span><span id="line-78">    public Float estimateScalar(Float[] inputs) {</span>
+<span class="source-line-no">079</span><span id="line-79">        return activationFunction.activate(linearCombination.estimateScalar(inputs));</span>
+<span class="source-line-no">080</span><span id="line-80">    }</span>
+<span class="source-line-no">081</span><span id="line-81"></span>
+<span class="source-line-no">082</span><span id="line-82">    /**</span>
+<span class="source-line-no">083</span><span id="line-83">     * Calculates the parameterGradients of the output with respect to all parameters,</span>
+<span class="source-line-no">084</span><span id="line-84">     * including the effect of the activation function.</span>
+<span class="source-line-no">085</span><span id="line-85">     * &lt;p&gt;</span>
+<span class="source-line-no">086</span><span id="line-86">     * Concretely:</span>
+<span class="source-line-no">087</span><span id="line-87">     * &lt;ul&gt;</span>
+<span class="source-line-no">088</span><span id="line-88">     *   &lt;li&gt;First calls {@link #calculateParameterGradients_df_dp(Float[])}</span>
+<span class="source-line-no">089</span><span id="line-89">     *       to compute parameterGradients of the pre-activation linear function</span>
+<span class="source-line-no">090</span><span id="line-90">     *       (bias + weighted inputs).&lt;/li&gt;</span>
+<span class="source-line-no">091</span><span id="line-91">     *   &lt;li&gt;Then multiplies each gradient by the derivative of the activation</span>
+<span class="source-line-no">092</span><span id="line-92">     *       function evaluated at the current output.&lt;/li&gt;</span>
+<span class="source-line-no">093</span><span id="line-93">     * &lt;/ul&gt;</span>
+<span class="source-line-no">094</span><span id="line-94">     *</span>
+<span class="source-line-no">095</span><span id="line-95">     * @param inputs the input feature vector</span>
+<span class="source-line-no">096</span><span id="line-96">     * @return the gradient vector (bias gradient followed by weight parameterGradients)</span>
+<span class="source-line-no">097</span><span id="line-97">     */</span>
+<span class="source-line-no">098</span><span id="line-98">    public Float[] calculateParameterGradients(Float[] inputs) {</span>
+<span class="source-line-no">099</span><span id="line-99">        Float[] gradients = calculateParameterGradients_df_dp(inputs);</span>
+<span class="source-line-no">100</span><span id="line-100">        float activationGradient = activationFunction.determineGradientForOutput(estimateScalar(inputs));</span>
+<span class="source-line-no">101</span><span id="line-101">        for (int p = 0; p &lt; gradients.length; p++) {</span>
+<span class="source-line-no">102</span><span id="line-102">            gradients[p] *= activationGradient;</span>
+<span class="source-line-no">103</span><span id="line-103">        }</span>
+<span class="source-line-no">104</span><span id="line-104">        return gradients;</span>
+<span class="source-line-no">105</span><span id="line-105">    }</span>
+<span class="source-line-no">106</span><span id="line-106"></span>
+<span class="source-line-no">107</span><span id="line-107">    /**</span>
+<span class="source-line-no">108</span><span id="line-108">     * Calculates the parameter parameterGradients of the underlying linear combination</span>
+<span class="source-line-no">109</span><span id="line-109">     * (pre-activation function). This is equivalent to</span>
+<span class="source-line-no">110</span><span id="line-110">     * {@link LinearCombination#calculateParameterGradients(Number[])}.</span>
+<span class="source-line-no">111</span><span id="line-111">     *</span>
+<span class="source-line-no">112</span><span id="line-112">     * @param inputs the input feature vector</span>
+<span class="source-line-no">113</span><span id="line-113">     * @return the gradient vector of the linear function</span>
+<span class="source-line-no">114</span><span id="line-114">     */</span>
+<span class="source-line-no">115</span><span id="line-115">    public Float[] calculateParameterGradients_df_dp(Float[] inputs) {</span>
+<span class="source-line-no">116</span><span id="line-116">        return linearCombination.calculateParameterGradients(inputs);</span>
+<span class="source-line-no">117</span><span id="line-117">    }</span>
+<span class="source-line-no">118</span><span id="line-118"></span>
+<span class="source-line-no">119</span><span id="line-119">    @Override</span>
+<span class="source-line-no">120</span><span id="line-120">    public JavaNumberTypeSupport&lt;Float&gt; getCurrentNumberType() {</span>
+<span class="source-line-no">121</span><span id="line-121">        return JavaNumberTypeSupport.FLOAT;</span>
+<span class="source-line-no">122</span><span id="line-122">    }</span>
+<span class="source-line-no">123</span><span id="line-123"></span>
+<span class="source-line-no">124</span><span id="line-124">    /**</span>
+<span class="source-line-no">125</span><span id="line-125">     * {@inheritDoc}</span>
+<span class="source-line-no">126</span><span id="line-126">     */</span>
+<span class="source-line-no">127</span><span id="line-127">    @Override</span>
+<span class="source-line-no">128</span><span id="line-128">    public int arity() {</span>
+<span class="source-line-no">129</span><span id="line-129">        return linearCombination.arity();</span>
+<span class="source-line-no">130</span><span id="line-130">    }</span>
+<span class="source-line-no">131</span><span id="line-131"></span>
+<span class="source-line-no">132</span><span id="line-132">    /**</span>
+<span class="source-line-no">133</span><span id="line-133">     * {@inheritDoc}</span>
+<span class="source-line-no">134</span><span id="line-134">     */</span>
+<span class="source-line-no">135</span><span id="line-135">    @Override</span>
+<span class="source-line-no">136</span><span id="line-136">    public Float[] getParameters() {</span>
+<span class="source-line-no">137</span><span id="line-137">        return linearCombination.getParameters();</span>
+<span class="source-line-no">138</span><span id="line-138">    }</span>
+<span class="source-line-no">139</span><span id="line-139"></span>
+<span class="source-line-no">140</span><span id="line-140">    /**</span>
+<span class="source-line-no">141</span><span id="line-141">     * {@inheritDoc}</span>
+<span class="source-line-no">142</span><span id="line-142">     */</span>
+<span class="source-line-no">143</span><span id="line-143">    @Override</span>
+<span class="source-line-no">144</span><span id="line-144">    public String toString() {</span>
+<span class="source-line-no">145</span><span id="line-145">        Float[] parameters = getParameters();</span>
+<span class="source-line-no">146</span><span id="line-146">        StringBuilder sb = new StringBuilder();</span>
+<span class="source-line-no">147</span><span id="line-147">        sb.append(activationFunction.getClass().getSimpleName());</span>
+<span class="source-line-no">148</span><span id="line-148">        sb.append("(").append(parameters[0] &lt; 0.0f ? "" : '+').append(parameters[0]);</span>
+<span class="source-line-no">149</span><span id="line-149">        for (int i = 1; i &lt; parameters.length &amp;&amp; i &lt; 7; i++) {</span>
+<span class="source-line-no">150</span><span id="line-150">            sb.append(':').append(String.format("%.2f", parameters[i]));</span>
+<span class="source-line-no">151</span><span id="line-151">        }</span>
+<span class="source-line-no">152</span><span id="line-152">        if (parameters.length &gt; 7) {</span>
+<span class="source-line-no">153</span><span id="line-153">            sb.append(":...");</span>
+<span class="source-line-no">154</span><span id="line-154">        }</span>
+<span class="source-line-no">155</span><span id="line-155">        return sb.append(')').toString();</span>
+<span class="source-line-no">156</span><span id="line-156">    }</span>
+<span class="source-line-no">157</span><span id="line-157">}</span>
 
 
 

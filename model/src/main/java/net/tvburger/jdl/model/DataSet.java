@@ -119,6 +119,18 @@ public record DataSet<N extends Number>(List<Sample<N>> samples) implements Iter
             result = 31 * result + Arrays.hashCode(targetOutputs);
             return result;
         }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String toString() {
+            return "Sample{" +
+                    "features=" + Arrays.toString(features) +
+                    ", targetOutputs=" + Arrays.toString(targetOutputs) +
+                    '}';
+        }
+
     }
 
     /**

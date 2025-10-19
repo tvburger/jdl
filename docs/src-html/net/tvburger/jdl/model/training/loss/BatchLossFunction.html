@@ -36,7 +36,7 @@
 <span class="source-line-no">023</span><span id="line-23"> */</span>
 <span class="source-line-no">024</span><span id="line-24">@DomainObject</span>
 <span class="source-line-no">025</span><span id="line-25">@Strategy(Strategy.Role.INTERFACE)</span>
-<span class="source-line-no">026</span><span id="line-26">public interface BatchLossFunction extends LossFunction {</span>
+<span class="source-line-no">026</span><span id="line-26">public interface BatchLossFunction&lt;N extends Number&gt; extends LossFunction&lt;N&gt; {</span>
 <span class="source-line-no">027</span><span id="line-27"></span>
 <span class="source-line-no">028</span><span id="line-28">    /**</span>
 <span class="source-line-no">029</span><span id="line-29">     * Calculates the total loss for the batch by aggregating the per-sample losses.</span>
@@ -44,7 +44,7 @@
 <span class="source-line-no">031</span><span id="line-31">     * @param sampleLosses a list of individual sample losses</span>
 <span class="source-line-no">032</span><span id="line-32">     * @return the total batch loss</span>
 <span class="source-line-no">033</span><span id="line-33">     */</span>
-<span class="source-line-no">034</span><span id="line-34">    float calculateBatchLoss(List&lt;Float&gt; sampleLosses);</span>
+<span class="source-line-no">034</span><span id="line-34">    N calculateBatchLoss(List&lt;N&gt; sampleLosses);</span>
 <span class="source-line-no">035</span><span id="line-35"></span>
 <span class="source-line-no">036</span><span id="line-36">    /**</span>
 <span class="source-line-no">037</span><span id="line-37">     * Computes the gradient of the batch loss with respect to the per-sample losses.</span>
@@ -53,7 +53,7 @@
 <span class="source-line-no">040</span><span id="line-40">     * @param batchSize the number of samples in the batch</span>
 <span class="source-line-no">041</span><span id="line-41">     * @return the gradient of the batch loss with respect to each sample loss</span>
 <span class="source-line-no">042</span><span id="line-42">     */</span>
-<span class="source-line-no">043</span><span id="line-43">    float calculateGradient_dJ_dL(int batchSize);</span>
+<span class="source-line-no">043</span><span id="line-43">    N calculateGradient_dJ_dL(int batchSize);</span>
 <span class="source-line-no">044</span><span id="line-44"></span>
 <span class="source-line-no">045</span><span id="line-45">}</span>
 

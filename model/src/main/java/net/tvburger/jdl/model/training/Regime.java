@@ -39,7 +39,7 @@ public interface Regime {
      *
      * <p>
      * The training process typically involves iteratively evaluating
-     * the objective function on the training set, calculating gradients,
+     * the objective function on the training set, calculating parameterGradients,
      * and applying the optimizer to update the estimation function's
      * parameters.
      * </p>
@@ -48,10 +48,14 @@ public interface Regime {
      * @param estimationFunction the model or estimation function to be trained
      * @param trainingSet        the dataset used for training
      * @param objective          the objective function that defines the
-     *                           training loss and gradients
+     *                           training loss and parameterGradients
      * @param optimizer          the optimizer used to update the estimation
-     *                           function’s parameters based on gradients
+     *                           function’s parameters based on parameterGradients
      */
-    <E extends EstimationFunction<Float>> void train(E estimationFunction, DataSet<Float> trainingSet, ObjectiveFunction objective, Optimizer<? super E, Float> optimizer);
+    default <E extends TrainableFunction<N>, N extends Number> void train(E estimationFunction, DataSet<N> trainingSet, ObjectiveFunction<N> objective, Optimizer<? super E, N> optimizer) {
+        train(estimationFunction, trainingSet, objective, optimizer, 1);
+    };
+
+    <E extends TrainableFunction<N>, N extends Number> void train(E estimationFunction, DataSet<N> trainingSet, ObjectiveFunction<N> objective, Optimizer<? super E, N> optimizer, int step);
 
 }

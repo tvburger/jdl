@@ -9,10 +9,10 @@ import net.tvburger.jdl.model.training.Optimizer;
 
 import java.util.Arrays;
 
-public class PerceptronUpdateRule implements Optimizer.OnlineOnly<Perceptron, Float> {
+public class PerceptronUpdateRule implements Optimizer.Stochastic<Perceptron, Float> {
 
     @Override
-    public void optimize(Perceptron perceptron, DataSet.Sample<Float> sample, ObjectiveFunction objective) {
+    public void optimize(Perceptron perceptron, DataSet.Sample<Float> sample, ObjectiveFunction<Float> objective, int step) {
         Float[] estimate = perceptron.estimate(sample.features());
         for (int i = 0; i < estimate.length; i++) {
             int sign = Floats.greaterThan(sample.targetOutputs()[i], 0.0f) ? +1 : -1;

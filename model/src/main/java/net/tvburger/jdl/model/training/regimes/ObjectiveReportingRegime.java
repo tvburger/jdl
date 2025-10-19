@@ -1,13 +1,14 @@
 package net.tvburger.jdl.model.training.regimes;
 
+import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.patterns.StaticFactory;
 import net.tvburger.jdl.common.patterns.Strategy;
 import net.tvburger.jdl.common.utils.Pair;
 import net.tvburger.jdl.model.DataSet;
-import net.tvburger.jdl.model.EstimationFunction;
 import net.tvburger.jdl.model.training.ObjectiveFunction;
 import net.tvburger.jdl.model.training.Optimizer;
 import net.tvburger.jdl.model.training.Regime;
+import net.tvburger.jdl.model.training.TrainableFunction;
 
 import java.util.List;
 
@@ -41,9 +42,8 @@ public class ObjectiveReportingRegime extends DelegatedRegime {
      */
     public static final String HP_OBJECTIVE_DUMP = "objectiveDump";
 
-    private Float improvement;
-    private Float currentLoss;
-    private int iteration;
+    private Number improvement;
+    private Number currentLoss;
 
     /**
      * Creates a new reporting regime that wraps the given regime.
@@ -51,7 +51,7 @@ public class ObjectiveReportingRegime extends DelegatedRegime {
      * @param regime the underlying training regime to delegate to
      */
     @StaticFactory
-    public static ObjectiveReportingRegime create(Regime regime) {
+    public static <N extends Number> ObjectiveReportingRegime create(Regime regime) {
         return new ObjectiveReportingRegime(regime, false);
     }
 
@@ -100,26 +100,38 @@ public class ObjectiveReportingRegime extends DelegatedRegime {
      * @param optimizer          the optimizer to update parameters
      * @param <E>                the type of estimation function
      */
-    @Override
-    public <E extends EstimationFunction<Float>> void train(E estimationFunction, DataSet<Float> trainingSet, ObjectiveFunction objective, Optimizer<? super E, Float> optimizer) {
-        Float previousLoss;
-        if (objective != null && iteration == 0) {
-            List<Pair<Float[], Float[]>> batch = trainingSet.samples().stream().map(s -> Pair.of(estimationFunction.estimate(s.features()), s.targetOutputs())).toList();
-            previousLoss = objective.calculateLoss(batch);
+    public <E extends TrainableFunction<N>, N extends Number> void train(E estimationFunction, DataSet<N> trainingSet, ObjectiveFunction<N> objective, Optimizer<? super E, N> optimizer) {
+        train(estimationFunction, trainingSet, objective, optimizer, (Integer) null);
+    }
+
+    public <E extends TrainableFunction<N>, N extends Number> void train(E estimationFunction, DataSet<N> trainingSet, ObjectiveFunction<N> objective, Optimizer<? super E, N> optimizer, int step) {
+        train(estimationFunction, trainingSet, objective, optimizer, (Integer) step);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <E extends TrainableFunction<N>, N extends Number> void train(E estimationFunction, DataSet<N> trainingSet, ObjectiveFunction<N> objective, Optimizer<? super E, N> optimizer, Integer step) {
+        JavaNumberTypeSupport<N> typeSupport = estimationFunction.getCurrentNumberType();
+        N previousLoss;
+        if (objective != null && step == 1) {
+            List<Pair<N[], N[]>> batch = trainingSet.samples().stream().map(s -> Pair.of(estimationFunction.estimate(s.features()), s.targetOutputs())).toList();
+            previousLoss = objective.calculateLoss(batch, estimationFunction.getParameters());
             if (isDumpingLossValues()) {
-                System.out.printf("[Measurement %4d] Aggregated loss = %.4f (baseline)%n", iteration, previousLoss);
+                System.out.printf("[Measurement %4d] Aggregated loss = %.4s (baseline)%n", 0, previousLoss);
             }
         } else {
-            previousLoss = currentLoss;
+            previousLoss = (N) currentLoss;
         }
-        iteration++;
-        regime.train(estimationFunction, trainingSet, objective, optimizer);
+        if (step == null) {
+            regime.train(estimationFunction, trainingSet, objective, optimizer);
+        } else {
+            regime.train(estimationFunction, trainingSet, objective, optimizer, step);
+        }
         if (objective != null) {
-            List<Pair<Float[], Float[]>> batch = trainingSet.samples().stream().map(s -> Pair.of(estimationFunction.estimate(s.features()), s.targetOutputs())).toList();
-            currentLoss = objective.calculateLoss(batch);
-            improvement = (previousLoss - currentLoss) / previousLoss * -100f;
+            List<Pair<N[], N[]>> batch = trainingSet.samples().stream().map(s -> Pair.of(estimationFunction.estimate(s.features()), s.targetOutputs())).toList();
+            currentLoss = objective.calculateLoss(batch, estimationFunction.getParameters());
+            improvement = typeSupport.multiply(typeSupport.divide(typeSupport.subtract(previousLoss, (N) currentLoss), previousLoss), -100);
             if (isDumpingLossValues()) {
-                System.out.printf("[Measurement %4d] Aggregated loss = %.4f (%.2f%%)%n", iteration, currentLoss, improvement);
+                System.out.printf("[Measurement %4d] Aggregated loss = %.4s (%.2s%%)%n", step, currentLoss, improvement);
             }
         }
     }
@@ -136,7 +148,7 @@ public class ObjectiveReportingRegime extends DelegatedRegime {
      * @return the relative improvement percentage, or {@code null} if no
      * training has happened yet
      */
-    public Float getRelativeImprovement() {
+    public Number getRelativeImprovement() {
         return improvement;
     }
 
@@ -146,7 +158,7 @@ public class ObjectiveReportingRegime extends DelegatedRegime {
      * @return the last aggregated loss value, or {@code null} if no training
      * has happened yet
      */
-    public Float getCurrentLoss() {
+    public Number getCurrentLoss() {
         return currentLoss;
     }
 
@@ -155,7 +167,6 @@ public class ObjectiveReportingRegime extends DelegatedRegime {
      * This clears the iteration count, current loss, and improvement history.
      */
     public void reset() {
-        this.iteration = 0;
         this.currentLoss = null;
         this.improvement = null;
     }

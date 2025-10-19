@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model.training.loss;
 
+import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.patterns.StaticUtility;
 import net.tvburger.jdl.model.training.ObjectiveFunction;
 
@@ -17,50 +18,6 @@ import net.tvburger.jdl.model.training.ObjectiveFunction;
 @StaticUtility
 public final class Objectives {
 
-    /**
-     * Predefined Mean Squared Error (MSE) objective function.
-     *
-     * <p>
-     * Internally composed of:
-     * <ul>
-     *   <li>{@link MeanError} for batch-level aggregation</li>
-     *   <li>{@link MeanError} for aggregating sample errors</li>
-     *   <li>{@link ScaledError} with factor {@code 0.5} wrapping a
-     *       {@link SquaredError} for dimension-level error</li>
-     * </ul>
-     * </p>
-     */
-    private static final ObjectiveFunction mse = ObjectiveFunction.minimize(new MeanError(), new MeanError(), new ScaledError(0.5f, new SquaredError()));
-
-    /**
-     * Predefined Summed Squared Error (SSE) objective function.
-     *
-     * <p>
-     * Internally composed of:
-     * <ul>
-     *   <li>{@link SummedError} for batch-level aggregation</li>
-     *   <li>{@link SummedError} for aggregating sample errors</li>
-     *   <li>{@link ScaledError} with factor {@code 0.5} wrapping a
-     *       {@link SquaredError} for dimension-level error</li>
-     * </ul>
-     * </p>
-     */
-    private static final ObjectiveFunction sse = ObjectiveFunction.minimize(new SummedError(), new SummedError(), new ScaledError(0.5f, new SquaredError()));
-
-    /**
-     * Predefined Binary Cross-Entropy (BCE) objective function.
-     *
-     * <p>
-     * Internally composed of:
-     * <ul>
-     *   <li>{@link MeanError} for batch-level aggregation</li>
-     *   <li>{@link MeanError} for aggregating sample errors</li>
-     *   <li>{@link BinaryCrossEntropy} for dimension-level error</li>
-     * </ul>
-     * </p>
-     */
-    private static final ObjectiveFunction bce = ObjectiveFunction.minimize(new MeanError(), new MeanError(), new BinaryCrossEntropy());
-
     private Objectives() {
     }
 
@@ -69,8 +26,9 @@ public final class Objectives {
      *
      * @return the predefined MSE {@link ObjectiveFunction}
      */
-    public static ObjectiveFunction mSE() {
-        return mse;
+    public static <N extends Number> ObjectiveFunction<N> mSE(JavaNumberTypeSupport<N> typeSupport) {
+        N scale = typeSupport.divide(typeSupport.one(), typeSupport.add(typeSupport.one(), typeSupport.one()));
+        return ObjectiveFunction.minimize(new MeanError<>(typeSupport), new MeanError<>(typeSupport), new ScaledError<>(typeSupport, scale, new SquaredError<>(typeSupport)));
     }
 
     /**
@@ -78,8 +36,9 @@ public final class Objectives {
      *
      * @return the predefined SSE {@link ObjectiveFunction}
      */
-    public static ObjectiveFunction sSE() {
-        return mse;
+    public static <N extends Number> ObjectiveFunction<N> sSE(JavaNumberTypeSupport<N> typeSupport) {
+        N scale = typeSupport.divide(typeSupport.one(), typeSupport.add(typeSupport.one(), typeSupport.one()));
+        return ObjectiveFunction.minimize(new SummedError<>(typeSupport), new SummedError<>(typeSupport), new ScaledError<>(typeSupport, scale, new SquaredError<>(typeSupport)));
     }
 
     /**
@@ -87,7 +46,7 @@ public final class Objectives {
      *
      * @return the predefined BCE {@link ObjectiveFunction}
      */
-    public static ObjectiveFunction bCE() {
-        return bce;
+    public static <N extends Number> ObjectiveFunction<N> bCE(JavaNumberTypeSupport<N> typeSupport) {
+        return ObjectiveFunction.minimize(new MeanError<>(typeSupport), new MeanError<>(typeSupport), new BinaryCrossEntropy<>(typeSupport));
     }
 }

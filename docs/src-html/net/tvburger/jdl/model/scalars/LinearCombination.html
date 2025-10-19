@@ -26,7 +26,7 @@
 <span class="source-line-no">013</span><span id="line-13"> * where the bias and weights are trainable parameters.</span>
 <span class="source-line-no">014</span><span id="line-14"> * &lt;p&gt;</span>
 <span class="source-line-no">015</span><span id="line-15"> * This class supports forward estimation of the scalar output as well as</span>
-<span class="source-line-no">016</span><span id="line-16"> * calculation of parameter gradients required for gradient-based training.</span>
+<span class="source-line-no">016</span><span id="line-16"> * calculation of parameter parameterGradients required for gradient-based training.</span>
 <span class="source-line-no">017</span><span id="line-17"> */</span>
 <span class="source-line-no">018</span><span id="line-18">@Strategy(Strategy.Role.CONCRETE)</span>
 <span class="source-line-no">019</span><span id="line-19">public class LinearCombination&lt;N extends Number&gt; implements TrainableScalarFunction&lt;N&gt; {</span>
@@ -91,7 +91,7 @@
 <span class="source-line-no">078</span><span id="line-78">    }</span>
 <span class="source-line-no">079</span><span id="line-79"></span>
 <span class="source-line-no">080</span><span id="line-80">    /**</span>
-<span class="source-line-no">081</span><span id="line-81">     * Calculates the gradients of the output with respect to all parameters (bias and weights)</span>
+<span class="source-line-no">081</span><span id="line-81">     * Calculates the parameterGradients of the output with respect to all parameters (bias and weights)</span>
 <span class="source-line-no">082</span><span id="line-82">     * for the given input vector.</span>
 <span class="source-line-no">083</span><span id="line-83">     * &lt;p&gt;</span>
 <span class="source-line-no">084</span><span id="line-84">     * The gradient vector has length {@code 1 + arity()}, where:</span>
@@ -101,7 +101,7 @@
 <span class="source-line-no">088</span><span id="line-88">     * &lt;/ul&gt;</span>
 <span class="source-line-no">089</span><span id="line-89">     *</span>
 <span class="source-line-no">090</span><span id="line-90">     * @param inputs the input feature vector</span>
-<span class="source-line-no">091</span><span id="line-91">     * @return the gradient vector (bias gradient followed by weight gradients)</span>
+<span class="source-line-no">091</span><span id="line-91">     * @return the gradient vector (bias gradient followed by weight parameterGradients)</span>
 <span class="source-line-no">092</span><span id="line-92">     */</span>
 <span class="source-line-no">093</span><span id="line-93">    @Override</span>
 <span class="source-line-no">094</span><span id="line-94">    public N[] calculateParameterGradients(N[] inputs) {</span>

@@ -15,16 +15,16 @@ import java.util.Arrays;
 public class AdalineLineMain {
 
     public static void main(String[] args) {
-        SyntheticDataSets.SyntheticDataSet<Float> syntheticDataSet = SyntheticDataSets.line(7, 3, JavaNumberTypeSupport.FLOAT);
+        SyntheticDataSets.SyntheticDataSet<Float> syntheticDataSet = SyntheticDataSets.line(2, 3, JavaNumberTypeSupport.FLOAT);
         DataSet<Float> dataSet = syntheticDataSet.load();
         DataSet<Float> trainingSet = dataSet.subset(10, dataSet.size());
         DataSet<Float> testSet = dataSet.subset(0, 10);
 
         Adaline adaline = Adaline.create(1, 1);
-        ObjectiveFunction objective = Objectives.mSE();
+        ObjectiveFunction<Float> objective = Objectives.mSE(JavaNumberTypeSupport.FLOAT);
         LeastMeanSquares leastMeanSquares = new LeastMeanSquares(0.001f);
-        ChainedRegime regime = Regimes.epochs(5).dumpNodes().reportObjective().online();
-        Trainer<Adaline> adalineTrainer = Trainer.of(new AdalineInitializer(), objective, leastMeanSquares, regime);
+        ChainedRegime regime = Regimes.epochs(100).dumpNodes().reportObjective().stochastic();
+        Trainer<Adaline, Float> adalineTrainer = Trainer.of(new AdalineInitializer(), objective, leastMeanSquares, regime);
         adalineTrainer.train(adaline, trainingSet);
         NeuralNetworks.dump(adaline);
 

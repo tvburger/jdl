@@ -2,6 +2,8 @@ package net.tvburger.jdl.linalg;
 
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 
+import java.util.function.BiFunction;
+
 public final class Vectors {
 
     private Vectors() {
@@ -13,6 +15,11 @@ public final class Vectors {
         for (int i = 0; i < numbers.length; i++) {
             numbers[i] = values[i];
         }
+        return new TypedVector<>(numbers, false, typeSupport);
+    }
+
+    public static <N extends Number> TypedVector<N> zeros(JavaNumberTypeSupport<N> typeSupport, int dimensions) {
+        N[] numbers = typeSupport.createArray(dimensions);
         return new TypedVector<>(numbers, false, typeSupport);
     }
 
@@ -78,6 +85,14 @@ public final class Vectors {
         N[] values = vector.getCurrentNumberType().createArray(vector.getDimensions());
         for (int i = 0; i < values.length; i++) {
             values[i] = vector.getCurrentNumberType().divide(vector.get(i + 1), denominator.get(i + 1));
+        }
+        return new TypedVector<>(values, vector.isColumnVector(), vector.getCurrentNumberType());
+    }
+
+    public static <N extends Number> TypedVector<N> elementWise(TypedVector<N> vector, BiFunction<Integer, N, N> function) {
+        N[] values = vector.getCurrentNumberType().createArray(vector.getDimensions());
+        for (int i = 0; i < values.length; i++) {
+            values[i] = function.apply(i + 1, vector.get(i + 1));
         }
         return new TypedVector<>(values, vector.isColumnVector(), vector.getCurrentNumberType());
     }

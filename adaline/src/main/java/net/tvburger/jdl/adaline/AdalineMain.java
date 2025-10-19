@@ -1,5 +1,6 @@
 package net.tvburger.jdl.adaline;
 
+import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.utils.Floats;
 import net.tvburger.jdl.datasets.LinesAndCircles;
 import net.tvburger.jdl.datasets.LogicalDataSets;
@@ -20,10 +21,10 @@ public class AdalineMain {
         DataSet<Float> testSet = dataSet.subset(0, 10);
 
         Adaline adaline = Adaline.create(400, 8);
-        ObjectiveFunction objective = Objectives.mSE();
-        LeastMeanSquares leastMeanSquares = new LeastMeanSquares(0.01f);
-        ChainedRegime regime = Regimes.epochs(100).reportObjective().online();
-        Trainer<Adaline> adalineTrainer = Trainer.of(new AdalineInitializer(), objective, leastMeanSquares, regime);
+        ObjectiveFunction<Float> objective = Objectives.mSE(JavaNumberTypeSupport.FLOAT);
+        LeastMeanSquares leastMeanSquares = new LeastMeanSquares(0.001f);
+        ChainedRegime regime = Regimes.epochs(100).reportObjective().stochastic();
+        Trainer<Adaline, Float> adalineTrainer = Trainer.of(new AdalineInitializer(), objective, leastMeanSquares, regime);
         adalineTrainer.train(adaline, trainingSet);
 
         for (DataSet.Sample<Float> sample : testSet) {

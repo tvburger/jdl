@@ -37,12 +37,27 @@ public final class FloatSupport implements JavaNumberTypeSupport<Float> {
     }
 
     @Override
+    public Float multiply(Float first, int second) {
+        return first * second;
+    }
+
+    @Override
     public Float divide(Float first, Float second) {
         return first / second;
     }
 
     @Override
+    public Float divide(Float first, int second) {
+        return first / second;
+    }
+
+    @Override
     public Float add(Float first, Float second) {
+        return first + second;
+    }
+
+    @Override
+    public Float add(Float first, int second) {
         return first + second;
     }
 
@@ -67,7 +82,7 @@ public final class FloatSupport implements JavaNumberTypeSupport<Float> {
     }
 
     @Override
-    public boolean greaterThan(Float first, Float second) {
+    public boolean isGreaterThan(Float first, Float second) {
         return first > second;
     }
 
@@ -89,5 +104,36 @@ public final class FloatSupport implements JavaNumberTypeSupport<Float> {
     @Override
     public Comparator<Float> comparator() {
         return Float::compare;
+    }
+
+    @Override
+    public Float clamp01(Float value) {
+        if (value <= zero()) {
+            return zero();
+        }
+        if (value >= one()) {
+            return one();
+        }
+        return value;
+    }
+
+    @Override
+    public Float epsilon() {
+        return Floats.EPSILON;
+    }
+
+    @Override
+    public Float log(Float value) {
+        return (float) Math.log(value);
+    }
+
+    @Override
+    public Float pow(Float base, int times) {
+        return (float) Math.pow(base, times);
+    }
+
+    @Override
+    public boolean isInstance(Object value) {
+        return value instanceof Float;
     }
 }

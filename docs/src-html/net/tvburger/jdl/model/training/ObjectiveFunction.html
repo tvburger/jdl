@@ -20,100 +20,124 @@
 <span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.model.training.loss.DimensionLossFunction;</span>
 <span class="source-line-no">008</span><span id="line-8">import net.tvburger.jdl.model.training.loss.LossFunction;</span>
 <span class="source-line-no">009</span><span id="line-9">import net.tvburger.jdl.model.training.loss.SampleLossFunction;</span>
-<span class="source-line-no">010</span><span id="line-10"></span>
-<span class="source-line-no">011</span><span id="line-11">import java.util.Arrays;</span>
-<span class="source-line-no">012</span><span id="line-12">import java.util.List;</span>
-<span class="source-line-no">013</span><span id="line-13"></span>
-<span class="source-line-no">014</span><span id="line-14">/**</span>
-<span class="source-line-no">015</span><span id="line-15"> * Represents an objective function that extends the concept of a</span>
-<span class="source-line-no">016</span><span id="line-16"> * {@link LossFunction} to provide both loss aggregation and gradient</span>
-<span class="source-line-no">017</span><span id="line-17"> * computation.</span>
-<span class="source-line-no">018</span><span id="line-18"> *</span>
-<span class="source-line-no">019</span><span id="line-19"> * &lt;p&gt;</span>
-<span class="source-line-no">020</span><span id="line-20"> * An {@code ObjectiveFunction} defines how the overall loss is calculated</span>
-<span class="source-line-no">021</span><span id="line-21"> * across a batch of samples, as well as how the gradients are determined</span>
-<span class="source-line-no">022</span><span id="line-22"> * for optimization algorithms (e.g., stochastic gradient descent).</span>
-<span class="source-line-no">023</span><span id="line-23"> * &lt;/p&gt;</span>
-<span class="source-line-no">024</span><span id="line-24"> *</span>
-<span class="source-line-no">025</span><span id="line-25"> * &lt;p&gt;</span>
-<span class="source-line-no">026</span><span id="line-26"> * Unlike {@link DimensionLossFunction}, {@link SampleLossFunction}, or</span>
-<span class="source-line-no">027</span><span id="line-27"> * {@link BatchLossFunction}, which focus on specific granularities,</span>
-<span class="source-line-no">028</span><span id="line-28"> * an objective function typically provides the entry point for a training</span>
-<span class="source-line-no">029</span><span id="line-29"> * process, combining loss evaluation and gradient calculation in one place.</span>
-<span class="source-line-no">030</span><span id="line-30"> * &lt;/p&gt;</span>
-<span class="source-line-no">031</span><span id="line-31"> */</span>
-<span class="source-line-no">032</span><span id="line-32">@DomainObject</span>
-<span class="source-line-no">033</span><span id="line-33">@Strategy(Strategy.Role.INTERFACE)</span>
-<span class="source-line-no">034</span><span id="line-34">public interface ObjectiveFunction extends LossFunction {</span>
-<span class="source-line-no">035</span><span id="line-35"></span>
-<span class="source-line-no">036</span><span id="line-36">    /**</span>
-<span class="source-line-no">037</span><span id="line-37">     * Calculates the loss for a batch of samples.</span>
-<span class="source-line-no">038</span><span id="line-38">     *</span>
-<span class="source-line-no">039</span><span id="line-39">     * &lt;p&gt;</span>
-<span class="source-line-no">040</span><span id="line-40">     * Each sample in the batch is represented as a {@link Pair} of</span>
-<span class="source-line-no">041</span><span id="line-41">     * {@code float[]} arrays, where the left element is the estimated</span>
-<span class="source-line-no">042</span><span id="line-42">     * (predicted) values and the right element is the target</span>
-<span class="source-line-no">043</span><span id="line-43">     * (expected) values. Implementations should define how individual</span>
-<span class="source-line-no">044</span><span id="line-44">     * sample losses are aggregated into a single scalar loss for the batch.</span>
-<span class="source-line-no">045</span><span id="line-45">     * &lt;/p&gt;</span>
-<span class="source-line-no">046</span><span id="line-46">     *</span>
-<span class="source-line-no">047</span><span id="line-47">     * @param batch a list of samples, where each sample is a pair of</span>
-<span class="source-line-no">048</span><span id="line-48">     *              {@code float[]} arrays (estimated vs target)</span>
-<span class="source-line-no">049</span><span id="line-49">     * @return the aggregated loss value for the batch</span>
-<span class="source-line-no">050</span><span id="line-50">     */</span>
-<span class="source-line-no">051</span><span id="line-51">    float calculateLoss(List&lt;Pair&lt;Float[], Float[]&gt;&gt; batch);</span>
-<span class="source-line-no">052</span><span id="line-52"></span>
-<span class="source-line-no">053</span><span id="line-53">    /**</span>
-<span class="source-line-no">054</span><span id="line-54">     * Determines the gradients of the objective function with respect to</span>
-<span class="source-line-no">055</span><span id="line-55">     * the estimated values, for a single sample.</span>
-<span class="source-line-no">056</span><span id="line-56">     *</span>
-<span class="source-line-no">057</span><span id="line-57">     * &lt;p&gt;</span>
-<span class="source-line-no">058</span><span id="line-58">     * Implementations should return a gradient array that corresponds in</span>
-<span class="source-line-no">059</span><span id="line-59">     * length and order to the {@code estimated} array, such that each entry</span>
-<span class="source-line-no">060</span><span id="line-60">     * can be used to update model parameters during optimization.</span>
-<span class="source-line-no">061</span><span id="line-61">     * &lt;/p&gt;</span>
-<span class="source-line-no">062</span><span id="line-62">     *</span>
-<span class="source-line-no">063</span><span id="line-63">     * @param samples   the total number of samples in the batch</span>
-<span class="source-line-no">064</span><span id="line-64">     * @param estimated the predicted values for a sample</span>
-<span class="source-line-no">065</span><span id="line-65">     * @param target    the expected target values for the sample</span>
-<span class="source-line-no">066</span><span id="line-66">     * @return an array of gradients, one per dimension of the input</span>
-<span class="source-line-no">067</span><span id="line-67">     */</span>
-<span class="source-line-no">068</span><span id="line-68">    Float[] calculateGradient_dJ_da(int samples, Float[] estimated, Float[] target);</span>
-<span class="source-line-no">069</span><span id="line-69"></span>
-<span class="source-line-no">070</span><span id="line-70">    /**</span>
-<span class="source-line-no">071</span><span id="line-71">     * Creates an {@link ObjectiveFunction} that minimizes the loss</span>
-<span class="source-line-no">072</span><span id="line-72">     * according to the given loss function components.</span>
-<span class="source-line-no">073</span><span id="line-73">     *</span>
-<span class="source-line-no">074</span><span id="line-74">     * &lt;p&gt;</span>
-<span class="source-line-no">075</span><span id="line-75">     * This factory method composes together a {@link BatchLossFunction},</span>
-<span class="source-line-no">076</span><span id="line-76">     * a {@link SampleLossFunction}, and one or more</span>
-<span class="source-line-no">077</span><span id="line-77">     * {@link DimensionLossFunction}s into a concrete</span>
-<span class="source-line-no">078</span><span id="line-78">     * {@link ObjectiveFunction} implementation. The resulting objective</span>
-<span class="source-line-no">079</span><span id="line-79">     * function calculates dimension-level errors, aggregates them into</span>
-<span class="source-line-no">080</span><span id="line-80">     * sample losses, and then aggregates those sample losses into a</span>
-<span class="source-line-no">081</span><span id="line-81">     * batch-level loss suitable for optimization.</span>
-<span class="source-line-no">082</span><span id="line-82">     * &lt;/p&gt;</span>
-<span class="source-line-no">083</span><span id="line-83">     *</span>
-<span class="source-line-no">084</span><span id="line-84">     * &lt;p&gt;</span>
-<span class="source-line-no">085</span><span id="line-85">     * The intent of this method is to provide a convenient entry point</span>
-<span class="source-line-no">086</span><span id="line-86">     * for constructing custom objective functions when the optimization</span>
-<span class="source-line-no">087</span><span id="line-87">     * goal is loss minimization (as is typical in regression and</span>
-<span class="source-line-no">088</span><span id="line-88">     * classification problems).</span>
-<span class="source-line-no">089</span><span id="line-89">     * &lt;/p&gt;</span>
-<span class="source-line-no">090</span><span id="line-90">     *</span>
-<span class="source-line-no">091</span><span id="line-91">     * @param batchLossFunction      the function used to aggregate losses</span>
-<span class="source-line-no">092</span><span id="line-92">     *                               across the entire batch</span>
-<span class="source-line-no">093</span><span id="line-93">     * @param sampleLossFunction     the function used to aggregate losses</span>
-<span class="source-line-no">094</span><span id="line-94">     *                               within a single sample</span>
-<span class="source-line-no">095</span><span id="line-95">     * @param dimensionLossFunctions one or more functions used to compute</span>
-<span class="source-line-no">096</span><span id="line-96">     *                               loss at the individual dimension level</span>
-<span class="source-line-no">097</span><span id="line-97">     * @return a composed {@link ObjectiveFunction} that minimizes loss</span>
-<span class="source-line-no">098</span><span id="line-98">     */</span>
-<span class="source-line-no">099</span><span id="line-99">    static ObjectiveFunction minimize(BatchLossFunction batchLossFunction, SampleLossFunction sampleLossFunction, DimensionLossFunction... dimensionLossFunctions) {</span>
-<span class="source-line-no">100</span><span id="line-100">        return new ObjectiveFunctionImpl(batchLossFunction, sampleLossFunction, Arrays.asList(dimensionLossFunctions));</span>
-<span class="source-line-no">101</span><span id="line-101">    }</span>
-<span class="source-line-no">102</span><span id="line-102"></span>
-<span class="source-line-no">103</span><span id="line-103">}</span>
+<span class="source-line-no">010</span><span id="line-10">import net.tvburger.jdl.model.training.regularization.ExplicitRegularization;</span>
+<span class="source-line-no">011</span><span id="line-11"></span>
+<span class="source-line-no">012</span><span id="line-12">import java.util.Arrays;</span>
+<span class="source-line-no">013</span><span id="line-13">import java.util.List;</span>
+<span class="source-line-no">014</span><span id="line-14">import java.util.Set;</span>
+<span class="source-line-no">015</span><span id="line-15"></span>
+<span class="source-line-no">016</span><span id="line-16">/**</span>
+<span class="source-line-no">017</span><span id="line-17"> * Represents an objective function that extends the concept of a</span>
+<span class="source-line-no">018</span><span id="line-18"> * {@link LossFunction} to provide both loss aggregation and gradient</span>
+<span class="source-line-no">019</span><span id="line-19"> * computation.</span>
+<span class="source-line-no">020</span><span id="line-20"> *</span>
+<span class="source-line-no">021</span><span id="line-21"> * &lt;p&gt;</span>
+<span class="source-line-no">022</span><span id="line-22"> * An {@code ObjectiveFunction} defines how the overall loss is calculated</span>
+<span class="source-line-no">023</span><span id="line-23"> * across a batch of samples, as well as how the parameterGradients are determined</span>
+<span class="source-line-no">024</span><span id="line-24"> * for optimization algorithms (e.g., stochastic gradient descent).</span>
+<span class="source-line-no">025</span><span id="line-25"> * &lt;/p&gt;</span>
+<span class="source-line-no">026</span><span id="line-26"> *</span>
+<span class="source-line-no">027</span><span id="line-27"> * &lt;p&gt;</span>
+<span class="source-line-no">028</span><span id="line-28"> * Unlike {@link DimensionLossFunction}, {@link SampleLossFunction}, or</span>
+<span class="source-line-no">029</span><span id="line-29"> * {@link BatchLossFunction}, which focus on specific granularities,</span>
+<span class="source-line-no">030</span><span id="line-30"> * an objective function typically provides the entry point for a training</span>
+<span class="source-line-no">031</span><span id="line-31"> * process, combining loss evaluation and gradient calculation in one place.</span>
+<span class="source-line-no">032</span><span id="line-32"> * &lt;/p&gt;</span>
+<span class="source-line-no">033</span><span id="line-33"> */</span>
+<span class="source-line-no">034</span><span id="line-34">@DomainObject</span>
+<span class="source-line-no">035</span><span id="line-35">@Strategy(Strategy.Role.INTERFACE)</span>
+<span class="source-line-no">036</span><span id="line-36">public interface ObjectiveFunction&lt;N extends Number&gt; extends LossFunction&lt;N&gt; {</span>
+<span class="source-line-no">037</span><span id="line-37"></span>
+<span class="source-line-no">038</span><span id="line-38">    /**</span>
+<span class="source-line-no">039</span><span id="line-39">     * Calculates the loss for a batch of samples.</span>
+<span class="source-line-no">040</span><span id="line-40">     *</span>
+<span class="source-line-no">041</span><span id="line-41">     * &lt;p&gt;</span>
+<span class="source-line-no">042</span><span id="line-42">     * Each sample in the batch is represented as a {@link Pair} of</span>
+<span class="source-line-no">043</span><span id="line-43">     * {@code float[]} arrays, where the left element is the estimated</span>
+<span class="source-line-no">044</span><span id="line-44">     * (predicted) values and the right element is the target</span>
+<span class="source-line-no">045</span><span id="line-45">     * (expected) values. Implementations should define how individual</span>
+<span class="source-line-no">046</span><span id="line-46">     * sample losses are aggregated into a single scalar loss for the batch.</span>
+<span class="source-line-no">047</span><span id="line-47">     * &lt;/p&gt;</span>
+<span class="source-line-no">048</span><span id="line-48">     *</span>
+<span class="source-line-no">049</span><span id="line-49">     * @param batch a list of samples, where each sample is a pair of</span>
+<span class="source-line-no">050</span><span id="line-50">     *              {@code float[]} arrays (estimated vs target)</span>
+<span class="source-line-no">051</span><span id="line-51">     * @return the aggregated loss value for the batch</span>
+<span class="source-line-no">052</span><span id="line-52">     */</span>
+<span class="source-line-no">053</span><span id="line-53">    N calculateLossWithoutRegularizationPenalty(List&lt;Pair&lt;N[], N[]&gt;&gt; batch);</span>
+<span class="source-line-no">054</span><span id="line-54"></span>
+<span class="source-line-no">055</span><span id="line-55">    default N calculateLoss(List&lt;Pair&lt;N[], N[]&gt;&gt; batch, N[] parameters) {</span>
+<span class="source-line-no">056</span><span id="line-56">        return getCurrentNumberType().add(calculateLossWithoutRegularizationPenalty(batch), calculateRegularizationPenalty(parameters));</span>
+<span class="source-line-no">057</span><span id="line-57">    }</span>
+<span class="source-line-no">058</span><span id="line-58"></span>
+<span class="source-line-no">059</span><span id="line-59">    N calculateRegularizationPenalty(N[] parameters);</span>
+<span class="source-line-no">060</span><span id="line-60"></span>
+<span class="source-line-no">061</span><span id="line-61">    /**</span>
+<span class="source-line-no">062</span><span id="line-62">     * Determines the parameterGradients of the objective function with respect to</span>
+<span class="source-line-no">063</span><span id="line-63">     * the estimated values, for a single sample.</span>
+<span class="source-line-no">064</span><span id="line-64">     *</span>
+<span class="source-line-no">065</span><span id="line-65">     * &lt;p&gt;</span>
+<span class="source-line-no">066</span><span id="line-66">     * Implementations should return a gradient array that corresponds in</span>
+<span class="source-line-no">067</span><span id="line-67">     * length and order to the {@code estimated} array, such that each entry</span>
+<span class="source-line-no">068</span><span id="line-68">     * can be used to update model parameters during optimization.</span>
+<span class="source-line-no">069</span><span id="line-69">     * &lt;/p&gt;</span>
+<span class="source-line-no">070</span><span id="line-70">     *</span>
+<span class="source-line-no">071</span><span id="line-71">     * @param samples   the total number of samples in the batch</span>
+<span class="source-line-no">072</span><span id="line-72">     * @param estimated the predicted values for a sample</span>
+<span class="source-line-no">073</span><span id="line-73">     * @param target    the expected target values for the sample</span>
+<span class="source-line-no">074</span><span id="line-74">     * @return an array of parameterGradients, one per dimension of the input</span>
+<span class="source-line-no">075</span><span id="line-75">     */</span>
+<span class="source-line-no">076</span><span id="line-76">    N[] calculateGradient_dJ_da(int samples, N[] estimated, N[] target);</span>
+<span class="source-line-no">077</span><span id="line-77"></span>
+<span class="source-line-no">078</span><span id="line-78">    N regularizedGradient(N parameter);</span>
+<span class="source-line-no">079</span><span id="line-79"></span>
+<span class="source-line-no">080</span><span id="line-80">    boolean isOptimization();</span>
+<span class="source-line-no">081</span><span id="line-81"></span>
+<span class="source-line-no">082</span><span id="line-82">    default boolean isMinimization() {</span>
+<span class="source-line-no">083</span><span id="line-83">        return !isOptimization();</span>
+<span class="source-line-no">084</span><span id="line-84">    }</span>
+<span class="source-line-no">085</span><span id="line-85"></span>
+<span class="source-line-no">086</span><span id="line-86">    /**</span>
+<span class="source-line-no">087</span><span id="line-87">     * Creates an {@link ObjectiveFunction} that minimizes the loss</span>
+<span class="source-line-no">088</span><span id="line-88">     * according to the given loss function components.</span>
+<span class="source-line-no">089</span><span id="line-89">     *</span>
+<span class="source-line-no">090</span><span id="line-90">     * &lt;p&gt;</span>
+<span class="source-line-no">091</span><span id="line-91">     * This factory method composes together a {@link BatchLossFunction},</span>
+<span class="source-line-no">092</span><span id="line-92">     * a {@link SampleLossFunction}, and one or more</span>
+<span class="source-line-no">093</span><span id="line-93">     * {@link DimensionLossFunction}s into a concrete</span>
+<span class="source-line-no">094</span><span id="line-94">     * {@link ObjectiveFunction} implementation. The resulting objective</span>
+<span class="source-line-no">095</span><span id="line-95">     * function calculates dimension-level errors, aggregates them into</span>
+<span class="source-line-no">096</span><span id="line-96">     * sample losses, and then aggregates those sample losses into a</span>
+<span class="source-line-no">097</span><span id="line-97">     * batch-level loss suitable for optimization.</span>
+<span class="source-line-no">098</span><span id="line-98">     * &lt;/p&gt;</span>
+<span class="source-line-no">099</span><span id="line-99">     *</span>
+<span class="source-line-no">100</span><span id="line-100">     * &lt;p&gt;</span>
+<span class="source-line-no">101</span><span id="line-101">     * The intent of this method is to provide a convenient entry point</span>
+<span class="source-line-no">102</span><span id="line-102">     * for constructing custom objective functions when the optimization</span>
+<span class="source-line-no">103</span><span id="line-103">     * goal is loss minimization (as is typical in regression and</span>
+<span class="source-line-no">104</span><span id="line-104">     * classification problems).</span>
+<span class="source-line-no">105</span><span id="line-105">     * &lt;/p&gt;</span>
+<span class="source-line-no">106</span><span id="line-106">     *</span>
+<span class="source-line-no">107</span><span id="line-107">     * @param batchLossFunction      the function used to aggregate losses</span>
+<span class="source-line-no">108</span><span id="line-108">     *                               across the entire batch</span>
+<span class="source-line-no">109</span><span id="line-109">     * @param sampleLossFunction     the function used to aggregate losses</span>
+<span class="source-line-no">110</span><span id="line-110">     *                               within a single sample</span>
+<span class="source-line-no">111</span><span id="line-111">     * @param dimensionLossFunctions one or more functions used to compute</span>
+<span class="source-line-no">112</span><span id="line-112">     *                               loss at the individual dimension level</span>
+<span class="source-line-no">113</span><span id="line-113">     * @return a composed {@link ObjectiveFunction} that minimizes loss</span>
+<span class="source-line-no">114</span><span id="line-114">     */</span>
+<span class="source-line-no">115</span><span id="line-115">    @SafeVarargs</span>
+<span class="source-line-no">116</span><span id="line-116">    static &lt;N extends Number&gt; ObjectiveFunction&lt;N&gt; minimize(BatchLossFunction&lt;N&gt; batchLossFunction, SampleLossFunction&lt;N&gt; sampleLossFunction, DimensionLossFunction&lt;N&gt;... dimensionLossFunctions) {</span>
+<span class="source-line-no">117</span><span id="line-117">        return new ObjectiveFunctionImpl&lt;&gt;(batchLossFunction, sampleLossFunction, Arrays.asList(dimensionLossFunctions), false);</span>
+<span class="source-line-no">118</span><span id="line-118">    }</span>
+<span class="source-line-no">119</span><span id="line-119"></span>
+<span class="source-line-no">120</span><span id="line-120">    void addRegularization(ExplicitRegularization&lt;N&gt; regularization);</span>
+<span class="source-line-no">121</span><span id="line-121"></span>
+<span class="source-line-no">122</span><span id="line-122">    void removeRegularization(ExplicitRegularization&lt;N&gt; regularization);</span>
+<span class="source-line-no">123</span><span id="line-123"></span>
+<span class="source-line-no">124</span><span id="line-124">    Set&lt;ExplicitRegularization&lt;N&gt;&gt; getRegularizations();</span>
+<span class="source-line-no">125</span><span id="line-125"></span>
+<span class="source-line-no">126</span><span id="line-126">}</span>
+<span class="source-line-no">127</span><span id="line-127"></span>
 
 
 

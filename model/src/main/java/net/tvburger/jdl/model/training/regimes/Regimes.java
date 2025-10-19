@@ -19,6 +19,10 @@ public final class Regimes {
     private Regimes() {
     }
 
+    public static OneShotRegime oneShot() {
+        return new OneShotRegime();
+    }
+
     /**
      * Creates a full-batch training regime that processes the entire dataset
      * in a single update.
@@ -42,10 +46,19 @@ public final class Regimes {
     /**
      * Creates an online training regime that processes one sample at a time.
      *
-     * @return a new {@link OnlineRegime}
+     * @return a new {@link StochasticRegime}
      */
-    public static OnlineRegime online() {
-        return new OnlineRegime();
+    public static StochasticRegime online() {
+        return new StochasticRegime();
+    }
+
+    /**
+     * Creates an online training regime that processes one sample at a time.
+     *
+     * @return a new {@link StochasticRegime}
+     */
+    public static StochasticRegime stochastic() {
+        return new StochasticRegime();
     }
 
     /**
@@ -57,6 +70,10 @@ public final class Regimes {
      */
     public static ChainedRegime.Builder epochs(int epochs) {
         return new ChainedRegime.Builder().epochs(epochs);
+    }
+
+    public static ChainedRegime.Builder epochs(int epochs, EpochRegime.EpochCompletionListener... listener) {
+        return new ChainedRegime.Builder().epochs(epochs, listener);
     }
 
     /**

@@ -8,6 +8,7 @@ public final class RationalLongSupport implements JavaNumberTypeSupport<Rational
     private static final Rational<Long> ONE = new Rational<>(1L, 1L);
     private static final Rational<Long> MINUS_ONE = new Rational<>(-1L, 1L);
     private static final Rational<Long> ZERO = new Rational<>(0L, 1L);
+    private static final Rational<Long> EPSILON = new Rational<>(1L, 10_000_000L);
 
     protected RationalLongSupport() {
     }
@@ -42,9 +43,19 @@ public final class RationalLongSupport implements JavaNumberTypeSupport<Rational
     }
 
     @Override
+    public Rational<Long> multiply(Rational<Long> first, int second) {
+        return rational(first.numerator() * second, first.denominator());
+    }
+
+    @Override
     public Rational<Long> divide(Rational<Long> first, Rational<Long> second) {
         return rational(first.numerator() * second.denominator(),
                 first.denominator() * second.numerator());
+    }
+
+    @Override
+    public Rational<Long> divide(Rational<Long> first, int second) {
+        return rational(first.numerator(), first.denominator() * second);
     }
 
     @Override
@@ -61,6 +72,11 @@ public final class RationalLongSupport implements JavaNumberTypeSupport<Rational
             return rational(first.numerator() * factor + second.numerator(), second.denominator());
         }
         return rational(first.numerator() * second.denominator() + second.numerator() * first.denominator(), first.denominator() * second.denominator());
+    }
+
+    @Override
+    public Rational<Long> add(Rational<Long> first, int second) {
+        return rational(first.numerator() + first.denominator() * second, first.denominator());
     }
 
     private Rational<Long> rational(long numerator, long denominator) {
@@ -111,7 +127,7 @@ public final class RationalLongSupport implements JavaNumberTypeSupport<Rational
     }
 
     @Override
-    public boolean greaterThan(Rational<Long> first, Rational<Long> second) {
+    public boolean isGreaterThan(Rational<Long> first, Rational<Long> second) {
         return first.numerator() * second.denominator() > first.denominator() * second.numerator();
     }
 
@@ -155,6 +171,32 @@ public final class RationalLongSupport implements JavaNumberTypeSupport<Rational
 
     @Override
     public Comparator<Rational<Long>> comparator() {
-        return (o1, o2) -> greaterThan(o1, o2) ? 1 : greaterThan(o2, o1) ? -1 : 0;
+        return (o1, o2) -> isGreaterThan(o1, o2) ? 1 : isGreaterThan(o2, o1) ? -1 : 0;
+    }
+
+    @Override
+    public Rational<Long> clamp01(Rational<Long> value) {
+        if (value.numerator() <= 0) {
+            return ZERO;
+        }
+        if (value.numerator() >= value.denominator()) {
+            return ONE;
+        }
+        return value;
+    }
+
+    @Override
+    public Rational<Long> epsilon() {
+        return EPSILON;
+    }
+
+    @Override
+    public Rational<Long> log(Rational<Long> value) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isInstance(Object value) {
+        return value instanceof Rational<?> r && r.numerator() instanceof Long && r.denominator() instanceof Long;
     }
 }

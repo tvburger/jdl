@@ -15,9 +15,9 @@
 <span class="source-line-no">002</span><span id="line-2"></span>
 <span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.patterns.Strategy;</span>
 <span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.model.DataSet;</span>
-<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.model.EstimationFunction;</span>
-<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.model.training.ObjectiveFunction;</span>
-<span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.model.training.Optimizer;</span>
+<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.model.training.ObjectiveFunction;</span>
+<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.model.training.Optimizer;</span>
+<span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.model.training.TrainableFunction;</span>
 <span class="source-line-no">008</span><span id="line-8"></span>
 <span class="source-line-no">009</span><span id="line-9">/**</span>
 <span class="source-line-no">010</span><span id="line-10"> * A training regime that performs &lt;strong&gt;mini-batch training&lt;/strong&gt;.</span>
@@ -71,12 +71,12 @@
 <span class="source-line-no">058</span><span id="line-58">     * @param &lt;E&gt;                the type of estimation function</span>
 <span class="source-line-no">059</span><span id="line-59">     */</span>
 <span class="source-line-no">060</span><span id="line-60">    @Override</span>
-<span class="source-line-no">061</span><span id="line-61">    public &lt;E extends EstimationFunction&lt;Float&gt;&gt; void train(E estimationFunction, DataSet&lt;Float&gt; trainingSet, ObjectiveFunction objective, Optimizer&lt;? super E, Float&gt; optimizer) {</span>
+<span class="source-line-no">061</span><span id="line-61">    public &lt;E extends TrainableFunction&lt;N&gt;, N extends Number&gt; void train(E estimationFunction, DataSet&lt;N&gt; trainingSet, ObjectiveFunction&lt;N&gt; objective, Optimizer&lt;? super E, N&gt; optimizer, int step) {</span>
 <span class="source-line-no">062</span><span id="line-62">        int offset = 0;</span>
 <span class="source-line-no">063</span><span id="line-63">        int trainingSetSize = trainingSet.size();</span>
 <span class="source-line-no">064</span><span id="line-64">        do {</span>
 <span class="source-line-no">065</span><span id="line-65">            int newOffset = Math.min(trainingSetSize, offset + getBatchSize());</span>
-<span class="source-line-no">066</span><span id="line-66">            regime.train(estimationFunction, trainingSet.subset(offset, newOffset), objective, optimizer);</span>
+<span class="source-line-no">066</span><span id="line-66">            regime.train(estimationFunction, trainingSet.subset(offset, newOffset), objective, optimizer, step);</span>
 <span class="source-line-no">067</span><span id="line-67">            offset = newOffset;</span>
 <span class="source-line-no">068</span><span id="line-68">        } while (offset &gt;= trainingSet.size());</span>
 <span class="source-line-no">069</span><span id="line-69">    }</span>

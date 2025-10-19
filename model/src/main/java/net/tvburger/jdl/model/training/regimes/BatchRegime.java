@@ -2,17 +2,17 @@ package net.tvburger.jdl.model.training.regimes;
 
 import net.tvburger.jdl.common.patterns.Strategy;
 import net.tvburger.jdl.model.DataSet;
-import net.tvburger.jdl.model.EstimationFunction;
 import net.tvburger.jdl.model.training.ObjectiveFunction;
 import net.tvburger.jdl.model.training.Optimizer;
 import net.tvburger.jdl.model.training.Regime;
+import net.tvburger.jdl.model.training.TrainableFunction;
 
 /**
  * A training regime that performs classic <strong>batch training</strong>.
  * <p>
  * In batch training, the optimizer is applied once to the entire training set
  * in a single call. This is equivalent to full-batch gradient descent, where
- * all samples are used together to compute gradients and update parameters.
+ * all samples are used together to compute parameterGradients and update parameters.
  * </p>
  *
  * <h2>Behavior</h2>
@@ -44,7 +44,7 @@ public final class BatchRegime implements Regime {
      * @param <E>                the type of estimation function being trained
      */
     @Override
-    public <E extends EstimationFunction<Float>> void train(E estimationFunction, DataSet<Float> trainingSet, ObjectiveFunction objective, Optimizer<? super E, Float> optimizer) {
-        optimizer.optimize(estimationFunction, trainingSet, objective);
+    public <E extends TrainableFunction<N>, N extends Number> void train(E estimationFunction, DataSet<N> trainingSet, ObjectiveFunction<N> objective, Optimizer<? super E, N> optimizer, int step) {
+        optimizer.optimize(estimationFunction, trainingSet, objective, step);
     }
 }

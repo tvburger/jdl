@@ -33,7 +33,7 @@
 <span class="source-line-no">020</span><span id="line-20"> */</span>
 <span class="source-line-no">021</span><span id="line-21">@DomainObject</span>
 <span class="source-line-no">022</span><span id="line-22">@Strategy(Strategy.Role.INTERFACE)</span>
-<span class="source-line-no">023</span><span id="line-23">public interface DimensionLossFunction extends LossFunction {</span>
+<span class="source-line-no">023</span><span id="line-23">public interface DimensionLossFunction&lt;N extends Number&gt; extends LossFunction&lt;N&gt; {</span>
 <span class="source-line-no">024</span><span id="line-24"></span>
 <span class="source-line-no">025</span><span id="line-25">    /**</span>
 <span class="source-line-no">026</span><span id="line-26">     * Calculates the loss for a single dimension, given the estimated value</span>
@@ -43,7 +43,7 @@
 <span class="source-line-no">030</span><span id="line-30">     * @param target    the expected or target value</span>
 <span class="source-line-no">031</span><span id="line-31">     * @return the loss for this dimension as a {@code float}</span>
 <span class="source-line-no">032</span><span id="line-32">     */</span>
-<span class="source-line-no">033</span><span id="line-33">    float calculateDimensionLoss(float estimated, float target);</span>
+<span class="source-line-no">033</span><span id="line-33">    N calculateDimensionLoss(N estimated, N target);</span>
 <span class="source-line-no">034</span><span id="line-34"></span>
 <span class="source-line-no">035</span><span id="line-35">    /**</span>
 <span class="source-line-no">036</span><span id="line-36">     * Calculates the gradient of the dimension loss with respect to the</span>
@@ -54,7 +54,7 @@
 <span class="source-line-no">041</span><span id="line-41">     * @param target    the expected or target value for this dimension</span>
 <span class="source-line-no">042</span><span id="line-42">     * @return the gradient of the loss with respect to the activation</span>
 <span class="source-line-no">043</span><span id="line-43">     */</span>
-<span class="source-line-no">044</span><span id="line-44">    float calculateGradient_dl_da(float estimated, float target);</span>
+<span class="source-line-no">044</span><span id="line-44">    N calculateGradient_dl_da(N estimated, N target);</span>
 <span class="source-line-no">045</span><span id="line-45"></span>
 <span class="source-line-no">046</span><span id="line-46">}</span>
 

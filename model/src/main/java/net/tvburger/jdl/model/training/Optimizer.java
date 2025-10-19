@@ -4,6 +4,7 @@ import net.tvburger.jdl.common.patterns.DomainObject;
 import net.tvburger.jdl.common.patterns.Strategy;
 import net.tvburger.jdl.model.DataSet;
 import net.tvburger.jdl.model.EstimationFunction;
+import net.tvburger.jdl.model.training.optimizer.UpdateStep;
 
 /**
  * Defines an optimization algorithm for training an {@link EstimationFunction}.
@@ -27,7 +28,7 @@ import net.tvburger.jdl.model.EstimationFunction;
  */
 @DomainObject
 @Strategy(Strategy.Role.INTERFACE)
-public interface Optimizer<E extends EstimationFunction<N>, N extends Number> {
+public interface Optimizer<E extends TrainableFunction<N>, N extends Number> {
 
     /**
      * An {@link Optimizer} variant that is restricted to online (sample-by-sample)
@@ -40,16 +41,16 @@ public interface Optimizer<E extends EstimationFunction<N>, N extends Number> {
      * </p>
      *
      * <p>
-     * The default {@link #optimize(EstimationFunction, DataSet, ObjectiveFunction)}
+     * The default {@link #optimize(TrainableFunction, DataSet, ObjectiveFunction, int)}
      * implementation iterates through the dataset and delegates to
-     * {@link #optimize(EstimationFunction, DataSet.Sample, ObjectiveFunction)} for
+     * {@link #optimize(TrainableFunction, DataSet.Sample, ObjectiveFunction, int)} for
      * each sample.
      * </p>
      *
      * @param <E> the type of estimation function being optimized
      */
     @Strategy(Strategy.Role.CONCRETE)
-    interface OnlineOnly<E extends EstimationFunction<N>, N extends Number> extends Optimizer<E, N> {
+    interface Stochastic<E extends TrainableFunction<N>, N extends Number> extends Optimizer<E, N> {
 
         /**
          * Default implementation of batch optimization for {@code OnlineOnly}
@@ -59,11 +60,11 @@ public interface Optimizer<E extends EstimationFunction<N>, N extends Number> {
          * @param estimationFunction the estimation function (model) to optimize
          * @param trainingSet        the dataset used for optimization
          * @param objective          the objective function that defines the loss
-         *                           and gradients
+         *                           and parameterGradients
          */
         @Override
-        default void optimize(E estimationFunction, DataSet<N> trainingSet, ObjectiveFunction objective) {
-            trainingSet.forEach(s -> optimize(estimationFunction, s, objective));
+        default void optimize(E estimationFunction, DataSet<N> trainingSet, ObjectiveFunction<N> objective, int step) {
+            trainingSet.forEach(s -> optimize(estimationFunction, s, objective, step));
         }
 
         /**
@@ -79,10 +80,15 @@ public interface Optimizer<E extends EstimationFunction<N>, N extends Number> {
          * @param estimationFunction the estimation function (model) to optimize
          * @param sample             the training sample used for optimization
          * @param objective          the objective function that defines the loss
-         *                           and gradients
+         *                           and parameterGradients
          */
-        void optimize(E estimationFunction, DataSet.Sample<N> sample, ObjectiveFunction objective);
+        void optimize(E estimationFunction, DataSet.Sample<N> sample, ObjectiveFunction<N> objective, int step);
 
+    }
+
+    static <E extends TrainableFunction<N>, N extends Number> Optimizer<E, N> nullOptimizer() {
+        return (estimationFunction, trainingSet, objective, step) -> {
+        };
     }
 
     /**
@@ -91,15 +97,15 @@ public interface Optimizer<E extends EstimationFunction<N>, N extends Number> {
      *
      * <p>
      * Typical implementations evaluate the {@link ObjectiveFunction} across the
-     * training set, compute gradients, and update the parameters of the
+     * training set, compute parameterGradients, and update the parameters of the
      * estimation function accordingly.
      * </p>
      *
      * @param estimationFunction the estimation function (model) to optimize
      * @param trainingSet        the dataset used for optimization
      * @param objective          the objective function that defines the loss
-     *                           and gradients
+     *                           and parameterGradients
      */
-    void optimize(E estimationFunction, DataSet<N> trainingSet, ObjectiveFunction objective);
+    void optimize(E estimationFunction, DataSet<N> trainingSet, ObjectiveFunction<N> objective, int step);
 
 }

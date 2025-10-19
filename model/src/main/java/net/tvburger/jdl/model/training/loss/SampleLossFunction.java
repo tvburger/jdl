@@ -23,7 +23,7 @@ import java.util.List;
  */
 @DomainObject
 @Strategy(Strategy.Role.INTERFACE)
-public interface SampleLossFunction extends LossFunction {
+public interface SampleLossFunction<N extends Number> extends LossFunction<N> {
 
     /**
      * Calculates the total loss for a single sample by aggregating
@@ -32,7 +32,7 @@ public interface SampleLossFunction extends LossFunction {
      * @param dimensionLosses a list of losses for each output dimension
      * @return the total sample loss
      */
-    float calculateSampleLoss(List<Float> dimensionLosses);
+    N calculateSampleLoss(List<N> dimensionLosses);
 
     /**
      * Computes the gradient of the sample loss with respect to the
@@ -42,6 +42,6 @@ public interface SampleLossFunction extends LossFunction {
      * @param dimensions the number of output dimensions
      * @return the gradient of the sample loss with respect to each dimension loss
      */
-    float calculateGradient_dL_dl(int dimensions);
+    N calculateGradient_dL_dl(int dimensions);
 
 }

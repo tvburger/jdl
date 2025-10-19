@@ -18,7 +18,7 @@
 <span class="source-line-no">005</span><span id="line-5">/**</span>
 <span class="source-line-no">006</span><span id="line-6"> * Marker interface for components that expose a configurable learning rate.</span>
 <span class="source-line-no">007</span><span id="line-7"> */</span>
-<span class="source-line-no">008</span><span id="line-8">public interface LearningRateConfigurable extends HyperparameterConfigurable {</span>
+<span class="source-line-no">008</span><span id="line-8">public interface LearningRateConfigurable&lt;N extends Number&gt; extends HyperparameterConfigurable {</span>
 <span class="source-line-no">009</span><span id="line-9"></span>
 <span class="source-line-no">010</span><span id="line-10">    /** The hyperparameter name for learning rate. */</span>
 <span class="source-line-no">011</span><span id="line-11">    String HP_LEARNING_RATE = "learningRate";</span>
@@ -28,19 +28,20 @@
 <span class="source-line-no">015</span><span id="line-15">     *</span>
 <span class="source-line-no">016</span><span id="line-16">     * @return the learning rate value</span>
 <span class="source-line-no">017</span><span id="line-17">     */</span>
-<span class="source-line-no">018</span><span id="line-18">    default float getLearningRate() {</span>
-<span class="source-line-no">019</span><span id="line-19">        return getHyperparameter(HP_LEARNING_RATE, Float.class);</span>
-<span class="source-line-no">020</span><span id="line-20">    }</span>
-<span class="source-line-no">021</span><span id="line-21"></span>
-<span class="source-line-no">022</span><span id="line-22">    /**</span>
-<span class="source-line-no">023</span><span id="line-23">     * Sets the learning rate (step size).</span>
-<span class="source-line-no">024</span><span id="line-24">     *</span>
-<span class="source-line-no">025</span><span id="line-25">     * @param learningRate the new learning rate (must be &gt; 0)</span>
-<span class="source-line-no">026</span><span id="line-26">     */</span>
-<span class="source-line-no">027</span><span id="line-27">    default void setLearningRate(float learningRate) {</span>
-<span class="source-line-no">028</span><span id="line-28">        setHyperparameter(HP_LEARNING_RATE, learningRate);</span>
-<span class="source-line-no">029</span><span id="line-29">    }</span>
-<span class="source-line-no">030</span><span id="line-30">}</span>
+<span class="source-line-no">018</span><span id="line-18">    @SuppressWarnings("unchecked")</span>
+<span class="source-line-no">019</span><span id="line-19">    default N getLearningRate() {</span>
+<span class="source-line-no">020</span><span id="line-20">        return (N) getHyperparameter(HP_LEARNING_RATE);</span>
+<span class="source-line-no">021</span><span id="line-21">    }</span>
+<span class="source-line-no">022</span><span id="line-22"></span>
+<span class="source-line-no">023</span><span id="line-23">    /**</span>
+<span class="source-line-no">024</span><span id="line-24">     * Sets the learning rate (step size).</span>
+<span class="source-line-no">025</span><span id="line-25">     *</span>
+<span class="source-line-no">026</span><span id="line-26">     * @param learningRate the new learning rate (must be &gt; 0)</span>
+<span class="source-line-no">027</span><span id="line-27">     */</span>
+<span class="source-line-no">028</span><span id="line-28">    default void setLearningRate(N learningRate) {</span>
+<span class="source-line-no">029</span><span id="line-29">        setHyperparameter(HP_LEARNING_RATE, learningRate);</span>
+<span class="source-line-no">030</span><span id="line-30">    }</span>
+<span class="source-line-no">031</span><span id="line-31">}</span>
 
 
 

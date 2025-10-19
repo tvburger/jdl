@@ -19,12 +19,22 @@ public interface JavaNumberTypeSupport<N> {
 
     N multiply(N first, N second);
 
+    N multiply(N first, int second);
+
     N divide(N first, N second);
+
+    N divide(N first, int second);
 
     N add(N first, N second);
 
+    N add(N first, int second);
+
     default N subtract(N first, N second) {
         return add(first, multiply(minusOne(), second));
+    }
+
+    default N subtract(N first, int second) {
+        return add(first, -second);
     }
 
     default N negate(N value) {
@@ -51,26 +61,26 @@ public interface JavaNumberTypeSupport<N> {
 
     boolean equals(N first, N second);
 
-    boolean greaterThan(N first, N second);
+    boolean isGreaterThan(N first, N second);
 
-    default boolean positive(N value) {
-        return greaterThan(value, zero());
+    default boolean isPositive(N value) {
+        return isGreaterThan(value, zero());
     }
 
-    default boolean negative(N value) {
-        return greaterThan(zero(), value);
+    default boolean isNegative(N value) {
+        return isGreaterThan(zero(), value);
     }
 
-    default boolean sameSign(N first, N second) {
+    default boolean hasSameSign(N first, N second) {
         return isZero(first) || isZero(second)
-                || positive(first) && positive(second)
-                || negative(first) && negative(second);
+                || isPositive(first) && isPositive(second)
+                || isNegative(first) && isNegative(second);
     }
 
     N squareRoot(N value);
 
     default N absolute(N value) {
-        return greaterThan(zero(), value) ? multiply(minusOne(), value) : value;
+        return isGreaterThan(zero(), value) ? multiply(minusOne(), value) : value;
     }
 
     N valueOf(double value);
@@ -78,10 +88,35 @@ public interface JavaNumberTypeSupport<N> {
     Comparator<N> comparator();
 
     default N max(N first, N second) {
-        return greaterThan(second, first) ? second : first;
+        return isGreaterThan(second, first) ? second : first;
     }
 
     default N min(N first, N second) {
-        return greaterThan(first, second) ? second : first;
+        return isGreaterThan(first, second) ? second : first;
     }
+
+    N clamp01(N value);
+
+    N epsilon();
+
+    N log(N value);
+
+    default N pow(N base, int times) {
+        for (int i = 1; i < times; i++) {
+            base = multiply(base, base);
+        }
+        return base;
+    }
+
+    boolean isInstance(Object value);
+
+    @SuppressWarnings("unchecked")
+    default N cast(Object value) {
+        if (isInstance(value)) {
+            return (N) value;
+        } else {
+            throw new IllegalArgumentException("Cannot cast value to target number type: " + value);
+        }
+    }
+
 }

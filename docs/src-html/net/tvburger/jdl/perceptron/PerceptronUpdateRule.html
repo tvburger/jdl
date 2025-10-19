@@ -22,10 +22,10 @@
 <span class="source-line-no">009</span><span id="line-9"></span>
 <span class="source-line-no">010</span><span id="line-10">import java.util.Arrays;</span>
 <span class="source-line-no">011</span><span id="line-11"></span>
-<span class="source-line-no">012</span><span id="line-12">public class PerceptronUpdateRule implements Optimizer.OnlineOnly&lt;Perceptron, Float&gt; {</span>
+<span class="source-line-no">012</span><span id="line-12">public class PerceptronUpdateRule implements Optimizer.Stochastic&lt;Perceptron, Float&gt; {</span>
 <span class="source-line-no">013</span><span id="line-13"></span>
 <span class="source-line-no">014</span><span id="line-14">    @Override</span>
-<span class="source-line-no">015</span><span id="line-15">    public void optimize(Perceptron perceptron, DataSet.Sample&lt;Float&gt; sample, ObjectiveFunction objective) {</span>
+<span class="source-line-no">015</span><span id="line-15">    public void optimize(Perceptron perceptron, DataSet.Sample&lt;Float&gt; sample, ObjectiveFunction&lt;Float&gt; objective, int step) {</span>
 <span class="source-line-no">016</span><span id="line-16">        Float[] estimate = perceptron.estimate(sample.features());</span>
 <span class="source-line-no">017</span><span id="line-17">        for (int i = 0; i &lt; estimate.length; i++) {</span>
 <span class="source-line-no">018</span><span id="line-18">            int sign = Floats.greaterThan(sample.targetOutputs()[i], 0.0f) ? +1 : -1;</span>

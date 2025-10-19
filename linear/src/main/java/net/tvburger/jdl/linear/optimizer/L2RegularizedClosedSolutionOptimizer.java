@@ -5,15 +5,24 @@ import net.tvburger.jdl.linalg.*;
 import net.tvburger.jdl.linear.FeatureMatrices;
 import net.tvburger.jdl.linear.LinearBasisFunctionModel;
 import net.tvburger.jdl.model.DataSet;
+import net.tvburger.jdl.model.training.ObjectiveFunction;
+import net.tvburger.jdl.model.training.Optimizer;
+import net.tvburger.jdl.model.training.optimizer.UpdateStep;
 
 public class L2RegularizedClosedSolutionOptimizer<N extends Number> implements LinearModelOptimizer<N> {
 
     private boolean debugOutput;
-    private final JavaNumberTypeSupport<N> typeSupport;
     private N lambda;
+
+    private final JavaNumberTypeSupport<N> typeSupport;
 
     public L2RegularizedClosedSolutionOptimizer(JavaNumberTypeSupport<N> typeSupport) {
         this.typeSupport = typeSupport;
+    }
+
+    @Override
+    public JavaNumberTypeSupport<N> getCurrentNumberType() {
+        return typeSupport;
     }
 
     public N getLambda() {
@@ -22,11 +31,6 @@ public class L2RegularizedClosedSolutionOptimizer<N extends Number> implements L
 
     public void setLambda(N lambda) {
         this.lambda = lambda;
-    }
-
-    @Override
-    public JavaNumberTypeSupport<N> getCurrentNumberType() {
-        return typeSupport;
     }
 
     public boolean isDebugOutput() {
@@ -38,21 +42,21 @@ public class L2RegularizedClosedSolutionOptimizer<N extends Number> implements L
     }
 
     @Override
-    public void setOptimalWeights(LinearBasisFunctionModel<N> regression, DataSet<N> trainSet) {
+    public void setOptimalWeights(LinearBasisFunctionModel<N> regression, DataSet<N> trainingSet) {
         JavaNumberTypeSupport<N> typeSupport = regression.getCurrentNumberType();
         if (debugOutput) {
             System.out.println("Number type = " + typeSupport.name());
         }
 
-        N[] values = typeSupport.createArray(trainSet.size());
+        N[] values = typeSupport.createArray(trainingSet.size());
         for (int i = 0; i < values.length; i++) {
-            values[i] = trainSet.samples().get(i).targetOutputs()[0];
+            values[i] = trainingSet.samples().get(i).targetOutputs()[0];
         }
         TypedVector<N> y = Vectors.of(typeSupport, values).transpose();
         if (debugOutput) {
             y.print("y");
         }
-        Matrix<N> designMatrix = FeatureMatrices.create(regression.getFeatureExtractor(), trainSet);
+        Matrix<N> designMatrix = FeatureMatrices.create(regression.getFeatureExtractor(), trainingSet);
         if (debugOutput) {
             designMatrix.print("Φ");
         }

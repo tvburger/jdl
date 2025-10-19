@@ -20,13 +20,15 @@ public interface Vector<N extends Number> extends Transposable<Vector<N>>, Numbe
 
     Vector<N> multiply(N value);
 
+    Vector<N> divide(N value);
+
     Vector<N> add(N value);
 
-    Vector<N> substract(N value);
+    Vector<N> subtract(N value);
 
     Vector<N> add(Vector<N> vector);
 
-    Vector<N> substract(Vector<N> vector);
+    Vector<N> subtract(Vector<N> vector);
 
     N dotProduct(Vector<N> vector);
 

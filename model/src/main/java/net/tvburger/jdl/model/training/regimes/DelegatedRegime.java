@@ -28,7 +28,7 @@ import java.util.Objects;
  *   forwarded to it.</li>
  *   <li>If no delegate is provided ({@code null}), a default inline regime is
  *   created that simply invokes
- *   {@link Optimizer#optimize(EstimationFunction, DataSet, ObjectiveFunction)}
+ *   {@link Optimizer#optimize(net.tvburger.jdl.model.training.TrainableFunction, DataSet, ObjectiveFunction, int)}
  *   once on the entire dataset, i.e. a <em>single batch update</em>.</li>
  * </ul>
  */

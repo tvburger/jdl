@@ -8,6 +8,7 @@ public final class RationalIntegerSupport implements JavaNumberTypeSupport<Ratio
     private static final Rational<Integer> ONE = new Rational<>(1, 1);
     private static final Rational<Integer> MINUS_ONE = new Rational<>(-1, 1);
     private static final Rational<Integer> ZERO = new Rational<>(0, 1);
+    private static final Rational<Integer> EPSILON = new Rational<>(1, 1_000_000);
 
     protected RationalIntegerSupport() {
     }
@@ -42,9 +43,19 @@ public final class RationalIntegerSupport implements JavaNumberTypeSupport<Ratio
     }
 
     @Override
+    public Rational<Integer> multiply(Rational<Integer> first, int second) {
+        return rational(first.numerator() * second, first.denominator());
+    }
+
+    @Override
     public Rational<Integer> divide(Rational<Integer> first, Rational<Integer> second) {
         return rational(first.numerator() * second.denominator(),
                 first.denominator() * second.numerator());
+    }
+
+    @Override
+    public Rational<Integer> divide(Rational<Integer> first, int second) {
+        return rational(first.numerator(), first.denominator() * second);
     }
 
     @Override
@@ -61,6 +72,11 @@ public final class RationalIntegerSupport implements JavaNumberTypeSupport<Ratio
             return rational(first.numerator() * factor + second.numerator(), second.denominator());
         }
         return rational(first.numerator() * second.denominator() + second.numerator() * first.denominator(), first.denominator() * second.denominator());
+    }
+
+    @Override
+    public Rational<Integer> add(Rational<Integer> first, int second) {
+        return rational(first.numerator() + first.denominator() * second, first.denominator());
     }
 
     private Rational<Integer> rational(int numerator, int denominator) {
@@ -111,7 +127,7 @@ public final class RationalIntegerSupport implements JavaNumberTypeSupport<Ratio
     }
 
     @Override
-    public boolean greaterThan(Rational<Integer> first, Rational<Integer> second) {
+    public boolean isGreaterThan(Rational<Integer> first, Rational<Integer> second) {
         return first.numerator() * second.denominator() > first.denominator() * second.numerator();
     }
 
@@ -155,6 +171,32 @@ public final class RationalIntegerSupport implements JavaNumberTypeSupport<Ratio
 
     @Override
     public Comparator<Rational<Integer>> comparator() {
-        return (o1, o2) -> greaterThan(o1, o2) ? 1 : greaterThan(o2, o1) ? -1 : 0;
+        return (o1, o2) -> isGreaterThan(o1, o2) ? 1 : isGreaterThan(o2, o1) ? -1 : 0;
+    }
+
+    @Override
+    public Rational<Integer> clamp01(Rational<Integer> value) {
+        if (value.numerator() <= 0) {
+            return ZERO;
+        }
+        if (value.numerator() >= value.denominator()) {
+            return ONE;
+        }
+        return value;
+    }
+
+    @Override
+    public Rational<Integer> epsilon() {
+        return EPSILON;
+    }
+
+    @Override
+    public Rational<Integer> log(Rational<Integer> value) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isInstance(Object value) {
+        return value instanceof Rational<?> r && r.numerator() instanceof Integer && r.denominator() instanceof Integer;
     }
 }

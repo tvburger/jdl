@@ -9,13 +9,13 @@ import net.tvburger.jdl.model.training.TrainableFunction;
  * <p>
  * Implementations represent functions {@code f(x; θ)} with trainable parameters θ
  * that produce a scalar output for a given input vector. This interface provides
- * a way to compute parameter gradients needed for training via backpropagation.
+ * a way to compute parameter parameterGradients needed for training via backpropagation.
  */
 @Strategy(Strategy.Role.INTERFACE)
 public interface TrainableScalarFunction<N extends Number> extends TrainableFunction<N>, ScalarEstimationFunction<N> {
 
     /**
-     * Calculates the gradients of the scalar function with respect to its
+     * Calculates the parameterGradients of the scalar function with respect to its
      * trainable parameters, given the input values.
      *
      * @param inputs the input feature vector to the function

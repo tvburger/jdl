@@ -2,10 +2,13 @@ package net.tvburger.jdl.model.training.regimes;
 
 import net.tvburger.jdl.common.patterns.Strategy;
 import net.tvburger.jdl.model.DataSet;
-import net.tvburger.jdl.model.EstimationFunction;
 import net.tvburger.jdl.model.training.ObjectiveFunction;
 import net.tvburger.jdl.model.training.Optimizer;
 import net.tvburger.jdl.model.training.Regime;
+import net.tvburger.jdl.model.training.TrainableFunction;
+
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * A {@link Regime} decorator that repeats training for a fixed number of epochs.
@@ -28,6 +31,51 @@ import net.tvburger.jdl.model.training.Regime;
  */
 @Strategy(Strategy.Role.CONCRETE)
 public final class EpochRegime extends DelegatedRegime implements EpochConfigurable {
+
+    @FunctionalInterface
+    public interface EpochCompletionListener {
+
+        <N extends Number> void epochCompleted(EpochRegime epochRegime, int currentEpoch, TrainableFunction<N> model, DataSet<N> trainingSet, Optimizer<? extends TrainableFunction<N>, N> optimizer);
+
+    }
+
+    public static EpochCompletionListener sample(int times, EpochCompletionListener listener) {
+        return new EpochCompletionListener() {
+            @Override
+            public <N extends Number> void epochCompleted(EpochRegime epochRegime, int currentEpoch, TrainableFunction<N> model, DataSet<N> trainingSet, Optimizer<? extends TrainableFunction<N>, N> optimizer) {
+                boolean call;
+                int totalEpochs = epochRegime.getEpochs();
+                if (totalEpochs < times || totalEpochs == currentEpoch || currentEpoch == 1) {
+                    call = true;
+                } else {
+                    call = (currentEpoch % (totalEpochs / times)) == 0;
+                }
+                if (call) {
+                    listener.epochCompleted(epochRegime, currentEpoch, model, trainingSet, optimizer);
+                }
+            }
+        };
+    }
+
+    private final List<EpochCompletionListener> listeners = new CopyOnWriteArrayList<>();
+
+    /**
+     * Registers an epoch completion listener.
+     *
+     * @param listener the listener to add
+     */
+    public void addEpochCompletionListener(EpochCompletionListener listener) {
+        listeners.add(listener);
+    }
+
+    /**
+     * Removes an epoch completion listener.
+     *
+     * @param listener the listener to remove
+     */
+    public void removeEpochCompletionListener(EpochCompletionListener listener) {
+        listeners.remove(listener);
+    }
 
     /**
      * Creates a new {@code EpochRegime} that delegates to the given regime
@@ -52,9 +100,18 @@ public final class EpochRegime extends DelegatedRegime implements EpochConfigura
      * @param <E>                the type of estimation function
      */
     @Override
-    public <E extends EstimationFunction<Float>> void train(E estimationFunction, DataSet<Float> trainingSet, ObjectiveFunction objective, Optimizer<? super E, Float> optimizer) {
-        for (int i = 0; i < getEpochs(); i++) {
-            regime.train(estimationFunction, trainingSet, objective, optimizer);
+    public <E extends TrainableFunction<N>, N extends Number> void train(E estimationFunction, DataSet<N> trainingSet, ObjectiveFunction<N> objective, Optimizer<? super E, N> optimizer) {
+        for (int i = 1; i <= getEpochs(); i++) {
+            regime.train(estimationFunction, trainingSet, objective, optimizer, i);
+            for (EpochCompletionListener listener : listeners) {
+                listener.epochCompleted(this, i, estimationFunction, trainingSet, optimizer);
+            }
         }
     }
+
+    @Override
+    public <E extends TrainableFunction<N>, N extends Number> void train(E estimationFunction, DataSet<N> trainingSet, ObjectiveFunction<N> objective, Optimizer<? super E, N> optimizer, int step) {
+        throw new UnsupportedOperationException();
+    }
+
 }

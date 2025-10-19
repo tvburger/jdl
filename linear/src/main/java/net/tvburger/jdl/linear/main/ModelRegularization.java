@@ -11,6 +11,7 @@ import net.tvburger.jdl.linear.basis.BasisFunction;
 import net.tvburger.jdl.linear.basis.PolynomialFunction;
 import net.tvburger.jdl.linear.optimizer.L2RegularizedClosedSolutionOptimizer;
 import net.tvburger.jdl.model.DataSet;
+import net.tvburger.jdl.model.training.regimes.Regimes;
 import net.tvburger.jdl.plots.Plot;
 
 import java.util.LinkedHashMap;
@@ -74,7 +75,7 @@ public class ModelRegularization {
         DataSet<N> testSet = dataSetGenerator.load(1000);
         Map<String, DataSet<N>> testSets = new LinkedHashMap<>();
         testSets.put("Test Set", testSet);
-        return new LinearRegression<>(basisFunctionGenerator, trainSet, testSets, new L2RegularizedClosedSolutionOptimizer<>(basisFunctionGenerator.getCurrentNumberType()));
+        return new LinearRegression<>(basisFunctionGenerator, trainSet, testSets, new L2RegularizedClosedSolutionOptimizer<>(basisFunctionGenerator.getCurrentNumberType()), Regimes.oneShot());
     }
 
 }

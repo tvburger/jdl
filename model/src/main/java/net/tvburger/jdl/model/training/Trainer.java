@@ -13,7 +13,7 @@ import net.tvburger.jdl.model.EstimationFunction;
  * pipeline: an {@link Initializer}, an {@link ObjectiveFunction},
  * an {@link Optimizer}, and a {@link Regime}. By composing these
  * elements, the trainer is able to initialize a model, compute loss
- * and gradients, apply optimization steps, and control the overall
+ * and parameterGradients, apply optimization steps, and control the overall
  * training process.
  * </p>
  *
@@ -32,7 +32,7 @@ import net.tvburger.jdl.model.EstimationFunction;
  */
 @DomainObject
 @Strategy(Strategy.Role.INTERFACE)
-public interface Trainer<E extends EstimationFunction<Float>> {
+public interface Trainer<E extends TrainableFunction<N>, N extends Number> {
 
     /**
      * Returns the initializer used to prepare the estimation function
@@ -40,7 +40,7 @@ public interface Trainer<E extends EstimationFunction<Float>> {
      *
      * @return the initializer
      */
-    Initializer<? super E, Float> getInitializer();
+    Initializer<? super E, N> getInitializer();
 
     /**
      * Sets the initializer used to prepare the estimation function
@@ -48,21 +48,21 @@ public interface Trainer<E extends EstimationFunction<Float>> {
      *
      * @param initializer the initializer to set
      */
-    void setInitializer(Initializer<? super E, Float> initializer);
+    void setInitializer(Initializer<? super E, N> initializer);
 
     /**
      * Returns the objective function used to evaluate and guide training.
      *
      * @return the objective function
      */
-    ObjectiveFunction getObjective();
+    ObjectiveFunction<N> getObjective();
 
     /**
      * Sets the objective function used to evaluate and guide training.
      *
      * @param objective the objective function to set
      */
-    void setObjective(ObjectiveFunction objective);
+    void setObjective(ObjectiveFunction<N> objective);
 
     /**
      * Returns the optimizer used to update the parameters of the
@@ -70,7 +70,7 @@ public interface Trainer<E extends EstimationFunction<Float>> {
      *
      * @return the optimizer
      */
-    Optimizer<? super E, Float> getOptimizer();
+    Optimizer<? super E, N> getOptimizer();
 
     /**
      * Sets the optimizer used to update the parameters of the
@@ -78,7 +78,7 @@ public interface Trainer<E extends EstimationFunction<Float>> {
      *
      * @param optimizer the optimizer to set
      */
-    void setOptimizer(Optimizer<? super E, Float> optimizer);
+    void setOptimizer(Optimizer<? super E, N> optimizer);
 
     /**
      * Returns the regime that controls the overall training flow,
@@ -104,7 +104,7 @@ public interface Trainer<E extends EstimationFunction<Float>> {
      * @param estimationFunction the model or estimation function to train
      * @param trainingSet        the dataset used for training
      */
-    void train(E estimationFunction, DataSet<Float> trainingSet);
+    void train(E estimationFunction, DataSet<N> trainingSet);
 
     /**
      * Factory method for creating a new {@code Trainer} with the given
@@ -123,12 +123,11 @@ public interface Trainer<E extends EstimationFunction<Float>> {
      * @param regime      the training regime to use
      * @return a configured trainer instance
      */
-    static <E extends EstimationFunction<Float>> Trainer<E> of(Initializer<? super E, Float> initializer, ObjectiveFunction objective, Optimizer<? super E, Float> optimizer, Regime regime) {
-        TrainerImpl<E> trainer = new TrainerImpl<>();
+    static <E extends TrainableFunction<N>, N extends Number> Trainer<E, N> of(Initializer<? super E, N> initializer, ObjectiveFunction<N> objective, Optimizer<? super E, N> optimizer, Regime regime) {
+        TrainerImpl<E, N> trainer = new TrainerImpl<>();
         trainer.setInitializer(initializer);
         trainer.setObjective(objective);
-        trainer.setOptimizer(optimizer == null ? (e, s, o) -> {
-        } : optimizer);
+        trainer.setOptimizer(optimizer == null ? Optimizer.nullOptimizer() : optimizer);
         trainer.setRegime(regime);
         return trainer;
     }

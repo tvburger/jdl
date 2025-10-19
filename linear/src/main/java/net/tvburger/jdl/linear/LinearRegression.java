@@ -3,11 +3,16 @@ package net.tvburger.jdl.linear;
 import net.tvburger.jdl.common.patterns.Facade;
 import net.tvburger.jdl.common.utils.Pair;
 import net.tvburger.jdl.linear.basis.BasisFunction;
-import net.tvburger.jdl.linear.optimizer.LinearModelOptimizer;
 import net.tvburger.jdl.model.DataSet;
+import net.tvburger.jdl.model.training.ObjectiveFunction;
+import net.tvburger.jdl.model.training.Optimizer;
+import net.tvburger.jdl.model.training.Regime;
+import net.tvburger.jdl.model.training.loss.Objectives;
+import net.tvburger.jdl.model.training.regularization.ExplicitRegularization;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 @Facade
 public class LinearRegression<N extends Number> {
@@ -15,13 +20,15 @@ public class LinearRegression<N extends Number> {
     protected final BasisFunction.Generator<N> basisFunctionGenerator;
     private final DataSet<N> trainSet;
     private final Map<String, DataSet<N>> testSets;
-    private final LinearModelOptimizer<N> optimizer;
+    private final Optimizer<LinearBasisFunctionModel<N>, N> optimizer;
+    private final Regime regime;
 
-    public LinearRegression(BasisFunction.Generator<N> basisFunctionGenerator, DataSet<N> trainSet, Map<String, DataSet<N>> testSets, LinearModelOptimizer<N> optimizer) {
+    public LinearRegression(BasisFunction.Generator<N> basisFunctionGenerator, DataSet<N> trainSet, Map<String, DataSet<N>> testSets, Optimizer<LinearBasisFunctionModel<N>, N> optimizer, Regime regime) {
         this.basisFunctionGenerator = basisFunctionGenerator;
         this.trainSet = trainSet;
         this.testSets = testSets;
         this.optimizer = optimizer;
+        this.regime = regime;
     }
 
     public DataSet<N> getTrainSet() {
@@ -32,13 +39,21 @@ public class LinearRegression<N extends Number> {
         return testSets;
     }
 
-    public LinearModelOptimizer<N> getOptimizer() {
+    public Optimizer<LinearBasisFunctionModel<N>, N> getOptimizer() {
         return optimizer;
     }
 
     public LinearBasisFunctionModel<N> fitComplexity(int m) {
+        return fitComplexity(m, Set.of());
+    }
+
+    public LinearBasisFunctionModel<N> fitComplexity(int m, Set<ExplicitRegularization<N>> regularizations) {
         LinearBasisFunctionModel<N> regression = LinearBasisFunctionModel.create(m, basisFunctionGenerator);
-        optimizer.setOptimalWeights(regression, trainSet);
+        ObjectiveFunction<N> objective = Objectives.mSE(basisFunctionGenerator.getCurrentNumberType());
+        if (null != regularizations) {
+            regularizations.forEach(objective::addRegularization);
+        }
+        regime.train(regression, trainSet, objective, optimizer);
         return regression;
     }
 

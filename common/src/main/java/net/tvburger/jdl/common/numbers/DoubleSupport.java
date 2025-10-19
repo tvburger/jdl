@@ -35,12 +35,27 @@ public final class DoubleSupport implements JavaNumberTypeSupport<Double> {
     }
 
     @Override
+    public Double multiply(Double first, int second) {
+        return first * second;
+    }
+
+    @Override
     public Double divide(Double first, Double second) {
         return first / second;
     }
 
     @Override
+    public Double divide(Double first, int second) {
+        return first / second;
+    }
+
+    @Override
     public Double add(Double first, Double second) {
+        return first + second;
+    }
+
+    @Override
+    public Double add(Double first, int second) {
         return first + second;
     }
 
@@ -66,7 +81,7 @@ public final class DoubleSupport implements JavaNumberTypeSupport<Double> {
     }
 
     @Override
-    public boolean greaterThan(Double first, Double second) {
+    public boolean isGreaterThan(Double first, Double second) {
         return first > second;
     }
 
@@ -88,5 +103,36 @@ public final class DoubleSupport implements JavaNumberTypeSupport<Double> {
     @Override
     public Comparator<Double> comparator() {
         return Double::compare;
+    }
+
+    @Override
+    public Double clamp01(Double value) {
+        if (value <= zero()) {
+            return zero();
+        }
+        if (value >= one()) {
+            return one();
+        }
+        return value;
+    }
+
+    @Override
+    public Double epsilon() {
+        return 1e-16;
+    }
+
+    @Override
+    public Double log(Double value) {
+        return Math.log(value);
+    }
+
+    @Override
+    public Double pow(Double base, int times) {
+        return Math.pow(base, times);
+    }
+
+    @Override
+    public boolean isInstance(Object value) {
+        return value instanceof Double;
     }
 }

@@ -16,108 +16,57 @@
 <span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;</span>
 <span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.patterns.Strategy;</span>
 <span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.linear.basis.BasisFunction;</span>
-<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.model.HyperparameterConfigurable;</span>
-<span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.model.scalars.LinearCombination;</span>
-<span class="source-line-no">008</span><span id="line-8">import net.tvburger.jdl.model.scalars.TrainableScalarFunction;</span>
-<span class="source-line-no">009</span><span id="line-9">import net.tvburger.jdl.model.scalars.UnaryEstimationFunction;</span>
-<span class="source-line-no">010</span><span id="line-10"></span>
-<span class="source-line-no">011</span><span id="line-11">import java.util.HashMap;</span>
-<span class="source-line-no">012</span><span id="line-12">import java.util.Map;</span>
+<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.model.scalars.LinearCombination;</span>
+<span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.model.scalars.UnaryEstimationFunction;</span>
+<span class="source-line-no">008</span><span id="line-8"></span>
+<span class="source-line-no">009</span><span id="line-9">@Strategy(Strategy.Role.CONCRETE)</span>
+<span class="source-line-no">010</span><span id="line-10">public class LinearBasisFunctionModel&lt;N extends Number&gt; extends LinearCombination&lt;N&gt; implements LinearModel&lt;N&gt;, UnaryEstimationFunction&lt;N&gt; {</span>
+<span class="source-line-no">011</span><span id="line-11"></span>
+<span class="source-line-no">012</span><span id="line-12">    private final FeatureExtractor&lt;N&gt; featureExtractor;</span>
 <span class="source-line-no">013</span><span id="line-13"></span>
-<span class="source-line-no">014</span><span id="line-14">@Strategy(Strategy.Role.CONCRETE)</span>
-<span class="source-line-no">015</span><span id="line-15">public class LinearBasisFunctionModel&lt;N extends Number&gt; implements LinearModel&lt;N&gt;, TrainableScalarFunction&lt;N&gt;, HyperparameterConfigurable, UnaryEstimationFunction&lt;N&gt; {</span>
-<span class="source-line-no">016</span><span id="line-16"></span>
-<span class="source-line-no">017</span><span id="line-17">    public static final String HP_M = "M";</span>
-<span class="source-line-no">018</span><span id="line-18"></span>
-<span class="source-line-no">019</span><span id="line-19">    private final Map&lt;String, Object&gt; hyperparameters;</span>
-<span class="source-line-no">020</span><span id="line-20">    private final BasisFunction.Generator&lt;N&gt; basisFunctionGenerator;</span>
-<span class="source-line-no">021</span><span id="line-21">    private FeatureExtractor&lt;N&gt; featureExtractor;</span>
-<span class="source-line-no">022</span><span id="line-22">    private LinearCombination&lt;N&gt; linearCombination;</span>
-<span class="source-line-no">023</span><span id="line-23"></span>
-<span class="source-line-no">024</span><span id="line-24">    private static void ensureValidM(int m) {</span>
-<span class="source-line-no">025</span><span id="line-25">        if (m &lt; 0) {</span>
-<span class="source-line-no">026</span><span id="line-26">            throw new IllegalArgumentException("M must be &gt;= 0!");</span>
-<span class="source-line-no">027</span><span id="line-27">        }</span>
-<span class="source-line-no">028</span><span id="line-28">    }</span>
-<span class="source-line-no">029</span><span id="line-29"></span>
-<span class="source-line-no">030</span><span id="line-30">    public static &lt;N extends Number&gt; LinearBasisFunctionModel&lt;N&gt; create(int m, BasisFunction.Generator&lt;N&gt; basisFunctionGenerator) {</span>
-<span class="source-line-no">031</span><span id="line-31">        return new LinearBasisFunctionModel&lt;&gt;(m, basisFunctionGenerator);</span>
+<span class="source-line-no">014</span><span id="line-14">    private static void ensureValidM(int m) {</span>
+<span class="source-line-no">015</span><span id="line-15">        if (m &lt; 0) {</span>
+<span class="source-line-no">016</span><span id="line-16">            throw new IllegalArgumentException("M must be &gt;= 0!");</span>
+<span class="source-line-no">017</span><span id="line-17">        }</span>
+<span class="source-line-no">018</span><span id="line-18">    }</span>
+<span class="source-line-no">019</span><span id="line-19"></span>
+<span class="source-line-no">020</span><span id="line-20">    public static &lt;N extends Number&gt; LinearBasisFunctionModel&lt;N&gt; create(int m, BasisFunction.Generator&lt;N&gt; basisFunctionGenerator) {</span>
+<span class="source-line-no">021</span><span id="line-21">        ensureValidM(m);</span>
+<span class="source-line-no">022</span><span id="line-22">        return new LinearBasisFunctionModel&lt;&gt;(m, basisFunctionGenerator);</span>
+<span class="source-line-no">023</span><span id="line-23">    }</span>
+<span class="source-line-no">024</span><span id="line-24"></span>
+<span class="source-line-no">025</span><span id="line-25">    protected LinearBasisFunctionModel(int modelComplexity, BasisFunction.Generator&lt;N&gt; basisFunctionGenerator) {</span>
+<span class="source-line-no">026</span><span id="line-26">        this(basisFunctionGenerator.generate(modelComplexity), basisFunctionGenerator.getCurrentNumberType().createArray(modelComplexity + 1), basisFunctionGenerator.getCurrentNumberType());</span>
+<span class="source-line-no">027</span><span id="line-27">    }</span>
+<span class="source-line-no">028</span><span id="line-28"></span>
+<span class="source-line-no">029</span><span id="line-29">    private LinearBasisFunctionModel(FeatureExtractor&lt;N&gt; featureExtractor, N[] parameters, JavaNumberTypeSupport&lt;N&gt; typeSupport) {</span>
+<span class="source-line-no">030</span><span id="line-30">        super(parameters, typeSupport);</span>
+<span class="source-line-no">031</span><span id="line-31">        this.featureExtractor = featureExtractor;</span>
 <span class="source-line-no">032</span><span id="line-32">    }</span>
 <span class="source-line-no">033</span><span id="line-33"></span>
-<span class="source-line-no">034</span><span id="line-34">    private static Map&lt;String, Object&gt; createHyperparameters(int m) {</span>
-<span class="source-line-no">035</span><span id="line-35">        ensureValidM(m);</span>
-<span class="source-line-no">036</span><span id="line-36">        Map&lt;String, Object&gt; hyperparameters = new HashMap&lt;&gt;();</span>
-<span class="source-line-no">037</span><span id="line-37">        hyperparameters.put(HP_M, m);</span>
-<span class="source-line-no">038</span><span id="line-38">        return hyperparameters;</span>
-<span class="source-line-no">039</span><span id="line-39">    }</span>
-<span class="source-line-no">040</span><span id="line-40"></span>
-<span class="source-line-no">041</span><span id="line-41">    protected LinearBasisFunctionModel(int m, BasisFunction.Generator&lt;N&gt; basisFunctionGenerator) {</span>
-<span class="source-line-no">042</span><span id="line-42">        this(createHyperparameters(m), basisFunctionGenerator, basisFunctionGenerator.generate(m), LinearCombination.create(m, basisFunctionGenerator.getCurrentNumberType()));</span>
-<span class="source-line-no">043</span><span id="line-43">    }</span>
-<span class="source-line-no">044</span><span id="line-44"></span>
-<span class="source-line-no">045</span><span id="line-45">    public LinearBasisFunctionModel(Map&lt;String, Object&gt; hyperparameters, BasisFunction.Generator&lt;N&gt; basisFunctionGenerator, FeatureExtractor&lt;N&gt; featureExtractor, LinearCombination&lt;N&gt; linearCombination) {</span>
-<span class="source-line-no">046</span><span id="line-46">        this.hyperparameters = hyperparameters;</span>
-<span class="source-line-no">047</span><span id="line-47">        this.basisFunctionGenerator = basisFunctionGenerator;</span>
-<span class="source-line-no">048</span><span id="line-48">        this.featureExtractor = featureExtractor;</span>
-<span class="source-line-no">049</span><span id="line-49">        this.linearCombination = linearCombination;</span>
-<span class="source-line-no">050</span><span id="line-50">    }</span>
-<span class="source-line-no">051</span><span id="line-51"></span>
-<span class="source-line-no">052</span><span id="line-52">    public FeatureExtractor&lt;N&gt; getFeatureExtractor() {</span>
-<span class="source-line-no">053</span><span id="line-53">        return featureExtractor;</span>
+<span class="source-line-no">034</span><span id="line-34">    public FeatureExtractor&lt;N&gt; getFeatureExtractor() {</span>
+<span class="source-line-no">035</span><span id="line-35">        return featureExtractor;</span>
+<span class="source-line-no">036</span><span id="line-36">    }</span>
+<span class="source-line-no">037</span><span id="line-37"></span>
+<span class="source-line-no">038</span><span id="line-38">    public int getModelComplexity() {</span>
+<span class="source-line-no">039</span><span id="line-39">        return getParameterCount() - 1;</span>
+<span class="source-line-no">040</span><span id="line-40">    }</span>
+<span class="source-line-no">041</span><span id="line-41"></span>
+<span class="source-line-no">042</span><span id="line-42">    @Override</span>
+<span class="source-line-no">043</span><span id="line-43">    public N estimateUnary(N input) {</span>
+<span class="source-line-no">044</span><span id="line-44">        N[] features = featureExtractor.extractFeatures(input);</span>
+<span class="source-line-no">045</span><span id="line-45">        return super.estimateScalar(features);</span>
+<span class="source-line-no">046</span><span id="line-46">    }</span>
+<span class="source-line-no">047</span><span id="line-47"></span>
+<span class="source-line-no">048</span><span id="line-48">    @Override</span>
+<span class="source-line-no">049</span><span id="line-49">    public N estimateScalar(N[] inputs) {</span>
+<span class="source-line-no">050</span><span id="line-50">        if (inputs.length != 1) {</span>
+<span class="source-line-no">051</span><span id="line-51">            throw new IllegalArgumentException("Invalid arity!");</span>
+<span class="source-line-no">052</span><span id="line-52">        }</span>
+<span class="source-line-no">053</span><span id="line-53">        return estimateUnary(inputs[0]);</span>
 <span class="source-line-no">054</span><span id="line-54">    }</span>
 <span class="source-line-no">055</span><span id="line-55"></span>
-<span class="source-line-no">056</span><span id="line-56">    public int getModelComplexity() {</span>
-<span class="source-line-no">057</span><span id="line-57">        return (Integer) hyperparameters.get(HP_M);</span>
-<span class="source-line-no">058</span><span id="line-58">    }</span>
-<span class="source-line-no">059</span><span id="line-59"></span>
-<span class="source-line-no">060</span><span id="line-60">    public void setModelComplexity(int m) {</span>
-<span class="source-line-no">061</span><span id="line-61">        ensureValidM(m);</span>
-<span class="source-line-no">062</span><span id="line-62">        hyperparameters.put(HP_M, m);</span>
-<span class="source-line-no">063</span><span id="line-63">        featureExtractor = basisFunctionGenerator.generate(m);</span>
-<span class="source-line-no">064</span><span id="line-64">        linearCombination = LinearCombination.create(m, getCurrentNumberType());</span>
-<span class="source-line-no">065</span><span id="line-65">    }</span>
-<span class="source-line-no">066</span><span id="line-66"></span>
-<span class="source-line-no">067</span><span id="line-67">    @Override</span>
-<span class="source-line-no">068</span><span id="line-68">    public Map&lt;String, Object&gt; getHyperparameters() {</span>
-<span class="source-line-no">069</span><span id="line-69">        return hyperparameters;</span>
-<span class="source-line-no">070</span><span id="line-70">    }</span>
-<span class="source-line-no">071</span><span id="line-71"></span>
-<span class="source-line-no">072</span><span id="line-72">    @Override</span>
-<span class="source-line-no">073</span><span id="line-73">    public void setHyperparameter(String name, Object value) {</span>
-<span class="source-line-no">074</span><span id="line-74">        switch (name) {</span>
-<span class="source-line-no">075</span><span id="line-75">            case HP_M:</span>
-<span class="source-line-no">076</span><span id="line-76">                if (value instanceof Integer i) {</span>
-<span class="source-line-no">077</span><span id="line-77">                    setModelComplexity(i);</span>
-<span class="source-line-no">078</span><span id="line-78">                } else {</span>
-<span class="source-line-no">079</span><span id="line-79">                    throw new IllegalArgumentException("Invalid value: " + value);</span>
-<span class="source-line-no">080</span><span id="line-80">                }</span>
-<span class="source-line-no">081</span><span id="line-81">                break;</span>
-<span class="source-line-no">082</span><span id="line-82">            default:</span>
-<span class="source-line-no">083</span><span id="line-83">                throw new IllegalArgumentException("Unsupported hyperparameter: " + name);</span>
-<span class="source-line-no">084</span><span id="line-84">        }</span>
-<span class="source-line-no">085</span><span id="line-85">    }</span>
-<span class="source-line-no">086</span><span id="line-86"></span>
-<span class="source-line-no">087</span><span id="line-87">    @Override</span>
-<span class="source-line-no">088</span><span id="line-88">    public N[] getParameters() {</span>
-<span class="source-line-no">089</span><span id="line-89">        return linearCombination.getParameters();</span>
-<span class="source-line-no">090</span><span id="line-90">    }</span>
-<span class="source-line-no">091</span><span id="line-91"></span>
-<span class="source-line-no">092</span><span id="line-92">    @Override</span>
-<span class="source-line-no">093</span><span id="line-93">    public N estimateUnary(N input) {</span>
-<span class="source-line-no">094</span><span id="line-94">        N[] features = featureExtractor.extractFeatures(input);</span>
-<span class="source-line-no">095</span><span id="line-95">        return linearCombination.estimateScalar(features);</span>
-<span class="source-line-no">096</span><span id="line-96">    }</span>
-<span class="source-line-no">097</span><span id="line-97"></span>
-<span class="source-line-no">098</span><span id="line-98">    @Override</span>
-<span class="source-line-no">099</span><span id="line-99">    public N[] calculateParameterGradients(N[] inputs) {</span>
-<span class="source-line-no">100</span><span id="line-100">        return linearCombination.calculateParameterGradients(inputs);</span>
-<span class="source-line-no">101</span><span id="line-101">    }</span>
-<span class="source-line-no">102</span><span id="line-102"></span>
-<span class="source-line-no">103</span><span id="line-103">    @Override</span>
-<span class="source-line-no">104</span><span id="line-104">    public JavaNumberTypeSupport&lt;N&gt; getCurrentNumberType() {</span>
-<span class="source-line-no">105</span><span id="line-105">        return linearCombination.getCurrentNumberType();</span>
-<span class="source-line-no">106</span><span id="line-106">    }</span>
-<span class="source-line-no">107</span><span id="line-107">}</span>
+<span class="source-line-no">056</span><span id="line-56">}</span>
 
 
 

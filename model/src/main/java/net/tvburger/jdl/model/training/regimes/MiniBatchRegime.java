@@ -2,9 +2,9 @@ package net.tvburger.jdl.model.training.regimes;
 
 import net.tvburger.jdl.common.patterns.Strategy;
 import net.tvburger.jdl.model.DataSet;
-import net.tvburger.jdl.model.EstimationFunction;
 import net.tvburger.jdl.model.training.ObjectiveFunction;
 import net.tvburger.jdl.model.training.Optimizer;
+import net.tvburger.jdl.model.training.TrainableFunction;
 
 /**
  * A training regime that performs <strong>mini-batch training</strong>.
@@ -58,12 +58,12 @@ public final class MiniBatchRegime extends DelegatedRegime implements BatchSizeC
      * @param <E>                the type of estimation function
      */
     @Override
-    public <E extends EstimationFunction<Float>> void train(E estimationFunction, DataSet<Float> trainingSet, ObjectiveFunction objective, Optimizer<? super E, Float> optimizer) {
+    public <E extends TrainableFunction<N>, N extends Number> void train(E estimationFunction, DataSet<N> trainingSet, ObjectiveFunction<N> objective, Optimizer<? super E, N> optimizer, int step) {
         int offset = 0;
         int trainingSetSize = trainingSet.size();
         do {
             int newOffset = Math.min(trainingSetSize, offset + getBatchSize());
-            regime.train(estimationFunction, trainingSet.subset(offset, newOffset), objective, optimizer);
+            regime.train(estimationFunction, trainingSet.subset(offset, newOffset), objective, optimizer, step);
             offset = newOffset;
         } while (offset >= trainingSet.size());
     }

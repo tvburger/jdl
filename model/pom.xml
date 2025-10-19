@@ -17,6 +17,11 @@
             <artifactId>jdl-common</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>jdl-linalg</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

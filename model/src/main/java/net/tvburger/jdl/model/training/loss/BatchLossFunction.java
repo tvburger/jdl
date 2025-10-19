@@ -23,7 +23,7 @@ import java.util.List;
  */
 @DomainObject
 @Strategy(Strategy.Role.INTERFACE)
-public interface BatchLossFunction extends LossFunction {
+public interface BatchLossFunction<N extends Number> extends LossFunction<N> {
 
     /**
      * Calculates the total loss for the batch by aggregating the per-sample losses.
@@ -31,7 +31,7 @@ public interface BatchLossFunction extends LossFunction {
      * @param sampleLosses a list of individual sample losses
      * @return the total batch loss
      */
-    float calculateBatchLoss(List<Float> sampleLosses);
+    N calculateBatchLoss(List<N> sampleLosses);
 
     /**
      * Computes the gradient of the batch loss with respect to the per-sample losses.
@@ -40,6 +40,6 @@ public interface BatchLossFunction extends LossFunction {
      * @param batchSize the number of samples in the batch
      * @return the gradient of the batch loss with respect to each sample loss
      */
-    float calculateGradient_dJ_dL(int batchSize);
+    N calculateGradient_dJ_dL(int batchSize);
 
 }

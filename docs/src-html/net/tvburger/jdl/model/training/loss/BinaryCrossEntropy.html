@@ -13,85 +13,129 @@
 <div class="source-container">
 <pre><span class="source-line-no">001</span><span id="line-1">package net.tvburger.jdl.model.training.loss;</span>
 <span class="source-line-no">002</span><span id="line-2"></span>
-<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.patterns.Strategy;</span>
-<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.utils.Floats;</span>
-<span class="source-line-no">005</span><span id="line-5"></span>
-<span class="source-line-no">006</span><span id="line-6">/**</span>
-<span class="source-line-no">007</span><span id="line-7"> * Binary Cross-Entropy (BCE) loss function.</span>
-<span class="source-line-no">008</span><span id="line-8"> * &lt;p&gt;</span>
-<span class="source-line-no">009</span><span id="line-9"> * This loss function is used for binary classification tasks</span>
-<span class="source-line-no">010</span><span id="line-10"> * where each output neuron predicts the probability of a binary label</span>
-<span class="source-line-no">011</span><span id="line-11"> * (0 or 1) using a {@code sigmoid} activation function.</span>
-<span class="source-line-no">012</span><span id="line-12"> * It computes the cross-entropy between the predicted probability</span>
-<span class="source-line-no">013</span><span id="line-13"> * and the target label.</span>
-<span class="source-line-no">014</span><span id="line-14"> * &lt;/p&gt;</span>
-<span class="source-line-no">015</span><span id="line-15"> *</span>
-<span class="source-line-no">016</span><span id="line-16"> * &lt;h3&gt;Definition&lt;/h3&gt;</span>
-<span class="source-line-no">017</span><span id="line-17"> * For a single output:</span>
-<span class="source-line-no">018</span><span id="line-18"> * &lt;pre&gt;</span>
-<span class="source-line-no">019</span><span id="line-19"> *     E = - [ y * log(a) + (1 - y) * log(1 - a) ]</span>
-<span class="source-line-no">020</span><span id="line-20"> * &lt;/pre&gt;</span>
-<span class="source-line-no">021</span><span id="line-21"> * where:</span>
-<span class="source-line-no">022</span><span id="line-22"> * &lt;ul&gt;</span>
-<span class="source-line-no">023</span><span id="line-23"> *   &lt;li&gt;{@code y} is the true label in {0,1}&lt;/li&gt;</span>
-<span class="source-line-no">024</span><span id="line-24"> *   &lt;li&gt;{@code a} is the predicted probability (sigmoid output)&lt;/li&gt;</span>
-<span class="source-line-no">025</span><span id="line-25"> * &lt;/ul&gt;</span>
-<span class="source-line-no">026</span><span id="line-26"> *</span>
-<span class="source-line-no">027</span><span id="line-27"> * &lt;h3&gt;Gradients&lt;/h3&gt;</span>
-<span class="source-line-no">028</span><span id="line-28"> * The derivative of the BCE loss with respect to the output activation {@code a} is:</span>
-<span class="source-line-no">029</span><span id="line-29"> * &lt;pre&gt;</span>
-<span class="source-line-no">030</span><span id="line-30"> *     dE/da = -( y / a - (1 - y) / (1 - a) )</span>
-<span class="source-line-no">031</span><span id="line-31"> * &lt;/pre&gt;</span>
-<span class="source-line-no">032</span><span id="line-32"> * When combined with the derivative of the sigmoid activation {@code f'(z) = a(1 - a)},</span>
-<span class="source-line-no">033</span><span id="line-33"> * this simplifies to the familiar error signal:</span>
-<span class="source-line-no">034</span><span id="line-34"> * &lt;pre&gt;</span>
-<span class="source-line-no">035</span><span id="line-35"> *     δ = a - y</span>
-<span class="source-line-no">036</span><span id="line-36"> * &lt;/pre&gt;</span>
-<span class="source-line-no">037</span><span id="line-37"> *</span>
-<span class="source-line-no">038</span><span id="line-38"> * &lt;h3&gt;Usage&lt;/h3&gt;</span>
-<span class="source-line-no">039</span><span id="line-39"> * &lt;ul&gt;</span>
-<span class="source-line-no">040</span><span id="line-40"> *   &lt;li&gt;Output layer: one sigmoid unit per target&lt;/li&gt;</span>
-<span class="source-line-no">041</span><span id="line-41"> *   &lt;li&gt;Loss function: {@code BinaryCrossEntropy}&lt;/li&gt;</span>
-<span class="source-line-no">042</span><span id="line-42"> *   &lt;li&gt;Training: use the error signals δ = a - y as the starting point for backpropagation&lt;/li&gt;</span>
-<span class="source-line-no">043</span><span id="line-43"> * &lt;/ul&gt;</span>
-<span class="source-line-no">044</span><span id="line-44"> *</span>
-<span class="source-line-no">045</span><span id="line-45"> * &lt;h3&gt;Numerical stability&lt;/h3&gt;</span>
-<span class="source-line-no">046</span><span id="line-46"> * To avoid {@code log(0)} or division by zero, a small epsilon (e.g. 1e-7)</span>
-<span class="source-line-no">047</span><span id="line-47"> * should be added when clamping predicted probabilities {@code a} into (0,1).</span>
-<span class="source-line-no">048</span><span id="line-48"> */</span>
-<span class="source-line-no">049</span><span id="line-49">@Strategy(Strategy.Role.CONCRETE)</span>
-<span class="source-line-no">050</span><span id="line-50">public class BinaryCrossEntropy implements DimensionLossFunction {</span>
-<span class="source-line-no">051</span><span id="line-51"></span>
-<span class="source-line-no">052</span><span id="line-52">    /**</span>
-<span class="source-line-no">053</span><span id="line-53">     * {@inheritDoc}</span>
-<span class="source-line-no">054</span><span id="line-54">     */</span>
-<span class="source-line-no">055</span><span id="line-55">    @Override</span>
-<span class="source-line-no">056</span><span id="line-56">    public float calculateDimensionLoss(float estimated, float target) {</span>
-<span class="source-line-no">057</span><span id="line-57">        float a = clamp01(estimated); // the activated value = estimated = predicted</span>
-<span class="source-line-no">058</span><span id="line-58">        float y = target; // the target output value</span>
-<span class="source-line-no">059</span><span id="line-59">        // Binary cross-entropy for this output</span>
-<span class="source-line-no">060</span><span id="line-60">        return -(y * (float) Math.log(a + Floats.EPSILON)</span>
-<span class="source-line-no">061</span><span id="line-61">                + (1f - y) * (float) Math.log(1f - a + Floats.EPSILON));</span>
-<span class="source-line-no">062</span><span id="line-62">    }</span>
-<span class="source-line-no">063</span><span id="line-63"></span>
-<span class="source-line-no">064</span><span id="line-64">    /**</span>
-<span class="source-line-no">065</span><span id="line-65">     * {@inheritDoc}</span>
-<span class="source-line-no">066</span><span id="line-66">     */</span>
-<span class="source-line-no">067</span><span id="line-67">    public float calculateGradient_dl_da(float estimated, float target) {</span>
-<span class="source-line-no">068</span><span id="line-68">        float a = clamp01(estimated);</span>
-<span class="source-line-no">069</span><span id="line-69">        float y = target;</span>
-<span class="source-line-no">070</span><span id="line-70">        // dE/da for binary cross-entropy</span>
-<span class="source-line-no">071</span><span id="line-71">        float dE_da = -(y / (a + Floats.EPSILON) - (1f - y) / (1f - a + Floats.EPSILON));</span>
-<span class="source-line-no">072</span><span id="line-72">        return dE_da;</span>
-<span class="source-line-no">073</span><span id="line-73">    }</span>
-<span class="source-line-no">074</span><span id="line-74"></span>
-<span class="source-line-no">075</span><span id="line-75">    private static float clamp01(float f) {</span>
-<span class="source-line-no">076</span><span id="line-76">        if (f &lt; Floats.EPSILON) return Floats.EPSILON;</span>
-<span class="source-line-no">077</span><span id="line-77">        if (f &gt; 1f - Floats.EPSILON) return 1f - Floats.EPSILON;</span>
-<span class="source-line-no">078</span><span id="line-78">        return f;</span>
-<span class="source-line-no">079</span><span id="line-79">    }</span>
+<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;</span>
+<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.patterns.Strategy;</span>
+<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.common.utils.Floats;</span>
+<span class="source-line-no">006</span><span id="line-6"></span>
+<span class="source-line-no">007</span><span id="line-7">/**</span>
+<span class="source-line-no">008</span><span id="line-8"> * Binary Cross-Entropy (BCE) loss function.</span>
+<span class="source-line-no">009</span><span id="line-9"> * &lt;p&gt;</span>
+<span class="source-line-no">010</span><span id="line-10"> * This loss function is used for binary classification tasks</span>
+<span class="source-line-no">011</span><span id="line-11"> * where each output neuron predicts the probability of a binary label</span>
+<span class="source-line-no">012</span><span id="line-12"> * (0 or 1) using a {@code sigmoid} activation function.</span>
+<span class="source-line-no">013</span><span id="line-13"> * It computes the cross-entropy between the predicted probability</span>
+<span class="source-line-no">014</span><span id="line-14"> * and the target label.</span>
+<span class="source-line-no">015</span><span id="line-15"> * &lt;/p&gt;</span>
+<span class="source-line-no">016</span><span id="line-16"> *</span>
+<span class="source-line-no">017</span><span id="line-17"> * &lt;h3&gt;Definition&lt;/h3&gt;</span>
+<span class="source-line-no">018</span><span id="line-18"> * For a single output:</span>
+<span class="source-line-no">019</span><span id="line-19"> * &lt;pre&gt;</span>
+<span class="source-line-no">020</span><span id="line-20"> *     E = - [ y * log(a) + (1 - y) * log(1 - a) ]</span>
+<span class="source-line-no">021</span><span id="line-21"> * &lt;/pre&gt;</span>
+<span class="source-line-no">022</span><span id="line-22"> * where:</span>
+<span class="source-line-no">023</span><span id="line-23"> * &lt;ul&gt;</span>
+<span class="source-line-no">024</span><span id="line-24"> *   &lt;li&gt;{@code y} is the true label in {0,1}&lt;/li&gt;</span>
+<span class="source-line-no">025</span><span id="line-25"> *   &lt;li&gt;{@code a} is the predicted probability (sigmoid output)&lt;/li&gt;</span>
+<span class="source-line-no">026</span><span id="line-26"> * &lt;/ul&gt;</span>
+<span class="source-line-no">027</span><span id="line-27"> *</span>
+<span class="source-line-no">028</span><span id="line-28"> * &lt;h3&gt;Gradients&lt;/h3&gt;</span>
+<span class="source-line-no">029</span><span id="line-29"> * The derivative of the BCE loss with respect to the output activation {@code a} is:</span>
+<span class="source-line-no">030</span><span id="line-30"> * &lt;pre&gt;</span>
+<span class="source-line-no">031</span><span id="line-31"> *     dE/da = -( y / a - (1 - y) / (1 - a) )</span>
+<span class="source-line-no">032</span><span id="line-32"> * &lt;/pre&gt;</span>
+<span class="source-line-no">033</span><span id="line-33"> * When combined with the derivative of the sigmoid activation {@code f'(z) = a(1 - a)},</span>
+<span class="source-line-no">034</span><span id="line-34"> * this simplifies to the familiar error signal:</span>
+<span class="source-line-no">035</span><span id="line-35"> * &lt;pre&gt;</span>
+<span class="source-line-no">036</span><span id="line-36"> *     δ = a - y</span>
+<span class="source-line-no">037</span><span id="line-37"> * &lt;/pre&gt;</span>
+<span class="source-line-no">038</span><span id="line-38"> *</span>
+<span class="source-line-no">039</span><span id="line-39"> * &lt;h3&gt;Usage&lt;/h3&gt;</span>
+<span class="source-line-no">040</span><span id="line-40"> * &lt;ul&gt;</span>
+<span class="source-line-no">041</span><span id="line-41"> *   &lt;li&gt;Output layer: one sigmoid unit per target&lt;/li&gt;</span>
+<span class="source-line-no">042</span><span id="line-42"> *   &lt;li&gt;Loss function: {@code BinaryCrossEntropy}&lt;/li&gt;</span>
+<span class="source-line-no">043</span><span id="line-43"> *   &lt;li&gt;Training: use the error signals δ = a - y as the starting point for backpropagation&lt;/li&gt;</span>
+<span class="source-line-no">044</span><span id="line-44"> * &lt;/ul&gt;</span>
+<span class="source-line-no">045</span><span id="line-45"> *</span>
+<span class="source-line-no">046</span><span id="line-46"> * &lt;h3&gt;Numerical stability&lt;/h3&gt;</span>
+<span class="source-line-no">047</span><span id="line-47"> * To avoid {@code log(0)} or division by zero, a small epsilon (e.g. 1e-7)</span>
+<span class="source-line-no">048</span><span id="line-48"> * should be added when clamping predicted probabilities {@code a} into (0,1).</span>
+<span class="source-line-no">049</span><span id="line-49"> */</span>
+<span class="source-line-no">050</span><span id="line-50">@Strategy(Strategy.Role.CONCRETE)</span>
+<span class="source-line-no">051</span><span id="line-51">public class BinaryCrossEntropy&lt;N extends Number&gt; implements DimensionLossFunction&lt;N&gt; {</span>
+<span class="source-line-no">052</span><span id="line-52"></span>
+<span class="source-line-no">053</span><span id="line-53">    private final JavaNumberTypeSupport&lt;N&gt; typeSupport;</span>
+<span class="source-line-no">054</span><span id="line-54"></span>
+<span class="source-line-no">055</span><span id="line-55">    public BinaryCrossEntropy(JavaNumberTypeSupport&lt;N&gt; typeSupport) {</span>
+<span class="source-line-no">056</span><span id="line-56">        this.typeSupport = typeSupport;</span>
+<span class="source-line-no">057</span><span id="line-57">    }</span>
+<span class="source-line-no">058</span><span id="line-58"></span>
+<span class="source-line-no">059</span><span id="line-59">    /**</span>
+<span class="source-line-no">060</span><span id="line-60">     * {@inheritDoc}</span>
+<span class="source-line-no">061</span><span id="line-61">     */</span>
+<span class="source-line-no">062</span><span id="line-62">    @Override</span>
+<span class="source-line-no">063</span><span id="line-63">    public N calculateDimensionLoss(N estimated, N target) {</span>
+<span class="source-line-no">064</span><span id="line-64">        N a = typeSupport.clamp01(estimated); // predicted probability</span>
+<span class="source-line-no">065</span><span id="line-65">        N y = target; // true label</span>
+<span class="source-line-no">066</span><span id="line-66"></span>
+<span class="source-line-no">067</span><span id="line-67">        // a + epsilon</span>
+<span class="source-line-no">068</span><span id="line-68">        N aPlusEps = typeSupport.add(a, typeSupport.epsilon());</span>
+<span class="source-line-no">069</span><span id="line-69">        // 1 - a</span>
+<span class="source-line-no">070</span><span id="line-70">        N oneMinusA = typeSupport.subtract(typeSupport.one(), a);</span>
+<span class="source-line-no">071</span><span id="line-71">        // 1 - y</span>
+<span class="source-line-no">072</span><span id="line-72">        N oneMinusY = typeSupport.subtract(typeSupport.one(), y);</span>
+<span class="source-line-no">073</span><span id="line-73">        // 1 - a + epsilon</span>
+<span class="source-line-no">074</span><span id="line-74">        N oneMinusAPlusEps = typeSupport.add(oneMinusA, typeSupport.epsilon());</span>
+<span class="source-line-no">075</span><span id="line-75"></span>
+<span class="source-line-no">076</span><span id="line-76">        // log(a + epsilon)</span>
+<span class="source-line-no">077</span><span id="line-77">        N logA = typeSupport.log(aPlusEps);</span>
+<span class="source-line-no">078</span><span id="line-78">        // log(1 - a + epsilon)</span>
+<span class="source-line-no">079</span><span id="line-79">        N logOneMinusA = typeSupport.log(oneMinusAPlusEps);</span>
 <span class="source-line-no">080</span><span id="line-80"></span>
-<span class="source-line-no">081</span><span id="line-81">}</span>
+<span class="source-line-no">081</span><span id="line-81">        // y * log(a + epsilon)</span>
+<span class="source-line-no">082</span><span id="line-82">        N yLogA = typeSupport.multiply(y, logA);</span>
+<span class="source-line-no">083</span><span id="line-83">        // (1 - y) * log(1 - a + epsilon)</span>
+<span class="source-line-no">084</span><span id="line-84">        N oneMinusYLogOneMinusA = typeSupport.multiply(oneMinusY, logOneMinusA);</span>
+<span class="source-line-no">085</span><span id="line-85"></span>
+<span class="source-line-no">086</span><span id="line-86">        // sum</span>
+<span class="source-line-no">087</span><span id="line-87">        N sum = typeSupport.add(yLogA, oneMinusYLogOneMinusA);</span>
+<span class="source-line-no">088</span><span id="line-88"></span>
+<span class="source-line-no">089</span><span id="line-89">        // -sum</span>
+<span class="source-line-no">090</span><span id="line-90">        return typeSupport.negate(sum);</span>
+<span class="source-line-no">091</span><span id="line-91">    }</span>
+<span class="source-line-no">092</span><span id="line-92"></span>
+<span class="source-line-no">093</span><span id="line-93">    /**</span>
+<span class="source-line-no">094</span><span id="line-94">     * {@inheritDoc}</span>
+<span class="source-line-no">095</span><span id="line-95">     */</span>
+<span class="source-line-no">096</span><span id="line-96">    public N calculateGradient_dl_da(N estimated, N target) {</span>
+<span class="source-line-no">097</span><span id="line-97">        N a = typeSupport.clamp01(estimated);</span>
+<span class="source-line-no">098</span><span id="line-98">        N y = target;</span>
+<span class="source-line-no">099</span><span id="line-99">        // a + epsilon</span>
+<span class="source-line-no">100</span><span id="line-100">        N aPlusEps = typeSupport.add(a, typeSupport.epsilon());</span>
+<span class="source-line-no">101</span><span id="line-101">        // 1 - a</span>
+<span class="source-line-no">102</span><span id="line-102">        N oneMinusA = typeSupport.subtract(typeSupport.one(), a);</span>
+<span class="source-line-no">103</span><span id="line-103">        // 1 - a + epsilon</span>
+<span class="source-line-no">104</span><span id="line-104">        N oneMinusAPlusEps = typeSupport.add(oneMinusA, typeSupport.epsilon());</span>
+<span class="source-line-no">105</span><span id="line-105">        // 1 - y</span>
+<span class="source-line-no">106</span><span id="line-106">        N oneMinusY = typeSupport.subtract(typeSupport.one(), y);</span>
+<span class="source-line-no">107</span><span id="line-107"></span>
+<span class="source-line-no">108</span><span id="line-108">        // y / (a + epsilon)</span>
+<span class="source-line-no">109</span><span id="line-109">        N yOverA = typeSupport.divide(y, aPlusEps);</span>
+<span class="source-line-no">110</span><span id="line-110">        // (1 - y) / (1 - a + epsilon)</span>
+<span class="source-line-no">111</span><span id="line-111">        N oneMinusYOverOneMinusA = typeSupport.divide(oneMinusY, oneMinusAPlusEps);</span>
+<span class="source-line-no">112</span><span id="line-112">        // y / (a + epsilon) - (1 - y) / (1 - a + epsilon)</span>
+<span class="source-line-no">113</span><span id="line-113">        N diff = typeSupport.subtract(yOverA, oneMinusYOverOneMinusA);</span>
+<span class="source-line-no">114</span><span id="line-114">        // -(...)</span>
+<span class="source-line-no">115</span><span id="line-115">        return typeSupport.negate(diff);</span>
+<span class="source-line-no">116</span><span id="line-116">    }</span>
+<span class="source-line-no">117</span><span id="line-117"></span>
+<span class="source-line-no">118</span><span id="line-118">    /**</span>
+<span class="source-line-no">119</span><span id="line-119">     * {@inheritDoc}</span>
+<span class="source-line-no">120</span><span id="line-120">     */</span>
+<span class="source-line-no">121</span><span id="line-121">    @Override</span>
+<span class="source-line-no">122</span><span id="line-122">    public JavaNumberTypeSupport&lt;N&gt; getCurrentNumberType() {</span>
+<span class="source-line-no">123</span><span id="line-123">        return typeSupport;</span>
+<span class="source-line-no">124</span><span id="line-124">    }</span>
+<span class="source-line-no">125</span><span id="line-125">}</span>
 
 
 

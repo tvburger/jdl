@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model.training.loss;
 
+import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.patterns.Strategy;
 
 /**
@@ -27,22 +28,34 @@ import net.tvburger.jdl.common.patterns.Strategy;
  * </pre>
  */
 @Strategy(Strategy.Role.CONCRETE)
-public class SquaredError implements DimensionLossFunction {
+public class SquaredError<N extends Number> implements DimensionLossFunction<N> {
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public float calculateDimensionLoss(float estimated, float target) {
-        return (target - estimated) * (target - estimated);
+    private final JavaNumberTypeSupport<N> typeSupport;
+
+    public SquaredError(JavaNumberTypeSupport<N> typeSupport) {
+        this.typeSupport = typeSupport;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public float calculateGradient_dl_da(float estimated, float target) {
-        return 2 * (target - estimated);
+    public N calculateDimensionLoss(N estimated, N target) {
+        N error = typeSupport.subtract(estimated, target);
+        return typeSupport.multiply(error, error);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public N calculateGradient_dl_da(N estimated, N target) {
+        N error = typeSupport.subtract(estimated, target);
+        return typeSupport.multiply(error, 2);
+    }
+
+    @Override
+    public JavaNumberTypeSupport<N> getCurrentNumberType() {
+        return typeSupport;
+    }
 }

@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model.training.loss;
 
+import net.tvburger.jdl.common.numbers.NumberTypeAgnostic;
 import net.tvburger.jdl.common.patterns.DomainObject;
 import net.tvburger.jdl.common.patterns.MarkerInterface;
 
@@ -13,5 +14,5 @@ import net.tvburger.jdl.common.patterns.MarkerInterface;
  */
 @DomainObject
 @MarkerInterface
-public interface LossFunction {
+public interface LossFunction<N extends Number> extends NumberTypeAgnostic<N> {
 }

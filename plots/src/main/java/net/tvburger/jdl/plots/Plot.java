@@ -40,6 +40,11 @@ public class Plot implements DataRenderer {
         chart.getStyler().setYAxisMax(max);
     }
 
+    public void setXRange(double min, double max) {
+        chart.getStyler().setXAxisMin(min);
+        chart.getStyler().setXAxisMax(max);
+    }
+
     public void setSeries(String name, float[] x, float[] y) {
         double[] xd = new double[x.length];
         for (int i = 0; i < xd.length; i++) {
@@ -52,7 +57,11 @@ public class Plot implements DataRenderer {
         setSeries(name, xd, yd);
     }
 
-    public void setSeries(String name, double[] x, double[] y) {
+    public synchronized boolean hasSeries(String name) {
+        return chart.getSeriesMap().containsKey(name);
+    }
+
+    public synchronized void setSeries(String name, double[] x, double[] y) {
         XYSeries xySeries = chart.getSeriesMap().get(name);
         if (xySeries != null) {
             chart.updateXYSeries(name, x, y, null);
@@ -62,7 +71,7 @@ public class Plot implements DataRenderer {
         }
     }
 
-    public void setPoints(String name, float[] x, float[] y) {
+    public synchronized void setPoints(String name, float[] x, float[] y) {
         XYSeries series = chart.addSeries(name, x, y);
         series.setMarker(SeriesMarkers.CIRCLE);
         series.setLineStyle(SeriesLines.NONE);

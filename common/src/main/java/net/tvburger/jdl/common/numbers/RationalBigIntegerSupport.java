@@ -9,6 +9,7 @@ public final class RationalBigIntegerSupport implements JavaNumberTypeSupport<Ra
     private static final Rational<BigInteger> ONE = new Rational<>(BigInteger.ONE, BigInteger.ONE);
     private static final Rational<BigInteger> MINUS_ONE = new Rational<>(BigInteger.valueOf(-1), BigInteger.ONE);
     private static final Rational<BigInteger> ZERO = new Rational<>(BigInteger.ZERO, BigInteger.ONE);
+    private static final Rational<BigInteger> EPSILON = new Rational<>(BigInteger.ONE, BigInteger.valueOf(1_000_000_000));
 
     protected RationalBigIntegerSupport() {
     }
@@ -43,9 +44,19 @@ public final class RationalBigIntegerSupport implements JavaNumberTypeSupport<Ra
     }
 
     @Override
+    public Rational<BigInteger> multiply(Rational<BigInteger> first, int second) {
+        return rational(first.numerator().multiply(BigInteger.valueOf(second)), first.denominator());
+    }
+
+    @Override
     public Rational<BigInteger> divide(Rational<BigInteger> first, Rational<BigInteger> second) {
         return rational(first.numerator().multiply(second.denominator()),
                 first.denominator().multiply(second.numerator()));
+    }
+
+    @Override
+    public Rational<BigInteger> divide(Rational<BigInteger> first, int second) {
+        return rational(first.numerator(), first.denominator().multiply(BigInteger.valueOf(second)));
     }
 
     @Override
@@ -62,6 +73,11 @@ public final class RationalBigIntegerSupport implements JavaNumberTypeSupport<Ra
             return rational(first.numerator().multiply(factor).add(second.numerator()), second.denominator());
         }
         return rational(first.numerator().multiply(second.denominator()).add(second.numerator().multiply(first.denominator())), first.denominator().multiply(second.denominator()));
+    }
+
+    @Override
+    public Rational<BigInteger> add(Rational<BigInteger> first, int second) {
+        return rational(first.numerator().add(first.denominator().multiply(BigInteger.valueOf(second))), first.denominator());
     }
 
     private Rational<BigInteger> rational(BigInteger numerator, BigInteger denominator) {
@@ -108,7 +124,7 @@ public final class RationalBigIntegerSupport implements JavaNumberTypeSupport<Ra
     }
 
     @Override
-    public boolean greaterThan(Rational<BigInteger> first, Rational<BigInteger> second) {
+    public boolean isGreaterThan(Rational<BigInteger> first, Rational<BigInteger> second) {
         return first.numerator().multiply(second.denominator()).compareTo(first.denominator().multiply(second.numerator())) > 0;
     }
 
@@ -152,6 +168,32 @@ public final class RationalBigIntegerSupport implements JavaNumberTypeSupport<Ra
 
     @Override
     public Comparator<Rational<BigInteger>> comparator() {
-        return (o1, o2) -> greaterThan(o1, o2) ? 1 : greaterThan(o2, o1) ? -1 : 0;
+        return (o1, o2) -> isGreaterThan(o1, o2) ? 1 : isGreaterThan(o2, o1) ? -1 : 0;
+    }
+
+    @Override
+    public Rational<BigInteger> clamp01(Rational<BigInteger> value) {
+        if (value.numerator().compareTo(BigInteger.ZERO) <= 0) {
+            return ZERO;
+        }
+        if (value.numerator().compareTo(value.denominator()) >= 0) {
+            return ONE;
+        }
+        return value;
+    }
+
+    @Override
+    public Rational<BigInteger> epsilon() {
+        return EPSILON;
+    }
+
+    @Override
+    public Rational<BigInteger> log(Rational<BigInteger> value) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isInstance(Object value) {
+        return value instanceof Rational<?> r && r.numerator() instanceof BigInteger && r.denominator() instanceof BigInteger;
     }
 }

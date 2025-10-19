@@ -22,13 +22,13 @@
 <span class="source-line-no">009</span><span id="line-9"> * &lt;p&gt;</span>
 <span class="source-line-no">010</span><span id="line-10"> * Implementations represent functions {@code f(x; θ)} with trainable parameters θ</span>
 <span class="source-line-no">011</span><span id="line-11"> * that produce a scalar output for a given input vector. This interface provides</span>
-<span class="source-line-no">012</span><span id="line-12"> * a way to compute parameter gradients needed for training via backpropagation.</span>
+<span class="source-line-no">012</span><span id="line-12"> * a way to compute parameter parameterGradients needed for training via backpropagation.</span>
 <span class="source-line-no">013</span><span id="line-13"> */</span>
 <span class="source-line-no">014</span><span id="line-14">@Strategy(Strategy.Role.INTERFACE)</span>
 <span class="source-line-no">015</span><span id="line-15">public interface TrainableScalarFunction&lt;N extends Number&gt; extends TrainableFunction&lt;N&gt;, ScalarEstimationFunction&lt;N&gt; {</span>
 <span class="source-line-no">016</span><span id="line-16"></span>
 <span class="source-line-no">017</span><span id="line-17">    /**</span>
-<span class="source-line-no">018</span><span id="line-18">     * Calculates the gradients of the scalar function with respect to its</span>
+<span class="source-line-no">018</span><span id="line-18">     * Calculates the parameterGradients of the scalar function with respect to its</span>
 <span class="source-line-no">019</span><span id="line-19">     * trainable parameters, given the input values.</span>
 <span class="source-line-no">020</span><span id="line-20">     *</span>
 <span class="source-line-no">021</span><span id="line-21">     * @param inputs the input feature vector to the function</span>

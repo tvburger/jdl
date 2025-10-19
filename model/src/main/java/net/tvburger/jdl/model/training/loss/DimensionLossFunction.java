@@ -20,7 +20,7 @@ import net.tvburger.jdl.common.patterns.Strategy;
  */
 @DomainObject
 @Strategy(Strategy.Role.INTERFACE)
-public interface DimensionLossFunction extends LossFunction {
+public interface DimensionLossFunction<N extends Number> extends LossFunction<N> {
 
     /**
      * Calculates the loss for a single dimension, given the estimated value
@@ -30,7 +30,7 @@ public interface DimensionLossFunction extends LossFunction {
      * @param target    the expected or target value
      * @return the loss for this dimension as a {@code float}
      */
-    float calculateDimensionLoss(float estimated, float target);
+    N calculateDimensionLoss(N estimated, N target);
 
     /**
      * Calculates the gradient of the dimension loss with respect to the
@@ -41,6 +41,6 @@ public interface DimensionLossFunction extends LossFunction {
      * @param target    the expected or target value for this dimension
      * @return the gradient of the loss with respect to the activation
      */
-    float calculateGradient_dl_da(float estimated, float target);
+    N calculateGradient_dl_da(N estimated, N target);
 
 }

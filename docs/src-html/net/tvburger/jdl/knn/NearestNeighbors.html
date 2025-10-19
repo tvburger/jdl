@@ -20,116 +20,122 @@
 <span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.model.DataSet;</span>
 <span class="source-line-no">008</span><span id="line-8">import net.tvburger.jdl.model.EstimationFunction;</span>
 <span class="source-line-no">009</span><span id="line-9">import net.tvburger.jdl.model.distances.DistanceMetric;</span>
-<span class="source-line-no">010</span><span id="line-10"></span>
-<span class="source-line-no">011</span><span id="line-11">import java.util.Comparator;</span>
-<span class="source-line-no">012</span><span id="line-12">import java.util.Set;</span>
-<span class="source-line-no">013</span><span id="line-13">import java.util.TreeSet;</span>
-<span class="source-line-no">014</span><span id="line-14"></span>
-<span class="source-line-no">015</span><span id="line-15">public class NearestNeighbors implements EstimationFunction&lt;Float&gt; {</span>
-<span class="source-line-no">016</span><span id="line-16"></span>
-<span class="source-line-no">017</span><span id="line-17">    private final DistanceMetric distanceMetric;</span>
-<span class="source-line-no">018</span><span id="line-18">    private final NeighborWeighting neighborWeighting;</span>
-<span class="source-line-no">019</span><span id="line-19">    private DataSet&lt;Float&gt; memory;</span>
-<span class="source-line-no">020</span><span id="line-20">    private int k;</span>
-<span class="source-line-no">021</span><span id="line-21"></span>
-<span class="source-line-no">022</span><span id="line-22">    public NearestNeighbors(int k, DistanceMetric distanceMetric, NeighborWeighting neighborWeighting) {</span>
-<span class="source-line-no">023</span><span id="line-23">        this.distanceMetric = distanceMetric;</span>
-<span class="source-line-no">024</span><span id="line-24">        this.neighborWeighting = neighborWeighting;</span>
-<span class="source-line-no">025</span><span id="line-25">        this.k = k;</span>
-<span class="source-line-no">026</span><span id="line-26">    }</span>
-<span class="source-line-no">027</span><span id="line-27"></span>
-<span class="source-line-no">028</span><span id="line-28">    public DataSet&lt;Float&gt; getMemory() {</span>
-<span class="source-line-no">029</span><span id="line-29">        return memory;</span>
-<span class="source-line-no">030</span><span id="line-30">    }</span>
-<span class="source-line-no">031</span><span id="line-31"></span>
-<span class="source-line-no">032</span><span id="line-32">    public void setMemory(DataSet&lt;Float&gt; memory) {</span>
-<span class="source-line-no">033</span><span id="line-33">        this.memory = memory;</span>
-<span class="source-line-no">034</span><span id="line-34">    }</span>
-<span class="source-line-no">035</span><span id="line-35"></span>
-<span class="source-line-no">036</span><span id="line-36">    public int getK() {</span>
-<span class="source-line-no">037</span><span id="line-37">        return k;</span>
-<span class="source-line-no">038</span><span id="line-38">    }</span>
-<span class="source-line-no">039</span><span id="line-39"></span>
-<span class="source-line-no">040</span><span id="line-40">    public void setK(int k) {</span>
-<span class="source-line-no">041</span><span id="line-41">        if (k &lt;= 0) {</span>
-<span class="source-line-no">042</span><span id="line-42">            throw new IllegalArgumentException("k must be positive!");</span>
-<span class="source-line-no">043</span><span id="line-43">        }</span>
-<span class="source-line-no">044</span><span id="line-44">        this.k = k;</span>
-<span class="source-line-no">045</span><span id="line-45">    }</span>
-<span class="source-line-no">046</span><span id="line-46"></span>
-<span class="source-line-no">047</span><span id="line-47">    @Override</span>
-<span class="source-line-no">048</span><span id="line-48">    public Float[] estimate(Float[] inputs) {</span>
-<span class="source-line-no">049</span><span id="line-49">        if (k &lt; 0) {</span>
-<span class="source-line-no">050</span><span id="line-50">            throw new IllegalStateException("Invalid k set (" + k + ")! Must be positive!");</span>
-<span class="source-line-no">051</span><span id="line-51">        }</span>
-<span class="source-line-no">052</span><span id="line-52">        if (memory == null || memory.isEmpty()) {</span>
-<span class="source-line-no">053</span><span id="line-53">            throw new IllegalStateException("Model has not been trained!");</span>
-<span class="source-line-no">054</span><span id="line-54">        }</span>
-<span class="source-line-no">055</span><span id="line-55">        if (k &gt; memory.size()) {</span>
-<span class="source-line-no">056</span><span id="line-56">            throw new IllegalArgumentException("We have not enough samples!");</span>
-<span class="source-line-no">057</span><span id="line-57">        }</span>
-<span class="source-line-no">058</span><span id="line-58">        float maxDistance = Float.POSITIVE_INFINITY;</span>
-<span class="source-line-no">059</span><span id="line-59">        Set&lt;Pair&lt;DataSet.Sample&lt;Float&gt;, Float&gt;&gt; neighbors = new TreeSet&lt;&gt;(furthestFirst());</span>
-<span class="source-line-no">060</span><span id="line-60">        for (DataSet.Sample&lt;Float&gt; sample : memory) {</span>
-<span class="source-line-no">061</span><span id="line-61">            float sampleDistance = distanceMetric.distance(sample.features(), inputs);</span>
-<span class="source-line-no">062</span><span id="line-62">            if (neighbors.size() &lt; k) {</span>
-<span class="source-line-no">063</span><span id="line-63">                neighbors.add(Pair.of(sample, sampleDistance));</span>
-<span class="source-line-no">064</span><span id="line-64">                if (sampleDistance &lt; maxDistance) {</span>
-<span class="source-line-no">065</span><span id="line-65">                    maxDistance = sampleDistance;</span>
-<span class="source-line-no">066</span><span id="line-66">                }</span>
-<span class="source-line-no">067</span><span id="line-67">            } else if (sampleDistance &lt; maxDistance) {</span>
-<span class="source-line-no">068</span><span id="line-68">                neighbors.remove(neighbors.iterator().next());</span>
-<span class="source-line-no">069</span><span id="line-69">                neighbors.add(Pair.of(sample, sampleDistance));</span>
-<span class="source-line-no">070</span><span id="line-70">                maxDistance = sampleDistance;</span>
-<span class="source-line-no">071</span><span id="line-71">            }</span>
-<span class="source-line-no">072</span><span id="line-72">        }</span>
-<span class="source-line-no">073</span><span id="line-73">        SimpleHolder&lt;Float&gt; totalWeights = new SimpleHolder&lt;&gt;(0.0f);</span>
-<span class="source-line-no">074</span><span id="line-74">        Float[] estimation = getCurrentNumberType().createArray(neighbors.iterator().next().left().targetOutputs().length);</span>
-<span class="source-line-no">075</span><span id="line-75">        neighbors.forEach(p -&gt; {</span>
-<span class="source-line-no">076</span><span id="line-76">            float distance = p.right();</span>
-<span class="source-line-no">077</span><span id="line-77">            float weight = neighborWeighting.weight(distance);</span>
-<span class="source-line-no">078</span><span id="line-78">            Float[] neighborOutputs = p.left().targetOutputs();</span>
-<span class="source-line-no">079</span><span id="line-79">            totalWeights.adjust(f -&gt; f + weight);</span>
-<span class="source-line-no">080</span><span id="line-80">            for (int i = 0; i &lt; estimation.length; i++) {</span>
-<span class="source-line-no">081</span><span id="line-81">                estimation[i] += weight * neighborOutputs[i];</span>
-<span class="source-line-no">082</span><span id="line-82">            }</span>
-<span class="source-line-no">083</span><span id="line-83">        });</span>
-<span class="source-line-no">084</span><span id="line-84">        for (int i = 0; i &lt; estimation.length; i++) {</span>
-<span class="source-line-no">085</span><span id="line-85">            estimation[i] = estimation[i] / totalWeights.get();</span>
-<span class="source-line-no">086</span><span id="line-86">        }</span>
-<span class="source-line-no">087</span><span id="line-87">        return estimation;</span>
-<span class="source-line-no">088</span><span id="line-88">    }</span>
-<span class="source-line-no">089</span><span id="line-89"></span>
-<span class="source-line-no">090</span><span id="line-90">    @Override</span>
-<span class="source-line-no">091</span><span id="line-91">    public int arity() {</span>
-<span class="source-line-no">092</span><span id="line-92">        if (memory == null || memory.isEmpty()) {</span>
-<span class="source-line-no">093</span><span id="line-93">            throw new IllegalStateException("Not trained!");</span>
-<span class="source-line-no">094</span><span id="line-94">        }</span>
-<span class="source-line-no">095</span><span id="line-95">        return memory.getFeatureCount();</span>
-<span class="source-line-no">096</span><span id="line-96">    }</span>
-<span class="source-line-no">097</span><span id="line-97"></span>
-<span class="source-line-no">098</span><span id="line-98">    @Override</span>
-<span class="source-line-no">099</span><span id="line-99">    public int coArity() {</span>
-<span class="source-line-no">100</span><span id="line-100">        if (memory == null || memory.isEmpty()) {</span>
-<span class="source-line-no">101</span><span id="line-101">            throw new IllegalStateException("Not trained!");</span>
-<span class="source-line-no">102</span><span id="line-102">        }</span>
-<span class="source-line-no">103</span><span id="line-103">        return memory.getTargetCount();</span>
-<span class="source-line-no">104</span><span id="line-104">    }</span>
-<span class="source-line-no">105</span><span id="line-105"></span>
-<span class="source-line-no">106</span><span id="line-106">    private Comparator&lt;? super Pair&lt;DataSet.Sample&lt;Float&gt;, Float&gt;&gt; furthestFirst() {</span>
-<span class="source-line-no">107</span><span id="line-107">        return (p1, p2) -&gt;</span>
-<span class="source-line-no">108</span><span id="line-108">                Floats.equals(p1.right(), p2.right())</span>
-<span class="source-line-no">109</span><span id="line-109">                        ? 0</span>
-<span class="source-line-no">110</span><span id="line-110">                        : Floats.greaterThan(p1.right(), p2.right())</span>
-<span class="source-line-no">111</span><span id="line-111">                        ? -1</span>
-<span class="source-line-no">112</span><span id="line-112">                        : 1;</span>
-<span class="source-line-no">113</span><span id="line-113">    }</span>
-<span class="source-line-no">114</span><span id="line-114"></span>
-<span class="source-line-no">115</span><span id="line-115">    @Override</span>
-<span class="source-line-no">116</span><span id="line-116">    public JavaNumberTypeSupport&lt;Float&gt; getCurrentNumberType() {</span>
-<span class="source-line-no">117</span><span id="line-117">        return JavaNumberTypeSupport.FLOAT;</span>
-<span class="source-line-no">118</span><span id="line-118">    }</span>
-<span class="source-line-no">119</span><span id="line-119">}</span>
+<span class="source-line-no">010</span><span id="line-10">import net.tvburger.jdl.model.training.TrainableFunction;</span>
+<span class="source-line-no">011</span><span id="line-11"></span>
+<span class="source-line-no">012</span><span id="line-12">import java.util.Comparator;</span>
+<span class="source-line-no">013</span><span id="line-13">import java.util.Set;</span>
+<span class="source-line-no">014</span><span id="line-14">import java.util.TreeSet;</span>
+<span class="source-line-no">015</span><span id="line-15"></span>
+<span class="source-line-no">016</span><span id="line-16">public class NearestNeighbors implements TrainableFunction&lt;Float&gt; {</span>
+<span class="source-line-no">017</span><span id="line-17"></span>
+<span class="source-line-no">018</span><span id="line-18">    private final DistanceMetric distanceMetric;</span>
+<span class="source-line-no">019</span><span id="line-19">    private final NeighborWeighting neighborWeighting;</span>
+<span class="source-line-no">020</span><span id="line-20">    private DataSet&lt;Float&gt; memory;</span>
+<span class="source-line-no">021</span><span id="line-21">    private int k;</span>
+<span class="source-line-no">022</span><span id="line-22"></span>
+<span class="source-line-no">023</span><span id="line-23">    public NearestNeighbors(int k, DistanceMetric distanceMetric, NeighborWeighting neighborWeighting) {</span>
+<span class="source-line-no">024</span><span id="line-24">        this.distanceMetric = distanceMetric;</span>
+<span class="source-line-no">025</span><span id="line-25">        this.neighborWeighting = neighborWeighting;</span>
+<span class="source-line-no">026</span><span id="line-26">        this.k = k;</span>
+<span class="source-line-no">027</span><span id="line-27">    }</span>
+<span class="source-line-no">028</span><span id="line-28"></span>
+<span class="source-line-no">029</span><span id="line-29">    public DataSet&lt;Float&gt; getMemory() {</span>
+<span class="source-line-no">030</span><span id="line-30">        return memory;</span>
+<span class="source-line-no">031</span><span id="line-31">    }</span>
+<span class="source-line-no">032</span><span id="line-32"></span>
+<span class="source-line-no">033</span><span id="line-33">    public void setMemory(DataSet&lt;Float&gt; memory) {</span>
+<span class="source-line-no">034</span><span id="line-34">        this.memory = memory;</span>
+<span class="source-line-no">035</span><span id="line-35">    }</span>
+<span class="source-line-no">036</span><span id="line-36"></span>
+<span class="source-line-no">037</span><span id="line-37">    public int getK() {</span>
+<span class="source-line-no">038</span><span id="line-38">        return k;</span>
+<span class="source-line-no">039</span><span id="line-39">    }</span>
+<span class="source-line-no">040</span><span id="line-40"></span>
+<span class="source-line-no">041</span><span id="line-41">    public void setK(int k) {</span>
+<span class="source-line-no">042</span><span id="line-42">        if (k &lt;= 0) {</span>
+<span class="source-line-no">043</span><span id="line-43">            throw new IllegalArgumentException("k must be positive!");</span>
+<span class="source-line-no">044</span><span id="line-44">        }</span>
+<span class="source-line-no">045</span><span id="line-45">        this.k = k;</span>
+<span class="source-line-no">046</span><span id="line-46">    }</span>
+<span class="source-line-no">047</span><span id="line-47"></span>
+<span class="source-line-no">048</span><span id="line-48">    @Override</span>
+<span class="source-line-no">049</span><span id="line-49">    public Float[] estimate(Float[] inputs) {</span>
+<span class="source-line-no">050</span><span id="line-50">        if (k &lt; 0) {</span>
+<span class="source-line-no">051</span><span id="line-51">            throw new IllegalStateException("Invalid k set (" + k + ")! Must be positive!");</span>
+<span class="source-line-no">052</span><span id="line-52">        }</span>
+<span class="source-line-no">053</span><span id="line-53">        if (memory == null || memory.isEmpty()) {</span>
+<span class="source-line-no">054</span><span id="line-54">            throw new IllegalStateException("Model has not been trained!");</span>
+<span class="source-line-no">055</span><span id="line-55">        }</span>
+<span class="source-line-no">056</span><span id="line-56">        if (k &gt; memory.size()) {</span>
+<span class="source-line-no">057</span><span id="line-57">            throw new IllegalArgumentException("We have not enough samples!");</span>
+<span class="source-line-no">058</span><span id="line-58">        }</span>
+<span class="source-line-no">059</span><span id="line-59">        float maxDistance = Float.POSITIVE_INFINITY;</span>
+<span class="source-line-no">060</span><span id="line-60">        Set&lt;Pair&lt;DataSet.Sample&lt;Float&gt;, Float&gt;&gt; neighbors = new TreeSet&lt;&gt;(furthestFirst());</span>
+<span class="source-line-no">061</span><span id="line-61">        for (DataSet.Sample&lt;Float&gt; sample : memory) {</span>
+<span class="source-line-no">062</span><span id="line-62">            float sampleDistance = distanceMetric.distance(sample.features(), inputs);</span>
+<span class="source-line-no">063</span><span id="line-63">            if (neighbors.size() &lt; k) {</span>
+<span class="source-line-no">064</span><span id="line-64">                neighbors.add(Pair.of(sample, sampleDistance));</span>
+<span class="source-line-no">065</span><span id="line-65">                if (sampleDistance &lt; maxDistance) {</span>
+<span class="source-line-no">066</span><span id="line-66">                    maxDistance = sampleDistance;</span>
+<span class="source-line-no">067</span><span id="line-67">                }</span>
+<span class="source-line-no">068</span><span id="line-68">            } else if (sampleDistance &lt; maxDistance) {</span>
+<span class="source-line-no">069</span><span id="line-69">                neighbors.remove(neighbors.iterator().next());</span>
+<span class="source-line-no">070</span><span id="line-70">                neighbors.add(Pair.of(sample, sampleDistance));</span>
+<span class="source-line-no">071</span><span id="line-71">                maxDistance = sampleDistance;</span>
+<span class="source-line-no">072</span><span id="line-72">            }</span>
+<span class="source-line-no">073</span><span id="line-73">        }</span>
+<span class="source-line-no">074</span><span id="line-74">        SimpleHolder&lt;Float&gt; totalWeights = new SimpleHolder&lt;&gt;(0.0f);</span>
+<span class="source-line-no">075</span><span id="line-75">        Float[] estimation = getCurrentNumberType().createArray(neighbors.iterator().next().left().targetOutputs().length);</span>
+<span class="source-line-no">076</span><span id="line-76">        neighbors.forEach(p -&gt; {</span>
+<span class="source-line-no">077</span><span id="line-77">            float distance = p.right();</span>
+<span class="source-line-no">078</span><span id="line-78">            float weight = neighborWeighting.weight(distance);</span>
+<span class="source-line-no">079</span><span id="line-79">            Float[] neighborOutputs = p.left().targetOutputs();</span>
+<span class="source-line-no">080</span><span id="line-80">            totalWeights.adjust(f -&gt; f + weight);</span>
+<span class="source-line-no">081</span><span id="line-81">            for (int i = 0; i &lt; estimation.length; i++) {</span>
+<span class="source-line-no">082</span><span id="line-82">                estimation[i] += weight * neighborOutputs[i];</span>
+<span class="source-line-no">083</span><span id="line-83">            }</span>
+<span class="source-line-no">084</span><span id="line-84">        });</span>
+<span class="source-line-no">085</span><span id="line-85">        for (int i = 0; i &lt; estimation.length; i++) {</span>
+<span class="source-line-no">086</span><span id="line-86">            estimation[i] = estimation[i] / totalWeights.get();</span>
+<span class="source-line-no">087</span><span id="line-87">        }</span>
+<span class="source-line-no">088</span><span id="line-88">        return estimation;</span>
+<span class="source-line-no">089</span><span id="line-89">    }</span>
+<span class="source-line-no">090</span><span id="line-90"></span>
+<span class="source-line-no">091</span><span id="line-91">    @Override</span>
+<span class="source-line-no">092</span><span id="line-92">    public int arity() {</span>
+<span class="source-line-no">093</span><span id="line-93">        if (memory == null || memory.isEmpty()) {</span>
+<span class="source-line-no">094</span><span id="line-94">            throw new IllegalStateException("Not trained!");</span>
+<span class="source-line-no">095</span><span id="line-95">        }</span>
+<span class="source-line-no">096</span><span id="line-96">        return memory.getFeatureCount();</span>
+<span class="source-line-no">097</span><span id="line-97">    }</span>
+<span class="source-line-no">098</span><span id="line-98"></span>
+<span class="source-line-no">099</span><span id="line-99">    @Override</span>
+<span class="source-line-no">100</span><span id="line-100">    public int coArity() {</span>
+<span class="source-line-no">101</span><span id="line-101">        if (memory == null || memory.isEmpty()) {</span>
+<span class="source-line-no">102</span><span id="line-102">            throw new IllegalStateException("Not trained!");</span>
+<span class="source-line-no">103</span><span id="line-103">        }</span>
+<span class="source-line-no">104</span><span id="line-104">        return memory.getTargetCount();</span>
+<span class="source-line-no">105</span><span id="line-105">    }</span>
+<span class="source-line-no">106</span><span id="line-106"></span>
+<span class="source-line-no">107</span><span id="line-107">    private Comparator&lt;? super Pair&lt;DataSet.Sample&lt;Float&gt;, Float&gt;&gt; furthestFirst() {</span>
+<span class="source-line-no">108</span><span id="line-108">        return (p1, p2) -&gt;</span>
+<span class="source-line-no">109</span><span id="line-109">                Floats.equals(p1.right(), p2.right())</span>
+<span class="source-line-no">110</span><span id="line-110">                        ? 0</span>
+<span class="source-line-no">111</span><span id="line-111">                        : Floats.greaterThan(p1.right(), p2.right())</span>
+<span class="source-line-no">112</span><span id="line-112">                        ? -1</span>
+<span class="source-line-no">113</span><span id="line-113">                        : 1;</span>
+<span class="source-line-no">114</span><span id="line-114">    }</span>
+<span class="source-line-no">115</span><span id="line-115"></span>
+<span class="source-line-no">116</span><span id="line-116">    @Override</span>
+<span class="source-line-no">117</span><span id="line-117">    public JavaNumberTypeSupport&lt;Float&gt; getCurrentNumberType() {</span>
+<span class="source-line-no">118</span><span id="line-118">        return JavaNumberTypeSupport.FLOAT;</span>
+<span class="source-line-no">119</span><span id="line-119">    }</span>
+<span class="source-line-no">120</span><span id="line-120"></span>
+<span class="source-line-no">121</span><span id="line-121">    @Override</span>
+<span class="source-line-no">122</span><span id="line-122">    public Float[] getParameters() {</span>
+<span class="source-line-no">123</span><span id="line-123">        return new Float[0];</span>
+<span class="source-line-no">124</span><span id="line-124">    }</span>
+<span class="source-line-no">125</span><span id="line-125">}</span>
 
 
 

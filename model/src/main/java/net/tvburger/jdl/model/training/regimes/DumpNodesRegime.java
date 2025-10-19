@@ -8,6 +8,7 @@ import net.tvburger.jdl.model.nn.NeuralNetworks;
 import net.tvburger.jdl.model.training.ObjectiveFunction;
 import net.tvburger.jdl.model.training.Optimizer;
 import net.tvburger.jdl.model.training.Regime;
+import net.tvburger.jdl.model.training.TrainableFunction;
 
 /**
  * A {@link Regime} decorator that dumps the internal node activations of a
@@ -106,11 +107,24 @@ public class DumpNodesRegime extends DelegatedRegime {
      * @param <E>                the type of estimation function
      */
     @Override
-    public <E extends EstimationFunction<Float>> void train(E estimationFunction, DataSet<Float> trainingSet, ObjectiveFunction objective, Optimizer<? super E, Float> optimizer) {
+    public <E extends TrainableFunction<N>, N extends Number> void train(E estimationFunction, DataSet<N> trainingSet, ObjectiveFunction<N> objective, Optimizer<? super E, N> optimizer) {
+        train(estimationFunction, trainingSet, objective, optimizer, (Integer) null);
+    }
+
+    @Override
+    public <E extends TrainableFunction<N>, N extends Number> void train(E estimationFunction, DataSet<N> trainingSet, ObjectiveFunction<N> objective, Optimizer<? super E, N> optimizer, int step) {
+        train(estimationFunction, trainingSet, objective, optimizer, (Integer) step);
+    }
+
+    private <E extends TrainableFunction<N>, N extends Number> void train(E estimationFunction, DataSet<N> trainingSet, ObjectiveFunction<N> objective, Optimizer<? super E, N> optimizer, Integer step) {
         if (isFirstTime()) {
             dumpNodes(estimationFunction);
         }
-        regime.train(estimationFunction, trainingSet, objective, optimizer);
+        if (step == null) {
+            regime.train(estimationFunction, trainingSet, objective, optimizer);
+        } else {
+            regime.train(estimationFunction, trainingSet, objective, optimizer, step);
+        }
         dumpNodes(estimationFunction);
     }
 

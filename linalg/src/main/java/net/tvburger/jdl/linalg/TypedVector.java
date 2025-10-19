@@ -66,6 +66,15 @@ public class TypedVector<N extends Number> implements Vector<N> {
     }
 
     @Override
+    public Vector<N> divide(N value) {
+        N[] dividedValues = typeSupport.createArray(values.length);
+        for (int i = 0; i < values.length; i++) {
+            dividedValues[i] = typeSupport.divide(values[i], value);
+        }
+        return new TypedVector<>(dividedValues, columnVector, typeSupport);
+    }
+
+    @Override
     public TypedVector<N> add(N value) {
         N[] addedValues = typeSupport.createArray(values.length);
         for (int i = 0; i < values.length; i++) {
@@ -75,7 +84,7 @@ public class TypedVector<N extends Number> implements Vector<N> {
     }
 
     @Override
-    public TypedVector<N> substract(N value) {
+    public TypedVector<N> subtract(N value) {
         return add(typeSupport.negate(value));
     }
 
@@ -89,7 +98,7 @@ public class TypedVector<N extends Number> implements Vector<N> {
     }
 
     @Override
-    public TypedVector<N> substract(Vector<N> vector) {
+    public TypedVector<N> subtract(Vector<N> vector) {
         return add(vector.multiply(typeSupport.minusOne()));
     }
 

@@ -22,7 +22,7 @@ import net.tvburger.jdl.model.EstimationFunction;
  * </p>
  *
  * <p>
- * The {@link #train(EstimationFunction, DataSet)} method follows the
+ * The {@link #train(TrainableFunction, DataSet)} method follows the
  * canonical training sequence:
  * </p>
  * <ol>
@@ -42,18 +42,18 @@ import net.tvburger.jdl.model.EstimationFunction;
  */
 @Mediator
 @Strategy(Strategy.Role.CONCRETE)
-public class TrainerImpl<E extends EstimationFunction<Float>> implements Trainer<E> {
+public class TrainerImpl<E extends TrainableFunction<N>, N extends Number> implements Trainer<E, N> {
 
-    private Initializer<? super E, Float> initializer;
-    private ObjectiveFunction objective;
-    private Optimizer<? super E, Float> optimizer;
+    private Initializer<? super E, N> initializer;
+    private ObjectiveFunction<N> objective;
+    private Optimizer<? super E, N> optimizer;
     private Regime regime;
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Initializer<? super E, Float> getInitializer() {
+    public Initializer<? super E, N> getInitializer() {
         return initializer;
     }
 
@@ -61,7 +61,7 @@ public class TrainerImpl<E extends EstimationFunction<Float>> implements Trainer
      * {@inheritDoc}
      */
     @Override
-    public void setInitializer(Initializer<? super E, Float> initializer) {
+    public void setInitializer(Initializer<? super E, N> initializer) {
         this.initializer = initializer;
     }
 
@@ -69,7 +69,7 @@ public class TrainerImpl<E extends EstimationFunction<Float>> implements Trainer
      * {@inheritDoc}
      */
     @Override
-    public ObjectiveFunction getObjective() {
+    public ObjectiveFunction<N> getObjective() {
         return objective;
     }
 
@@ -77,7 +77,7 @@ public class TrainerImpl<E extends EstimationFunction<Float>> implements Trainer
      * {@inheritDoc}
      */
     @Override
-    public void setObjective(ObjectiveFunction objective) {
+    public void setObjective(ObjectiveFunction<N> objective) {
         this.objective = objective;
     }
 
@@ -85,7 +85,7 @@ public class TrainerImpl<E extends EstimationFunction<Float>> implements Trainer
      * {@inheritDoc}
      */
     @Override
-    public Optimizer<? super E, Float> getOptimizer() {
+    public Optimizer<? super E, N> getOptimizer() {
         return optimizer;
     }
 
@@ -93,7 +93,7 @@ public class TrainerImpl<E extends EstimationFunction<Float>> implements Trainer
      * {@inheritDoc}
      */
     @Override
-    public void setOptimizer(Optimizer<? super E, Float> optimizer) {
+    public void setOptimizer(Optimizer<? super E, N> optimizer) {
         this.optimizer = optimizer;
     }
 
@@ -117,7 +117,7 @@ public class TrainerImpl<E extends EstimationFunction<Float>> implements Trainer
      * {@inheritDoc}
      */
     @Override
-    public void train(E estimationFunction, DataSet<Float> trainingSet) {
+    public void train(E estimationFunction, DataSet<N> trainingSet) {
         if (optimizer == null) {
             throw new IllegalStateException("No optimizer defined!");
         }

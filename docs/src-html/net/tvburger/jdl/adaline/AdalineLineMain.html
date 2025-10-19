@@ -28,16 +28,16 @@
 <span class="source-line-no">015</span><span id="line-15">public class AdalineLineMain {</span>
 <span class="source-line-no">016</span><span id="line-16"></span>
 <span class="source-line-no">017</span><span id="line-17">    public static void main(String[] args) {</span>
-<span class="source-line-no">018</span><span id="line-18">        SyntheticDataSets.SyntheticDataSet&lt;Float&gt; syntheticDataSet = SyntheticDataSets.line(7, 3, JavaNumberTypeSupport.FLOAT);</span>
+<span class="source-line-no">018</span><span id="line-18">        SyntheticDataSets.SyntheticDataSet&lt;Float&gt; syntheticDataSet = SyntheticDataSets.line(2, 3, JavaNumberTypeSupport.FLOAT);</span>
 <span class="source-line-no">019</span><span id="line-19">        DataSet&lt;Float&gt; dataSet = syntheticDataSet.load();</span>
 <span class="source-line-no">020</span><span id="line-20">        DataSet&lt;Float&gt; trainingSet = dataSet.subset(10, dataSet.size());</span>
 <span class="source-line-no">021</span><span id="line-21">        DataSet&lt;Float&gt; testSet = dataSet.subset(0, 10);</span>
 <span class="source-line-no">022</span><span id="line-22"></span>
 <span class="source-line-no">023</span><span id="line-23">        Adaline adaline = Adaline.create(1, 1);</span>
-<span class="source-line-no">024</span><span id="line-24">        ObjectiveFunction objective = Objectives.mSE();</span>
+<span class="source-line-no">024</span><span id="line-24">        ObjectiveFunction&lt;Float&gt; objective = Objectives.mSE(JavaNumberTypeSupport.FLOAT);</span>
 <span class="source-line-no">025</span><span id="line-25">        LeastMeanSquares leastMeanSquares = new LeastMeanSquares(0.001f);</span>
-<span class="source-line-no">026</span><span id="line-26">        ChainedRegime regime = Regimes.epochs(5).dumpNodes().reportObjective().online();</span>
-<span class="source-line-no">027</span><span id="line-27">        Trainer&lt;Adaline&gt; adalineTrainer = Trainer.of(new AdalineInitializer(), objective, leastMeanSquares, regime);</span>
+<span class="source-line-no">026</span><span id="line-26">        ChainedRegime regime = Regimes.epochs(100).dumpNodes().reportObjective().stochastic();</span>
+<span class="source-line-no">027</span><span id="line-27">        Trainer&lt;Adaline, Float&gt; adalineTrainer = Trainer.of(new AdalineInitializer(), objective, leastMeanSquares, regime);</span>
 <span class="source-line-no">028</span><span id="line-28">        adalineTrainer.train(adaline, trainingSet);</span>
 <span class="source-line-no">029</span><span id="line-29">        NeuralNetworks.dump(adaline);</span>
 <span class="source-line-no">030</span><span id="line-30"></span>
