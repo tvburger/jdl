@@ -1,11 +1,14 @@
 net.tvburger.jdl
 net.tvburger.jdl.adaline
+net.tvburger.jdl.cnn
 net.tvburger.jdl.common
 net.tvburger.jdl.common.numbers
 net.tvburger.jdl.common.patterns
+net.tvburger.jdl.common.shapes
 net.tvburger.jdl.common.utils
 net.tvburger.jdl.datasets
 net.tvburger.jdl.knn
+net.tvburger.jdl.lenet
 net.tvburger.jdl.linalg
 net.tvburger.jdl.linear
 net.tvburger.jdl.linear.basis
@@ -29,3 +32,4 @@ net.tvburger.jdl.model.training.regimes
 net.tvburger.jdl.model.training.regularization
 net.tvburger.jdl.perceptron
 net.tvburger.jdl.plots
+net.tvburger.jdl.plots.listeners

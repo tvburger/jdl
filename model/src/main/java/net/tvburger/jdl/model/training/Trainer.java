@@ -20,11 +20,11 @@ import net.tvburger.jdl.model.EstimationFunction;
  * <p>
  * This interface exposes getters and setters for each component,
  * allowing dynamic reconfiguration of the training strategy. It also
- * defines a {@link #train(EstimationFunction, DataSet)} method as the
+ * defines a {@link #train(TrainableFunction, DataSet)} method as the
  * entry point for executing the training process.
  * </p>
  *
- * @param <E> the type of {@link EstimationFunction} being trained
+ * @param <E> the type of {@link TrainableFunction} being trained
  * @see Initializer
  * @see ObjectiveFunction
  * @see Optimizer

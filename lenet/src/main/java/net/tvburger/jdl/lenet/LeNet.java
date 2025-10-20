@@ -15,7 +15,7 @@ public class LeNet {
         DataSet<Float> samples = MnistDataSets.loadDigits();
         for (int i = 0; i < 10; i++) {
             DataSet.Sample<Float> sample = samples.samples().get(i);
-            ImageViewer imageViewer = ImageViewer.create(sample);
+            ImageViewer imageViewer = ImageViewer.fromMnistImage(sample);
             imageViewer.display();
             ConvolutionalLayer layer = ConvolutionalLayer.create(28, 28, 1, 5, 1, 0, Activations.tanh());
             ConvolutionalShape input = layer.getInputShape().withPixels(sample.features());

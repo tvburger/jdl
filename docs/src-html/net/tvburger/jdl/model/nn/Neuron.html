@@ -16,7 +16,7 @@
 <span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;</span>
 <span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.patterns.DomainObject;</span>
 <span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.common.patterns.Entity;</span>
-<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.model.scalars.LinearCombination;</span>
+<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.model.scalars.AffineTransformation;</span>
 <span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.model.scalars.NeuronFunction;</span>
 <span class="source-line-no">008</span><span id="line-8">import net.tvburger.jdl.model.scalars.TrainableScalarFunction;</span>
 <span class="source-line-no">009</span><span id="line-9">import net.tvburger.jdl.model.scalars.activations.ActivationFunction;</span>
@@ -61,7 +61,7 @@
 <span class="source-line-no">048</span><span id="line-48">    }</span>
 <span class="source-line-no">049</span><span id="line-49"></span>
 <span class="source-line-no">050</span><span id="line-50">    public static Neuron create(String name, List&lt;? extends Neuron&gt; inputNodes, ActivationFunction activationFunction) {</span>
-<span class="source-line-no">051</span><span id="line-51">        return new Neuron(name, inputNodes, new NeuronFunction(LinearCombination.create(inputNodes.size(), JavaNumberTypeSupport.FLOAT), activationFunction));</span>
+<span class="source-line-no">051</span><span id="line-51">        return new Neuron(name, inputNodes, new NeuronFunction(AffineTransformation.create(inputNodes.size(), JavaNumberTypeSupport.FLOAT), activationFunction));</span>
 <span class="source-line-no">052</span><span id="line-52">    }</span>
 <span class="source-line-no">053</span><span id="line-53"></span>
 <span class="source-line-no">054</span><span id="line-54">    private final String name;</span>
@@ -236,10 +236,58 @@
 <span class="source-line-no">223</span><span id="line-223">     * {@inheritDoc}</span>
 <span class="source-line-no">224</span><span id="line-224">     */</span>
 <span class="source-line-no">225</span><span id="line-225">    @Override</span>
-<span class="source-line-no">226</span><span id="line-226">    public Float[] getParameters() {</span>
-<span class="source-line-no">227</span><span id="line-227">        return neuronFunction.getParameters();</span>
+<span class="source-line-no">226</span><span id="line-226">    public int getParameterCount() {</span>
+<span class="source-line-no">227</span><span id="line-227">        return neuronFunction.getParameterCount();</span>
 <span class="source-line-no">228</span><span id="line-228">    }</span>
-<span class="source-line-no">229</span><span id="line-229">}</span>
+<span class="source-line-no">229</span><span id="line-229"></span>
+<span class="source-line-no">230</span><span id="line-230">    /**</span>
+<span class="source-line-no">231</span><span id="line-231">     * {@inheritDoc}</span>
+<span class="source-line-no">232</span><span id="line-232">     */</span>
+<span class="source-line-no">233</span><span id="line-233">    @Override</span>
+<span class="source-line-no">234</span><span id="line-234">    public Float[] getParameters() {</span>
+<span class="source-line-no">235</span><span id="line-235">        return neuronFunction.getParameters();</span>
+<span class="source-line-no">236</span><span id="line-236">    }</span>
+<span class="source-line-no">237</span><span id="line-237"></span>
+<span class="source-line-no">238</span><span id="line-238">    /**</span>
+<span class="source-line-no">239</span><span id="line-239">     * {@inheritDoc}</span>
+<span class="source-line-no">240</span><span id="line-240">     */</span>
+<span class="source-line-no">241</span><span id="line-241">    @Override</span>
+<span class="source-line-no">242</span><span id="line-242">    public Float getParameter(int p) {</span>
+<span class="source-line-no">243</span><span id="line-243">        return neuronFunction.getParameter(p);</span>
+<span class="source-line-no">244</span><span id="line-244">    }</span>
+<span class="source-line-no">245</span><span id="line-245"></span>
+<span class="source-line-no">246</span><span id="line-246">    /**</span>
+<span class="source-line-no">247</span><span id="line-247">     * {@inheritDoc}</span>
+<span class="source-line-no">248</span><span id="line-248">     */</span>
+<span class="source-line-no">249</span><span id="line-249">    @Override</span>
+<span class="source-line-no">250</span><span id="line-250">    public void setParameters(Float[] values) {</span>
+<span class="source-line-no">251</span><span id="line-251">        neuronFunction.setParameters(values);</span>
+<span class="source-line-no">252</span><span id="line-252">    }</span>
+<span class="source-line-no">253</span><span id="line-253"></span>
+<span class="source-line-no">254</span><span id="line-254">    /**</span>
+<span class="source-line-no">255</span><span id="line-255">     * {@inheritDoc}</span>
+<span class="source-line-no">256</span><span id="line-256">     */</span>
+<span class="source-line-no">257</span><span id="line-257">    @Override</span>
+<span class="source-line-no">258</span><span id="line-258">    public void setParameter(int p, Float value) {</span>
+<span class="source-line-no">259</span><span id="line-259">        neuronFunction.setParameter(p, value);</span>
+<span class="source-line-no">260</span><span id="line-260">    }</span>
+<span class="source-line-no">261</span><span id="line-261"></span>
+<span class="source-line-no">262</span><span id="line-262">    /**</span>
+<span class="source-line-no">263</span><span id="line-263">     * {@inheritDoc}</span>
+<span class="source-line-no">264</span><span id="line-264">     */</span>
+<span class="source-line-no">265</span><span id="line-265">    @Override</span>
+<span class="source-line-no">266</span><span id="line-266">    public void adjustParameters(Float[] deltas) {</span>
+<span class="source-line-no">267</span><span id="line-267">        neuronFunction.adjustParameters(deltas);</span>
+<span class="source-line-no">268</span><span id="line-268">    }</span>
+<span class="source-line-no">269</span><span id="line-269"></span>
+<span class="source-line-no">270</span><span id="line-270">    /**</span>
+<span class="source-line-no">271</span><span id="line-271">     * {@inheritDoc}</span>
+<span class="source-line-no">272</span><span id="line-272">     */</span>
+<span class="source-line-no">273</span><span id="line-273">    @Override</span>
+<span class="source-line-no">274</span><span id="line-274">    public void adjustParameter(int p, Float delta) {</span>
+<span class="source-line-no">275</span><span id="line-275">        neuronFunction.adjustParameter(p, delta);</span>
+<span class="source-line-no">276</span><span id="line-276">    }</span>
+<span class="source-line-no">277</span><span id="line-277">}</span>
 
 
 

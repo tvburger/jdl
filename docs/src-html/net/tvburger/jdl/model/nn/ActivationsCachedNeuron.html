@@ -15,7 +15,7 @@
 <span class="source-line-no">002</span><span id="line-2"></span>
 <span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;</span>
 <span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.patterns.Decorator;</span>
-<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.model.scalars.LinearCombination;</span>
+<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.model.scalars.AffineTransformation;</span>
 <span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.model.scalars.NeuronFunction;</span>
 <span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.model.scalars.activations.ActivationFunction;</span>
 <span class="source-line-no">008</span><span id="line-8">import net.tvburger.jdl.model.scalars.activations.Activations;</span>
@@ -45,7 +45,7 @@
 <span class="source-line-no">032</span><span id="line-32">    }</span>
 <span class="source-line-no">033</span><span id="line-33"></span>
 <span class="source-line-no">034</span><span id="line-34">    public static ActivationsCachedNeuron create(String name, List&lt;? extends Neuron&gt; inputNodes, ActivationFunction activationFunction) {</span>
-<span class="source-line-no">035</span><span id="line-35">        return new ActivationsCachedNeuron(name, inputNodes, new NeuronFunction(LinearCombination.create(inputNodes.size(), JavaNumberTypeSupport.FLOAT), activationFunction));</span>
+<span class="source-line-no">035</span><span id="line-35">        return new ActivationsCachedNeuron(name, inputNodes, new NeuronFunction(AffineTransformation.create(inputNodes.size(), JavaNumberTypeSupport.FLOAT), activationFunction));</span>
 <span class="source-line-no">036</span><span id="line-36">    }</span>
 <span class="source-line-no">037</span><span id="line-37"></span>
 <span class="source-line-no">038</span><span id="line-38">    /**</span>

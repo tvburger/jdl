@@ -20,33 +20,28 @@
 <span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.model.training.ObjectiveFunction;</span>
 <span class="source-line-no">008</span><span id="line-8">import net.tvburger.jdl.model.training.Optimizer;</span>
 <span class="source-line-no">009</span><span id="line-9"></span>
-<span class="source-line-no">010</span><span id="line-10">import java.util.Arrays;</span>
+<span class="source-line-no">010</span><span id="line-10">public class PerceptronUpdateRule implements Optimizer.Stochastic&lt;Perceptron, Float&gt; {</span>
 <span class="source-line-no">011</span><span id="line-11"></span>
-<span class="source-line-no">012</span><span id="line-12">public class PerceptronUpdateRule implements Optimizer.Stochastic&lt;Perceptron, Float&gt; {</span>
-<span class="source-line-no">013</span><span id="line-13"></span>
-<span class="source-line-no">014</span><span id="line-14">    @Override</span>
-<span class="source-line-no">015</span><span id="line-15">    public void optimize(Perceptron perceptron, DataSet.Sample&lt;Float&gt; sample, ObjectiveFunction&lt;Float&gt; objective, int step) {</span>
-<span class="source-line-no">016</span><span id="line-16">        Float[] estimate = perceptron.estimate(sample.features());</span>
-<span class="source-line-no">017</span><span id="line-17">        for (int i = 0; i &lt; estimate.length; i++) {</span>
-<span class="source-line-no">018</span><span id="line-18">            int sign = Floats.greaterThan(sample.targetOutputs()[i], 0.0f) ? +1 : -1;</span>
-<span class="source-line-no">019</span><span id="line-19">            LastInputStoredNeuron neuron = perceptron.getNeuron(2, i, LastInputStoredNeuron.class);</span>
-<span class="source-line-no">020</span><span id="line-20">            if (!Floats.equals(sample.targetOutputs()[i], estimate[i])) {</span>
-<span class="source-line-no">021</span><span id="line-21">                System.out.println("Training: real = " + Arrays.toString(sample.targetOutputs()) + " estimated = " + Arrays.toString(estimate) + ": features = " + Arrays.toString(sample.features()));</span>
-<span class="source-line-no">022</span><span id="line-22">                System.out.println("Sample target output = " + sample.targetOutputs()[i] + ", sign = " + sign);</span>
-<span class="source-line-no">023</span><span id="line-23">                updateParameters(neuron, sign);</span>
-<span class="source-line-no">024</span><span id="line-24">            }</span>
-<span class="source-line-no">025</span><span id="line-25">        }</span>
-<span class="source-line-no">026</span><span id="line-26">    }</span>
-<span class="source-line-no">027</span><span id="line-27"></span>
-<span class="source-line-no">028</span><span id="line-28">    private void updateParameters(LastInputStoredNeuron neuron, float y) {</span>
-<span class="source-line-no">029</span><span id="line-29">        NeuronFunction neuronFunction = neuron.getNeuronFunction();</span>
-<span class="source-line-no">030</span><span id="line-30">        neuronFunction.adjustParameter(0, y);</span>
-<span class="source-line-no">031</span><span id="line-31">        for (int d = 1; d &lt; neuron.arity(); d++) {</span>
-<span class="source-line-no">032</span><span id="line-32">            neuronFunction.adjustParameter(d, y * neuron.getStoredInput(d));</span>
-<span class="source-line-no">033</span><span id="line-33">        }</span>
-<span class="source-line-no">034</span><span id="line-34">        System.out.println(neuron);</span>
-<span class="source-line-no">035</span><span id="line-35">    }</span>
-<span class="source-line-no">036</span><span id="line-36">}</span>
+<span class="source-line-no">012</span><span id="line-12">    @Override</span>
+<span class="source-line-no">013</span><span id="line-13">    public void optimize(Perceptron perceptron, DataSet.Sample&lt;Float&gt; sample, ObjectiveFunction&lt;Float&gt; objective, int step) {</span>
+<span class="source-line-no">014</span><span id="line-14">        Float[] estimate = perceptron.estimate(sample.features());</span>
+<span class="source-line-no">015</span><span id="line-15">        for (int i = 0; i &lt; estimate.length; i++) {</span>
+<span class="source-line-no">016</span><span id="line-16">            int sign = Floats.greaterThan(sample.targetOutputs()[i], 0.0f) ? +1 : -1;</span>
+<span class="source-line-no">017</span><span id="line-17">            LastInputStoredNeuron neuron = perceptron.getNeuron(2, i, LastInputStoredNeuron.class);</span>
+<span class="source-line-no">018</span><span id="line-18">            if (!Floats.equals(sample.targetOutputs()[i], estimate[i])) {</span>
+<span class="source-line-no">019</span><span id="line-19">                updateParameters(neuron, sign);</span>
+<span class="source-line-no">020</span><span id="line-20">            }</span>
+<span class="source-line-no">021</span><span id="line-21">        }</span>
+<span class="source-line-no">022</span><span id="line-22">    }</span>
+<span class="source-line-no">023</span><span id="line-23"></span>
+<span class="source-line-no">024</span><span id="line-24">    private void updateParameters(LastInputStoredNeuron neuron, float y) {</span>
+<span class="source-line-no">025</span><span id="line-25">        NeuronFunction neuronFunction = neuron.getNeuronFunction();</span>
+<span class="source-line-no">026</span><span id="line-26">        neuronFunction.adjustParameter(0, y);</span>
+<span class="source-line-no">027</span><span id="line-27">        for (int d = 1; d &lt; neuron.arity(); d++) {</span>
+<span class="source-line-no">028</span><span id="line-28">            neuronFunction.adjustParameter(d, y * neuron.getStoredInput(d));</span>
+<span class="source-line-no">029</span><span id="line-29">        }</span>
+<span class="source-line-no">030</span><span id="line-30">    }</span>
+<span class="source-line-no">031</span><span id="line-31">}</span>
 
 
 

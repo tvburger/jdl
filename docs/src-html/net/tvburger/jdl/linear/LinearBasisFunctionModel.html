@@ -16,11 +16,11 @@
 <span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;</span>
 <span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.patterns.Strategy;</span>
 <span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.linear.basis.BasisFunction;</span>
-<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.model.scalars.LinearCombination;</span>
+<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.model.scalars.AffineTransformation;</span>
 <span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.model.scalars.UnaryEstimationFunction;</span>
 <span class="source-line-no">008</span><span id="line-8"></span>
 <span class="source-line-no">009</span><span id="line-9">@Strategy(Strategy.Role.CONCRETE)</span>
-<span class="source-line-no">010</span><span id="line-10">public class LinearBasisFunctionModel&lt;N extends Number&gt; extends LinearCombination&lt;N&gt; implements LinearModel&lt;N&gt;, UnaryEstimationFunction&lt;N&gt; {</span>
+<span class="source-line-no">010</span><span id="line-10">public class LinearBasisFunctionModel&lt;N extends Number&gt; extends AffineTransformation&lt;N&gt; implements LinearModel&lt;N&gt;, UnaryEstimationFunction&lt;N&gt; {</span>
 <span class="source-line-no">011</span><span id="line-11"></span>
 <span class="source-line-no">012</span><span id="line-12">    private final FeatureExtractor&lt;N&gt; featureExtractor;</span>
 <span class="source-line-no">013</span><span id="line-13"></span>
@@ -36,11 +36,11 @@
 <span class="source-line-no">023</span><span id="line-23">    }</span>
 <span class="source-line-no">024</span><span id="line-24"></span>
 <span class="source-line-no">025</span><span id="line-25">    protected LinearBasisFunctionModel(int modelComplexity, BasisFunction.Generator&lt;N&gt; basisFunctionGenerator) {</span>
-<span class="source-line-no">026</span><span id="line-26">        this(basisFunctionGenerator.generate(modelComplexity), basisFunctionGenerator.getCurrentNumberType().createArray(modelComplexity + 1), basisFunctionGenerator.getCurrentNumberType());</span>
+<span class="source-line-no">026</span><span id="line-26">        this(basisFunctionGenerator.generate(modelComplexity), basisFunctionGenerator.getCurrentNumberType().zero(), basisFunctionGenerator.getCurrentNumberType().createArray(modelComplexity), basisFunctionGenerator.getCurrentNumberType());</span>
 <span class="source-line-no">027</span><span id="line-27">    }</span>
 <span class="source-line-no">028</span><span id="line-28"></span>
-<span class="source-line-no">029</span><span id="line-29">    private LinearBasisFunctionModel(FeatureExtractor&lt;N&gt; featureExtractor, N[] parameters, JavaNumberTypeSupport&lt;N&gt; typeSupport) {</span>
-<span class="source-line-no">030</span><span id="line-30">        super(parameters, typeSupport);</span>
+<span class="source-line-no">029</span><span id="line-29">    private LinearBasisFunctionModel(FeatureExtractor&lt;N&gt; featureExtractor, N bias, N[] weights, JavaNumberTypeSupport&lt;N&gt; typeSupport) {</span>
+<span class="source-line-no">030</span><span id="line-30">        super(bias, weights, typeSupport);</span>
 <span class="source-line-no">031</span><span id="line-31">        this.featureExtractor = featureExtractor;</span>
 <span class="source-line-no">032</span><span id="line-32">    }</span>
 <span class="source-line-no">033</span><span id="line-33"></span>
@@ -49,7 +49,7 @@
 <span class="source-line-no">036</span><span id="line-36">    }</span>
 <span class="source-line-no">037</span><span id="line-37"></span>
 <span class="source-line-no">038</span><span id="line-38">    public int getModelComplexity() {</span>
-<span class="source-line-no">039</span><span id="line-39">        return getParameterCount() - 1;</span>
+<span class="source-line-no">039</span><span id="line-39">        return arity();</span>
 <span class="source-line-no">040</span><span id="line-40">    }</span>
 <span class="source-line-no">041</span><span id="line-41"></span>
 <span class="source-line-no">042</span><span id="line-42">    @Override</span>

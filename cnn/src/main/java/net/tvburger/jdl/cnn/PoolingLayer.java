@@ -36,7 +36,7 @@ public class PoolingLayer {
     public static PoolingLayer create(ConvolutionalShape inputShape, ConvolutionalShape outputShape, int size, int stride, int padding, ActivationFunction activationFunction) {
         List<ConvolutionalFilter> filters = new ArrayList<>();
         for (int i = 0; i < outputShape.getChannels(); i++) {
-            filters.add(ConvolutionalFilter.create(size, inputShape.getChannels(), activationFunction));
+            filters.add(ConvolutionalFilter.create(size, inputShape.getChannels()));
         }
         return new PoolingLayer(inputShape, outputShape, filters, stride, padding);
     }

@@ -119,7 +119,25 @@ public class NearestNeighbors implements TrainableFunction<Float> {
     }
 
     @Override
+    public int getParameterCount() {
+        return 0;
+    }
+
+    @Override
     public Float[] getParameters() {
         return new Float[0];
+    }
+
+    @Override
+    public Float getParameter(int p) {
+        return 0f;
+    }
+
+    @Override
+    public void setParameters(Float[] values) {
+    }
+
+    @Override
+    public void setParameter(int p, Float value) {
     }
 }

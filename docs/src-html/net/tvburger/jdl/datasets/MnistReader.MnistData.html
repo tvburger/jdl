@@ -14,7 +14,7 @@
 <pre><span class="source-line-no">001</span><span id="line-1">package net.tvburger.jdl.datasets;</span>
 <span class="source-line-no">002</span><span id="line-2"></span>
 <span class="source-line-no">003</span><span id="line-3">import java.io.*;</span>
-<span class="source-line-no">004</span><span id="line-4">import java.nio.file.Path;</span>
+<span class="source-line-no">004</span><span id="line-4">import java.nio.file.NoSuchFileException;</span>
 <span class="source-line-no">005</span><span id="line-5">import java.util.ArrayList;</span>
 <span class="source-line-no">006</span><span id="line-6">import java.util.List;</span>
 <span class="source-line-no">007</span><span id="line-7"></span>
@@ -37,63 +37,73 @@
 <span class="source-line-no">024</span><span id="line-24">        }</span>
 <span class="source-line-no">025</span><span id="line-25">    }</span>
 <span class="source-line-no">026</span><span id="line-26"></span>
-<span class="source-line-no">027</span><span id="line-27">    public static MnistData readImagesLabels(Path imagesPath, Path labelsPath) throws IOException {</span>
+<span class="source-line-no">027</span><span id="line-27">    public static MnistData readImagesLabels(String imagesPath, String labelsPath) throws IOException {</span>
 <span class="source-line-no">028</span><span id="line-28">        // ---- Read labels ----</span>
 <span class="source-line-no">029</span><span id="line-29">        final int labelCount;</span>
 <span class="source-line-no">030</span><span id="line-30">        final byte[] labels;</span>
-<span class="source-line-no">031</span><span id="line-31">        try (DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(labelsPath.toFile())))) {</span>
-<span class="source-line-no">032</span><span id="line-32">            int magic = in.readInt(); // big-endian by default</span>
-<span class="source-line-no">033</span><span id="line-33">            if (magic != MAGIC_LABELS) {</span>
-<span class="source-line-no">034</span><span id="line-34">                throw new IOException("Magic number mismatch for labels: expected " + MAGIC_LABELS + ", got " + magic);</span>
-<span class="source-line-no">035</span><span id="line-35">            }</span>
-<span class="source-line-no">036</span><span id="line-36">            labelCount = in.readInt();</span>
-<span class="source-line-no">037</span><span id="line-37">            labels = in.readNBytes(labelCount);</span>
-<span class="source-line-no">038</span><span id="line-38">            if (labels.length != labelCount) {</span>
-<span class="source-line-no">039</span><span id="line-39">                throw new EOFException("Labels file truncated: expected " + labelCount + " bytes, got " + labels.length);</span>
-<span class="source-line-no">040</span><span id="line-40">            }</span>
-<span class="source-line-no">041</span><span id="line-41">        }</span>
-<span class="source-line-no">042</span><span id="line-42"></span>
-<span class="source-line-no">043</span><span id="line-43">        // ---- Read images ----</span>
-<span class="source-line-no">044</span><span id="line-44">        final int imageCount, rows, cols;</span>
-<span class="source-line-no">045</span><span id="line-45">        final byte[] imageBytes;</span>
-<span class="source-line-no">046</span><span id="line-46">        try (DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(imagesPath.toFile())))) {</span>
-<span class="source-line-no">047</span><span id="line-47">            int magic = in.readInt();</span>
-<span class="source-line-no">048</span><span id="line-48">            if (magic != MAGIC_IMAGES) {</span>
-<span class="source-line-no">049</span><span id="line-49">                throw new IOException("Magic number mismatch for images: expected " + MAGIC_IMAGES + ", got " + magic);</span>
-<span class="source-line-no">050</span><span id="line-50">            }</span>
-<span class="source-line-no">051</span><span id="line-51">            imageCount = in.readInt();</span>
-<span class="source-line-no">052</span><span id="line-52">            rows = in.readInt();</span>
-<span class="source-line-no">053</span><span id="line-53">            cols = in.readInt();</span>
-<span class="source-line-no">054</span><span id="line-54">            long total = (long) imageCount * rows * cols;</span>
-<span class="source-line-no">055</span><span id="line-55">            if (total &gt; Integer.MAX_VALUE) {</span>
-<span class="source-line-no">056</span><span id="line-56">                throw new IllegalArgumentException("Image data too large: " + total + " bytes");</span>
-<span class="source-line-no">057</span><span id="line-57">            }</span>
-<span class="source-line-no">058</span><span id="line-58">            imageBytes = in.readNBytes((int) total);</span>
-<span class="source-line-no">059</span><span id="line-59">            if (imageBytes.length != total) {</span>
-<span class="source-line-no">060</span><span id="line-60">                throw new EOFException("Images file truncated: expected " + total + " bytes, got " + imageBytes.length);</span>
-<span class="source-line-no">061</span><span id="line-61">            }</span>
-<span class="source-line-no">062</span><span id="line-62">        }</span>
-<span class="source-line-no">063</span><span id="line-63"></span>
-<span class="source-line-no">064</span><span id="line-64">        if (imageCount != labelCount) {</span>
-<span class="source-line-no">065</span><span id="line-65">            throw new IOException("Count mismatch: images=" + imageCount + ", labels=" + labelCount);</span>
-<span class="source-line-no">066</span><span id="line-66">        }</span>
-<span class="source-line-no">067</span><span id="line-67"></span>
-<span class="source-line-no">068</span><span id="line-68">        // ---- Convert to int[] per image (0..255) ----</span>
-<span class="source-line-no">069</span><span id="line-69">        List&lt;int[]&gt; images = new ArrayList&lt;&gt;(imageCount);</span>
-<span class="source-line-no">070</span><span id="line-70">        final int pixelsPerImage = rows * cols;</span>
-<span class="source-line-no">071</span><span id="line-71">        for (int i = 0; i &lt; imageCount; i++) {</span>
-<span class="source-line-no">072</span><span id="line-72">            int[] img = new int[pixelsPerImage];</span>
-<span class="source-line-no">073</span><span id="line-73">            int base = i * pixelsPerImage;</span>
-<span class="source-line-no">074</span><span id="line-74">            for (int p = 0; p &lt; pixelsPerImage; p++) {</span>
-<span class="source-line-no">075</span><span id="line-75">                // Convert signed byte to unsigned int 0..255</span>
-<span class="source-line-no">076</span><span id="line-76">                img[p] = imageBytes[base + p] &amp; 0xFF;</span>
-<span class="source-line-no">077</span><span id="line-77">            }</span>
-<span class="source-line-no">078</span><span id="line-78">            images.add(img);</span>
-<span class="source-line-no">079</span><span id="line-79">        }</span>
-<span class="source-line-no">080</span><span id="line-80"></span>
-<span class="source-line-no">081</span><span id="line-81">        return new MnistData(images, labels, rows, cols);</span>
-<span class="source-line-no">082</span><span id="line-82">    }</span>
-<span class="source-line-no">083</span><span id="line-83">}</span>
+<span class="source-line-no">031</span><span id="line-31">        ClassLoader classLoader = MnistReader.class.getClassLoader();</span>
+<span class="source-line-no">032</span><span id="line-32"></span>
+<span class="source-line-no">033</span><span id="line-33">        InputStream labelsInputStream = classLoader.getResourceAsStream(labelsPath);</span>
+<span class="source-line-no">034</span><span id="line-34">        if (labelsInputStream == null) {</span>
+<span class="source-line-no">035</span><span id="line-35">            throw new NoSuchFileException("Not found!");</span>
+<span class="source-line-no">036</span><span id="line-36">        }</span>
+<span class="source-line-no">037</span><span id="line-37">        try (DataInputStream in = new DataInputStream(new BufferedInputStream(labelsInputStream))) {</span>
+<span class="source-line-no">038</span><span id="line-38">            int magic = in.readInt(); // big-endian by default</span>
+<span class="source-line-no">039</span><span id="line-39">            if (magic != MAGIC_LABELS) {</span>
+<span class="source-line-no">040</span><span id="line-40">                throw new IOException("Magic number mismatch for labels: expected " + MAGIC_LABELS + ", got " + magic);</span>
+<span class="source-line-no">041</span><span id="line-41">            }</span>
+<span class="source-line-no">042</span><span id="line-42">            labelCount = in.readInt();</span>
+<span class="source-line-no">043</span><span id="line-43">            labels = in.readNBytes(labelCount);</span>
+<span class="source-line-no">044</span><span id="line-44">            if (labels.length != labelCount) {</span>
+<span class="source-line-no">045</span><span id="line-45">                throw new EOFException("Labels file truncated: expected " + labelCount + " bytes, got " + labels.length);</span>
+<span class="source-line-no">046</span><span id="line-46">            }</span>
+<span class="source-line-no">047</span><span id="line-47">        }</span>
+<span class="source-line-no">048</span><span id="line-48"></span>
+<span class="source-line-no">049</span><span id="line-49">        // ---- Read images ----</span>
+<span class="source-line-no">050</span><span id="line-50">        final int imageCount, rows, cols;</span>
+<span class="source-line-no">051</span><span id="line-51">        final byte[] imageBytes;</span>
+<span class="source-line-no">052</span><span id="line-52">        InputStream imagesInputStream = classLoader.getResourceAsStream(imagesPath);</span>
+<span class="source-line-no">053</span><span id="line-53">        if (imagesInputStream == null) {</span>
+<span class="source-line-no">054</span><span id="line-54">            throw new NoSuchFileException("Not found!");</span>
+<span class="source-line-no">055</span><span id="line-55">        }</span>
+<span class="source-line-no">056</span><span id="line-56">        try (DataInputStream in = new DataInputStream(new BufferedInputStream(imagesInputStream))) {</span>
+<span class="source-line-no">057</span><span id="line-57">            int magic = in.readInt();</span>
+<span class="source-line-no">058</span><span id="line-58">            if (magic != MAGIC_IMAGES) {</span>
+<span class="source-line-no">059</span><span id="line-59">                throw new IOException("Magic number mismatch for images: expected " + MAGIC_IMAGES + ", got " + magic);</span>
+<span class="source-line-no">060</span><span id="line-60">            }</span>
+<span class="source-line-no">061</span><span id="line-61">            imageCount = in.readInt();</span>
+<span class="source-line-no">062</span><span id="line-62">            rows = in.readInt();</span>
+<span class="source-line-no">063</span><span id="line-63">            cols = in.readInt();</span>
+<span class="source-line-no">064</span><span id="line-64">            long total = (long) imageCount * rows * cols;</span>
+<span class="source-line-no">065</span><span id="line-65">            if (total &gt; Integer.MAX_VALUE) {</span>
+<span class="source-line-no">066</span><span id="line-66">                throw new IllegalArgumentException("Image data too large: " + total + " bytes");</span>
+<span class="source-line-no">067</span><span id="line-67">            }</span>
+<span class="source-line-no">068</span><span id="line-68">            imageBytes = in.readNBytes((int) total);</span>
+<span class="source-line-no">069</span><span id="line-69">            if (imageBytes.length != total) {</span>
+<span class="source-line-no">070</span><span id="line-70">                throw new EOFException("Images file truncated: expected " + total + " bytes, got " + imageBytes.length);</span>
+<span class="source-line-no">071</span><span id="line-71">            }</span>
+<span class="source-line-no">072</span><span id="line-72">        }</span>
+<span class="source-line-no">073</span><span id="line-73"></span>
+<span class="source-line-no">074</span><span id="line-74">        if (imageCount != labelCount) {</span>
+<span class="source-line-no">075</span><span id="line-75">            throw new IOException("Count mismatch: images=" + imageCount + ", labels=" + labelCount);</span>
+<span class="source-line-no">076</span><span id="line-76">        }</span>
+<span class="source-line-no">077</span><span id="line-77"></span>
+<span class="source-line-no">078</span><span id="line-78">        // ---- Convert to int[] per image (0..255) ----</span>
+<span class="source-line-no">079</span><span id="line-79">        List&lt;int[]&gt; images = new ArrayList&lt;&gt;(imageCount);</span>
+<span class="source-line-no">080</span><span id="line-80">        final int pixelsPerImage = rows * cols;</span>
+<span class="source-line-no">081</span><span id="line-81">        for (int i = 0; i &lt; imageCount; i++) {</span>
+<span class="source-line-no">082</span><span id="line-82">            int[] img = new int[pixelsPerImage];</span>
+<span class="source-line-no">083</span><span id="line-83">            int base = i * pixelsPerImage;</span>
+<span class="source-line-no">084</span><span id="line-84">            for (int p = 0; p &lt; pixelsPerImage; p++) {</span>
+<span class="source-line-no">085</span><span id="line-85">                // Convert signed byte to unsigned int 0..255</span>
+<span class="source-line-no">086</span><span id="line-86">                img[p] = imageBytes[base + p] &amp; 0xFF;</span>
+<span class="source-line-no">087</span><span id="line-87">            }</span>
+<span class="source-line-no">088</span><span id="line-88">            images.add(img);</span>
+<span class="source-line-no">089</span><span id="line-89">        }</span>
+<span class="source-line-no">090</span><span id="line-90"></span>
+<span class="source-line-no">091</span><span id="line-91">        return new MnistData(images, labels, rows, cols);</span>
+<span class="source-line-no">092</span><span id="line-92">    }</span>
+<span class="source-line-no">093</span><span id="line-93">}</span>
 
 
 
