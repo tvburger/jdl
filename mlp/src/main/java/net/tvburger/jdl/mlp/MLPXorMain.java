@@ -31,7 +31,7 @@ public class MLPXorMain {
 
         NeuralNetworkInitializer initializer = new XavierInitializer();
         ObjectiveFunction<Float> objective = Objectives.bCE(JavaNumberTypeSupport.FLOAT);
-        GradientDescentOptimizer<NeuralNetwork, Float> optimizer = NeuralNetworkOptimizers.adamW();
+        GradientDescentOptimizer<NeuralNetwork, Float> optimizer = NeuralNetworkOptimizers.vanilla(0.1f);
         ChainedRegime regime = Regimes.dumpNodes().epochs(1_000).reportObjective().batch();
         Trainer<MultiLayerPerceptron, Float> mlpTrainer = Trainer.of(initializer, objective, optimizer, regime);
         mlpTrainer.train(mlp, trainingSet);

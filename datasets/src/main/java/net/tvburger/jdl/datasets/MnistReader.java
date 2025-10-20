@@ -1,7 +1,7 @@
 package net.tvburger.jdl.datasets;
 
 import java.io.*;
-import java.nio.file.Path;
+import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,11 +24,17 @@ public final class MnistReader {
         }
     }
 
-    public static MnistData readImagesLabels(Path imagesPath, Path labelsPath) throws IOException {
+    public static MnistData readImagesLabels(String imagesPath, String labelsPath) throws IOException {
         // ---- Read labels ----
         final int labelCount;
         final byte[] labels;
-        try (DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(labelsPath.toFile())))) {
+        ClassLoader classLoader = MnistReader.class.getClassLoader();
+
+        InputStream labelsInputStream = classLoader.getResourceAsStream(labelsPath);
+        if (labelsInputStream == null) {
+            throw new NoSuchFileException("Not found!");
+        }
+        try (DataInputStream in = new DataInputStream(new BufferedInputStream(labelsInputStream))) {
             int magic = in.readInt(); // big-endian by default
             if (magic != MAGIC_LABELS) {
                 throw new IOException("Magic number mismatch for labels: expected " + MAGIC_LABELS + ", got " + magic);
@@ -43,7 +49,11 @@ public final class MnistReader {
         // ---- Read images ----
         final int imageCount, rows, cols;
         final byte[] imageBytes;
-        try (DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(imagesPath.toFile())))) {
+        InputStream imagesInputStream = classLoader.getResourceAsStream(imagesPath);
+        if (imagesInputStream == null) {
+            throw new NoSuchFileException("Not found!");
+        }
+        try (DataInputStream in = new DataInputStream(new BufferedInputStream(imagesInputStream))) {
             int magic = in.readInt();
             if (magic != MAGIC_IMAGES) {
                 throw new IOException("Magic number mismatch for images: expected " + MAGIC_IMAGES + ", got " + magic);

@@ -11,6 +11,7 @@ public final class Activations {
     private static final ReLU relu = new ReLU();
     private static final Linear linear = new Linear();
     private static final Sigmoid sigmoid = new Sigmoid();
+    private static final Tanh tanh = new Tanh();
     private static final Step step = new Step();
 
     private Activations() {
@@ -59,6 +60,15 @@ public final class Activations {
      */
     public static Sigmoid sigmoid() {
         return sigmoid;
+    }
+
+    /**
+     * Returns the tanh activation
+     *
+     * @return tanh activation
+     */
+    public static Tanh tanh() {
+        return tanh;
     }
 
     /**

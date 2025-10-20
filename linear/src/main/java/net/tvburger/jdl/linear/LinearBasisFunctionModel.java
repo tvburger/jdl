@@ -3,11 +3,11 @@ package net.tvburger.jdl.linear;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.patterns.Strategy;
 import net.tvburger.jdl.linear.basis.BasisFunction;
-import net.tvburger.jdl.model.scalars.LinearCombination;
+import net.tvburger.jdl.model.scalars.AffineTransformation;
 import net.tvburger.jdl.model.scalars.UnaryEstimationFunction;
 
 @Strategy(Strategy.Role.CONCRETE)
-public class LinearBasisFunctionModel<N extends Number> extends LinearCombination<N> implements LinearModel<N>, UnaryEstimationFunction<N> {
+public class LinearBasisFunctionModel<N extends Number> extends AffineTransformation<N> implements LinearModel<N>, UnaryEstimationFunction<N> {
 
     private final FeatureExtractor<N> featureExtractor;
 
@@ -23,11 +23,11 @@ public class LinearBasisFunctionModel<N extends Number> extends LinearCombinatio
     }
 
     protected LinearBasisFunctionModel(int modelComplexity, BasisFunction.Generator<N> basisFunctionGenerator) {
-        this(basisFunctionGenerator.generate(modelComplexity), basisFunctionGenerator.getCurrentNumberType().createArray(modelComplexity + 1), basisFunctionGenerator.getCurrentNumberType());
+        this(basisFunctionGenerator.generate(modelComplexity), basisFunctionGenerator.getCurrentNumberType().zero(), basisFunctionGenerator.getCurrentNumberType().createArray(modelComplexity), basisFunctionGenerator.getCurrentNumberType());
     }
 
-    private LinearBasisFunctionModel(FeatureExtractor<N> featureExtractor, N[] parameters, JavaNumberTypeSupport<N> typeSupport) {
-        super(parameters, typeSupport);
+    private LinearBasisFunctionModel(FeatureExtractor<N> featureExtractor, N bias, N[] weights, JavaNumberTypeSupport<N> typeSupport) {
+        super(bias, weights, typeSupport);
         this.featureExtractor = featureExtractor;
     }
 
@@ -36,7 +36,7 @@ public class LinearBasisFunctionModel<N extends Number> extends LinearCombinatio
     }
 
     public int getModelComplexity() {
-        return getParameterCount() - 1;
+        return arity();
     }
 
     @Override

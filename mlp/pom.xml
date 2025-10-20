@@ -22,6 +22,11 @@
             <artifactId>jdl-datasets</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>jdl-plots</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

@@ -1,39 +1,44 @@
-package net.tvburger.jdl.perceptron;
+package net.tvburger.jdl.mlp;
 
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.datasets.LinesAndCircles;
 import net.tvburger.jdl.model.DataSet;
+import net.tvburger.jdl.model.nn.training.initializers.XavierInitializer;
+import net.tvburger.jdl.model.nn.training.optimizers.NeuralNetworkOptimizers;
+import net.tvburger.jdl.model.scalars.activations.Activations;
+import net.tvburger.jdl.model.training.Optimizer;
 import net.tvburger.jdl.model.training.Regime;
 import net.tvburger.jdl.model.training.Trainer;
+import net.tvburger.jdl.model.training.loss.Objectives;
 import net.tvburger.jdl.model.training.regimes.Regimes;
 import net.tvburger.jdl.plots.ImageViewer;
 import net.tvburger.jdl.plots.listeners.EpochRmePlotter;
 
 import java.util.Arrays;
 
-public class Mark1 {
+public class MLPMark1Main {
 
     public static void main(String[] args) {
-        Perceptron mark1 = Perceptron.create(400, 512, 8);
-        mark1.accept(new PerceptronInitializer());
+        MultiLayerPerceptron mlp = MultiLayerPerceptron.create(Activations.sigmoid(), Activations.linear(), 400, 512, 8);
 
         DataSet<Float> dataSet = new LinesAndCircles().load();
         DataSet<Float> trainingSet = dataSet.subset(10, dataSet.size());
         DataSet<Float> testSet = dataSet.subset(0, 10);
         EpochRmePlotter epochRmePlotter = new EpochRmePlotter();
         epochRmePlotter.display();
-        Regime regime = Regimes.epochs(10,
+        Regime regime = Regimes.epochs(2,
                 epochRmePlotter.attach("Training Set (" + trainingSet.size() + ")"),
                 epochRmePlotter.attach("Test Set (" + testSet.size() + ")", testSet)).stochastic();
-        Trainer<Perceptron, Float> trainer = Trainer.of(new PerceptronInitializer(), null, new PerceptronUpdateRule(), regime);
-        trainer.train(mark1, trainingSet);
+        Optimizer<? super MultiLayerPerceptron, Float> optimizer = NeuralNetworkOptimizers.vanilla();
+        Trainer<MultiLayerPerceptron, Float> trainer = Trainer.of(new XavierInitializer(), Objectives.bCE(mlp.getCurrentNumberType()), optimizer, regime);
+        trainer.train(mlp, trainingSet);
 
         int i = 0;
         int correct = 0;
         int wrong = 0;
         for (DataSet.Sample<Float> sample : testSet) {
             i++;
-            Float[] estimate = mark1.estimate(sample.features());
+            Float[] estimate = mlp.estimate(sample.features());
             if (Arrays.equals(estimate, sample.targetOutputs())) {
                 correct++;
             } else {
@@ -45,7 +50,7 @@ public class Mark1 {
         }
         if (wrong == 0) {
             DataSet.Sample<Float> sample = testSet.samples().getFirst();
-            Float[] estimate = mark1.estimate(sample.features());
+            Float[] estimate = mlp.estimate(sample.features());
             String label = createLabel(1, sample, estimate);
             ImageViewer image = ImageViewer.fromPerceptronImage(label, sample);
             image.display();

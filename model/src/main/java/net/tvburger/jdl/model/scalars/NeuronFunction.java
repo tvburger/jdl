@@ -35,7 +35,7 @@ public class NeuronFunction implements TrainableScalarFunction<Float> {
      * @param activationFunction the non-linear activation function to apply
      */
     public static NeuronFunction create(int dimensions, ActivationFunction activationFunction) {
-        return new NeuronFunction(LinearCombination.create(dimensions, JavaNumberTypeSupport.FLOAT), activationFunction);
+        return new NeuronFunction(AffineTransformation.create(dimensions, JavaNumberTypeSupport.FLOAT), activationFunction);
     }
 
     /**
@@ -133,8 +133,56 @@ public class NeuronFunction implements TrainableScalarFunction<Float> {
      * {@inheritDoc}
      */
     @Override
+    public int getParameterCount() {
+        return linearCombination.getParameterCount();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Float[] getParameters() {
         return linearCombination.getParameters();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Float getParameter(int p) {
+        return linearCombination.getParameter(p);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setParameters(Float[] values) {
+        linearCombination.setParameters(values);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setParameter(int p, Float value) {
+        linearCombination.setParameter(p, value);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void adjustParameters(Float[] deltas) {
+        linearCombination.adjustParameters(deltas);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void adjustParameter(int p, Float delta) {
+        linearCombination.adjustParameter(p, delta);
     }
 
     /**

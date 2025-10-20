@@ -3,7 +3,7 @@ package net.tvburger.jdl.datasets;
 import net.tvburger.jdl.common.utils.Floats;
 import net.tvburger.jdl.model.DataSet;
 
-public class LogicalDataSets {
+public final class LogicalDataSets {
 
     private LogicalDataSets() {
     }

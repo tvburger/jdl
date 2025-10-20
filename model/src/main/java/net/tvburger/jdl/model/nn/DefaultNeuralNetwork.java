@@ -126,6 +126,21 @@ public class DefaultNeuralNetwork implements NeuralNetwork {
     }
 
     @Override
+    public Float getParameter(int p) {
+        return getParameters()[p];
+    }
+
+    @Override
+    public void setParameters(Float[] values) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setParameter(int p, Float value) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public JavaNumberTypeSupport<Float> getCurrentNumberType() {
         return JavaNumberTypeSupport.FLOAT;
     }

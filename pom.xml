@@ -13,12 +13,14 @@
         <module>plots</module>
         <module>linalg</module>
         <module>model</module>
+        <module>cnn</module>
         <module>datasets</module>
         <module>linear</module>
         <module>knn</module>
         <module>perceptron</module>
         <module>adaline</module>
         <module>mlp</module>
+        <module>lenet</module>
     </modules>
 
     <properties>

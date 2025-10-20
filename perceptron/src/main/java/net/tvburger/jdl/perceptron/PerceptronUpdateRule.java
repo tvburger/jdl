@@ -7,8 +7,6 @@ import net.tvburger.jdl.model.scalars.NeuronFunction;
 import net.tvburger.jdl.model.training.ObjectiveFunction;
 import net.tvburger.jdl.model.training.Optimizer;
 
-import java.util.Arrays;
-
 public class PerceptronUpdateRule implements Optimizer.Stochastic<Perceptron, Float> {
 
     @Override
@@ -18,8 +16,6 @@ public class PerceptronUpdateRule implements Optimizer.Stochastic<Perceptron, Fl
             int sign = Floats.greaterThan(sample.targetOutputs()[i], 0.0f) ? +1 : -1;
             LastInputStoredNeuron neuron = perceptron.getNeuron(2, i, LastInputStoredNeuron.class);
             if (!Floats.equals(sample.targetOutputs()[i], estimate[i])) {
-                System.out.println("Training: real = " + Arrays.toString(sample.targetOutputs()) + " estimated = " + Arrays.toString(estimate) + ": features = " + Arrays.toString(sample.features()));
-                System.out.println("Sample target output = " + sample.targetOutputs()[i] + ", sign = " + sign);
                 updateParameters(neuron, sign);
             }
         }
@@ -31,6 +27,5 @@ public class PerceptronUpdateRule implements Optimizer.Stochastic<Perceptron, Fl
         for (int d = 1; d < neuron.arity(); d++) {
             neuronFunction.adjustParameter(d, y * neuron.getStoredInput(d));
         }
-        System.out.println(neuron);
     }
 }

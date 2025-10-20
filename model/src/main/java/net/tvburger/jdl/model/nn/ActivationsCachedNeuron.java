@@ -2,7 +2,7 @@ package net.tvburger.jdl.model.nn;
 
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.patterns.Decorator;
-import net.tvburger.jdl.model.scalars.LinearCombination;
+import net.tvburger.jdl.model.scalars.AffineTransformation;
 import net.tvburger.jdl.model.scalars.NeuronFunction;
 import net.tvburger.jdl.model.scalars.activations.ActivationFunction;
 import net.tvburger.jdl.model.scalars.activations.Activations;
@@ -32,7 +32,7 @@ public class ActivationsCachedNeuron extends Neuron {
     }
 
     public static ActivationsCachedNeuron create(String name, List<? extends Neuron> inputNodes, ActivationFunction activationFunction) {
-        return new ActivationsCachedNeuron(name, inputNodes, new NeuronFunction(LinearCombination.create(inputNodes.size(), JavaNumberTypeSupport.FLOAT), activationFunction));
+        return new ActivationsCachedNeuron(name, inputNodes, new NeuronFunction(AffineTransformation.create(inputNodes.size(), JavaNumberTypeSupport.FLOAT), activationFunction));
     }
 
     /**

@@ -3,7 +3,7 @@ package net.tvburger.jdl.model.nn;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.patterns.DomainObject;
 import net.tvburger.jdl.common.patterns.Entity;
-import net.tvburger.jdl.model.scalars.LinearCombination;
+import net.tvburger.jdl.model.scalars.AffineTransformation;
 import net.tvburger.jdl.model.scalars.NeuronFunction;
 import net.tvburger.jdl.model.scalars.TrainableScalarFunction;
 import net.tvburger.jdl.model.scalars.activations.ActivationFunction;
@@ -48,7 +48,7 @@ public class Neuron implements TrainableScalarFunction<Float> {
     }
 
     public static Neuron create(String name, List<? extends Neuron> inputNodes, ActivationFunction activationFunction) {
-        return new Neuron(name, inputNodes, new NeuronFunction(LinearCombination.create(inputNodes.size(), JavaNumberTypeSupport.FLOAT), activationFunction));
+        return new Neuron(name, inputNodes, new NeuronFunction(AffineTransformation.create(inputNodes.size(), JavaNumberTypeSupport.FLOAT), activationFunction));
     }
 
     private final String name;
@@ -176,7 +176,7 @@ public class Neuron implements TrainableScalarFunction<Float> {
     public Float getWeight(Neuron source) {
         for (int d = 1; d <= inputNodes.size(); d++) {
             if (inputNodes.get(d - 1) == source) {
-                return neuronFunction.getParameter(d);
+                return neuronFunction.getParameter(d - 1);
             }
         }
         return null;
@@ -223,7 +223,55 @@ public class Neuron implements TrainableScalarFunction<Float> {
      * {@inheritDoc}
      */
     @Override
+    public int getParameterCount() {
+        return neuronFunction.getParameterCount();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Float[] getParameters() {
         return neuronFunction.getParameters();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Float getParameter(int p) {
+        return neuronFunction.getParameter(p);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setParameters(Float[] values) {
+        neuronFunction.setParameters(values);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setParameter(int p, Float value) {
+        neuronFunction.setParameter(p, value);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void adjustParameters(Float[] deltas) {
+        neuronFunction.adjustParameters(deltas);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void adjustParameter(int p, Float delta) {
+        neuronFunction.adjustParameter(p, delta);
     }
 }

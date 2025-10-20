@@ -3,17 +3,17 @@ package net.tvburger.jdl.model.scalars;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.patterns.Strategy;
 
-import java.util.Arrays;
-
 /**
- * A simple linear scalar model of the form:
+ * A simple linear combination of the form:
  * <pre>
- *   f(x) = bias + Σ w_i * x_i
+ *   f(x) = Σ w_i * x_i
  * </pre>
- * where the bias and weights are trainable parameters.
+ * where the weights are trainable parameters.
  * <p>
  * This class supports forward estimation of the scalar output as well as
  * calculation of parameter parameterGradients required for gradient-based training.
+ *
+ * @see AffineTransformation
  */
 @Strategy(Strategy.Role.CONCRETE)
 public class LinearCombination<N extends Number> implements TrainableScalarFunction<N> {
@@ -24,24 +24,19 @@ public class LinearCombination<N extends Number> implements TrainableScalarFunct
     /**
      * Creates a new {@code LinearCombination} with the specified number of input dimensions.
      * <p>
-     * The underlying parameter vector will have length {@code dimensions + 1},
-     * with the first element reserved for the bias and the rest for the weights.
+     * The underlying parameter vector will have length {@code dimensions} representing the weights.
      *
      * @param dimensions number of input features
      * @return a new {@code LinearCombination} instance with zero-initialized parameters
      */
     public static <N extends Number> LinearCombination<N> create(int dimensions, JavaNumberTypeSupport<N> typeSupport) {
-        return new LinearCombination<>(typeSupport.createArray(dimensions + 1), typeSupport);
+        return new LinearCombination<>(typeSupport.createArray(dimensions), typeSupport);
     }
-
 
     /**
      * Constructs a {@code LinearCombination} with the given parameter vector.
-     * <p>
-     * The first element of the array is treated as the bias, while the subsequent
-     * elements are the weights.
      *
-     * @param parameters parameter vector (bias + weights)
+     * @param parameters parameter vector (weights)
      */
     public LinearCombination(N[] parameters, JavaNumberTypeSupport<N> typeSupport) {
         this.parameters = parameters;
@@ -58,7 +53,7 @@ public class LinearCombination<N extends Number> implements TrainableScalarFunct
      * <p>
      * The computation is:
      * <pre>
-     *   output = bias + Σ (inputs[i] * weights[i])
+     *   output = Σ (inputs[i] * weights[i])
      * </pre>
      *
      * @param inputs the input feature vector
@@ -67,40 +62,43 @@ public class LinearCombination<N extends Number> implements TrainableScalarFunct
      */
     @Override
     public N estimateScalar(N[] inputs) {
-        if (inputs.length != arity()) {
+        if (inputs.length != parameters.length) {
             throw new IllegalArgumentException();
         }
-        N sum = getBias();
-        for (int d = 1; d <= arity(); d++) {
+        N sum = typeSupport.zero();
+        for (int d = 1; d <= parameters.length; d++) {
             sum = typeSupport.add(sum, typeSupport.multiply(inputs[d - 1], getWeight(d)));
         }
         return sum;
     }
 
     /**
-     * Calculates the parameterGradients of the output with respect to all parameters (bias and weights)
+     * Calculates the parameterGradients of the output with respect to all parameters (weights)
      * for the given input vector.
      * <p>
-     * The gradient vector has length {@code 1 + arity()}, where:
+     * The gradient vector has length {@code arity()}, where:
      * <ul>
-     *   <li>Index 0 corresponds to the derivative w.r.t. the bias (always {@code 1}).</li>
-     *   <li>Indices 1..arity correspond to the input values, i.e. ∂f/∂w_i = input[i-1].</li>
+     *   <li>Indices 0..arity correspond to the input values, i.e. ∂f/∂w_i = input[i-1].</li>
      * </ul>
      *
      * @param inputs the input feature vector
-     * @return the gradient vector (bias gradient followed by weight parameterGradients)
+     * @return the gradient vector (weight parameterGradients)
      */
     @Override
     public N[] calculateParameterGradients(N[] inputs) {
-        N[] gradients = typeSupport.createArray(1 + arity());
-        gradients[0] = typeSupport.one();
-        if (arity() >= 0) System.arraycopy(inputs, 0, gradients, 1, arity());
-        return gradients;
+        return inputs;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int getParameterCount() {
+        return parameters.length;
     }
 
     /**
      * Returns the full parameter vector of this model.
-     * The first element is the bias, the rest are the weights.
      *
      * @return the parameter array
      */
@@ -110,14 +108,38 @@ public class LinearCombination<N extends Number> implements TrainableScalarFunct
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public N getParameter(int p) {
+        return parameters[p];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setParameters(N[] values) {
+        System.arraycopy(values, 0, parameters, 0, parameters.length);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setParameter(int p, N value) {
+        parameters[p] = value;
+    }
+
+    /**
      * Returns the number of input features this model accepts,
-     * equal to the number of weights (parameters.length - 1).
+     * equal to the number of weights (parameters.length).
      *
      * @return the arity (number of input dimensions)
      */
     @Override
     public int arity() {
-        return Math.max(0, parameters.length - 1);
+        return parameters.length;
     }
 
     /**
@@ -128,7 +150,7 @@ public class LinearCombination<N extends Number> implements TrainableScalarFunct
      * @throws IllegalArgumentException if {@code d} is out of range
      */
     protected final int validDimension(int d) {
-        if (d < 1 || d > arity()) {
+        if (d < 1 || d > parameters.length) {
             throw new IllegalArgumentException("Invalid dimension!");
         }
         return d;
@@ -140,7 +162,7 @@ public class LinearCombination<N extends Number> implements TrainableScalarFunct
      * @return the weight vector
      */
     public N[] getWeights() {
-        return arity() > 0 ? Arrays.copyOfRange(parameters, 1, arity() + 1) : typeSupport.createArray(0);
+        return parameters;
     }
 
     /**
@@ -150,10 +172,10 @@ public class LinearCombination<N extends Number> implements TrainableScalarFunct
      * @throws IllegalArgumentException if the number of weights does not match {@link #arity()}
      */
     public void setWeights(N[] weights) {
-        if (weights.length != coArity()) {
+        if (weights.length != parameters.length) {
             throw new IllegalArgumentException("Invalid number of weights!");
         }
-        System.arraycopy(weights, 0, parameters, 1, arity());
+        System.arraycopy(weights, 0, parameters, 0, parameters.length);
     }
 
     /**
@@ -164,7 +186,7 @@ public class LinearCombination<N extends Number> implements TrainableScalarFunct
      * @throws IllegalArgumentException if {@code d} is out of range
      */
     public N getWeight(int d) {
-        return parameters[validDimension(d)];
+        return parameters[validDimension(d) - 1];
     }
 
     /**
@@ -175,7 +197,7 @@ public class LinearCombination<N extends Number> implements TrainableScalarFunct
      * @throws IllegalArgumentException if {@code d} is out of range
      */
     public void setWeight(int d, N weight) {
-        parameters[validDimension(d)] = weight;
+        parameters[validDimension(d) - 1] = weight;
     }
 
     /**
@@ -186,45 +208,7 @@ public class LinearCombination<N extends Number> implements TrainableScalarFunct
      * @throws IllegalArgumentException if {@code d} is out of range
      */
     public void adjustWeight(int d, N delta) {
-        parameters[validDimension(d)] = typeSupport.add(parameters[d], delta);
+        parameters[d - 1] = typeSupport.add(parameters[validDimension(d) - 1], delta);
     }
 
-    /**
-     * Returns the bias parameter.
-     *
-     * @return the bias value (0.0f if there are no parameters)
-     */
-    public N getBias() {
-        return parameters.length == 0 ? typeSupport.zero() : parameters[0];
-    }
-
-    /**
-     * Sets the bias parameter.
-     *
-     * @param bias the new bias value
-     */
-    public void setBias(N bias) {
-        parameters[0] = bias;
-    }
-
-    /**
-     * Adjusts the bias parameter by adding {@code delta}.
-     *
-     * @param delta the adjustment value
-     */
-    public void adjustBias(N delta) {
-        parameters[0] = typeSupport.add(parameters[0], delta);
-    }
-
-//    public NeuralNetwork toNeuralNetwork() {
-//        List<List<? extends Neuron>> neurons = new ArrayList<>();
-//        List<InputNeuron> inputNeurons = new ArrayList<>();
-//        for (int d = 1; d <= arity(); d++) {
-//            inputNeurons.add(new InputNeuron("Input(" + (d - 1) + ")"));
-//        }
-//        neurons.add(inputNeurons);
-//        Neuron outputNeuron = new ActivationsCachedNeuron("Output", inputNeurons, new NeuronFunction(this, Activations.identity()));
-//        neurons.add(List.of(outputNeuron));
-//        return new DefaultNeuralNetwork(neurons);
-//    }
 }

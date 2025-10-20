@@ -15,6 +15,8 @@ import java.util.Map;
 
 public class GradientDescentOptimizer<E extends TrainableFunction<N>, N extends Number> implements Optimizer<E, N>, HyperparameterConfigurable {
 
+    public boolean debug = false;
+
     private final ObjectiveGradientEstimator<N> objectiveGradientEstimator;
     private final GradientDescentModelDecomposer<E, N> modelDecomposer;
     private final UpdateStep<LinearCombination<N>, N> updateStep;
@@ -40,7 +42,7 @@ public class GradientDescentOptimizer<E extends TrainableFunction<N>, N extends 
         }
 
         accumulatedAdjustments.forEach((m, a) -> {
-            if (step == 1) {
+            if (debug && step == 1) {
                 System.out.println("0: Applying accumulated adjustment for model: " + Arrays.toString(m.getParameters()));
             }
             N[] parameters = m.getParameters();
@@ -50,7 +52,9 @@ public class GradientDescentOptimizer<E extends TrainableFunction<N>, N extends 
             Vector<N> updatedThetas = thetas.add(adjustments);
             N[] updatedParameters = updatedThetas.asArray();
             m.setParameters(updatedParameters);
-            System.out.println(step + ": Applied accumulated adjustment for model: " + Arrays.toString(m.getParameters()));
+            if (debug) {
+                System.out.println(step + ": Applied accumulated adjustment for model: " + Arrays.toString(m.getParameters()));
+            }
         });
     }
 

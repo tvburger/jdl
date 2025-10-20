@@ -17,9 +17,7 @@ public interface TrainableFunction<N extends Number> extends EstimationFunction<
      *
      * @return the number of parameters
      */
-    default int getParameterCount() {
-        return getParameters().length;
-    }
+    int getParameterCount();
 
     /**
      * Returns the underlying parameter vector for this function.
@@ -29,30 +27,22 @@ public interface TrainableFunction<N extends Number> extends EstimationFunction<
     N[] getParameters();
 
     /**
-     * Replaces the parameter vector with the given values.
-     *
-     * @param values the new parameter values
-     * @throws IllegalArgumentException if the array length does not match
-     *                                  {@link #getParameterCount()}
-     */
-    default void setParameters(N[] values) {
-        N[] parameters = getParameters();
-        if (values.length != parameters.length) {
-            throw new IllegalArgumentException();
-        }
-        System.arraycopy(values, 0, parameters, 0, parameters.length);
-    }
-
-    /**
      * Returns the parameter at the given index.
      *
      * @param p index of the parameter
      * @return the parameter value
      * @throws ArrayIndexOutOfBoundsException if the index is out of range
      */
-    default N getParameter(int p) {
-        return getParameters()[p];
-    }
+    N getParameter(int p);
+
+    /**
+     * Replaces the parameter vector with the given values.
+     *
+     * @param values the new parameter values
+     * @throws IllegalArgumentException if the array length does not match
+     *                                  {@link #getParameterCount()}
+     */
+    void setParameters(N[] values);
 
     /**
      * Sets the parameter at the given index to the specified value.
@@ -61,9 +51,7 @@ public interface TrainableFunction<N extends Number> extends EstimationFunction<
      * @param value new value to set
      * @throws ArrayIndexOutOfBoundsException if the index is out of range
      */
-    default void setParameter(int p, N value) {
-        getParameters()[p] = value;
-    }
+    void setParameter(int p, N value);
 
     /**
      * Adjusts all parameters (except the first one, typically the bias)
@@ -72,8 +60,8 @@ public interface TrainableFunction<N extends Number> extends EstimationFunction<
      * @param deltas an array of additive updates, aligned with the parameter vector
      */
     default void adjustParameters(N[] deltas) {
-        for (int p = 0; p < deltas.length; p++) {
-            adjustParameter(p, deltas[p]);
+        for (int i = 0; i < deltas.length; i++) {
+            adjustParameter(i, deltas[i]);
         }
     }
 
@@ -87,4 +75,5 @@ public interface TrainableFunction<N extends Number> extends EstimationFunction<
     default void adjustParameter(int p, N delta) {
         setParameter(p, getCurrentNumberType().add(getParameter(p), delta));
     }
+
 }
