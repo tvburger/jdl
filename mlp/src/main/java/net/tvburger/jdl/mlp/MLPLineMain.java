@@ -14,24 +14,37 @@ import net.tvburger.jdl.model.training.Trainer;
 import net.tvburger.jdl.model.training.loss.Objectives;
 import net.tvburger.jdl.model.training.optimizer.GradientDescentOptimizer;
 import net.tvburger.jdl.model.training.regimes.ChainedRegime;
+import net.tvburger.jdl.model.training.regimes.EpochRegime;
 import net.tvburger.jdl.model.training.regimes.Regimes;
+import net.tvburger.jdl.model.training.regularization.RegularizationFactory;
+import net.tvburger.jdl.model.training.regularization.Regularizations;
+import net.tvburger.jdl.plots.listeners.EpochRmePlotter;
 
 import java.util.Arrays;
+import java.util.Random;
 
 public class MLPLineMain {
 
     public static void main(String[] args) {
-        SyntheticDataSets.SyntheticDataSet<Float> line = SyntheticDataSets.line(0.0f, 1.0f, JavaNumberTypeSupport.FLOAT);
-        line.setNoiseScale(0.1f);
+        SyntheticDataSets.SyntheticDataSet<Float> line = SyntheticDataSets.line(-10.0f, 20.0f, JavaNumberTypeSupport.FLOAT);
+        line.setNoiseScale(1.0f);
         DataSet<Float> dataSet = line.load();
-        DataSet<Float> trainingSet = dataSet.subset(10, dataSet.size());
-        DataSet<Float> testSet = dataSet.subset(0, 10);
+        DataSet<Float> trainingSet = dataSet.resample(20, new Random());
+        DataSet<Float> testSet = dataSet.resample(20, new Random());
+//        MultiLayerPerceptron mlp = MultiLayerPerceptron.create(Activations.linear(), Activations.linear(), 1, 2, 1);
         MultiLayerPerceptron mlp = MultiLayerPerceptron.create(Activations.linear(), Activations.linear(), 1, 1);
 
         NeuralNetworkInitializer initializer = new XavierInitializer();
         ObjectiveFunction<Float> objective = Objectives.mSE(JavaNumberTypeSupport.FLOAT);
+        RegularizationFactory<Float> factory = Regularizations.getFactory(JavaNumberTypeSupport.FLOAT);
+//        objective.addRegularization(factory.createElasticNet(0.5f, 0.001f));
         GradientDescentOptimizer<NeuralNetwork, Float> optimizer = NeuralNetworkOptimizers.vanilla(0.001f);
-        ChainedRegime regime = Regimes.dumpNodes().epochs(10_000).reportObjective().batch();
+        EpochRmePlotter epochRmePlotter = new EpochRmePlotter();
+        epochRmePlotter.display();
+        ChainedRegime regime = Regimes.epochs(100_000,
+                        EpochRegime.sample(250, epochRmePlotter.attach("Training Set (" + trainingSet.size() + ")")),
+                        EpochRegime.sample(250, epochRmePlotter.attach("Test Set (" + testSet.size() + ")", testSet)))
+                .batch();
         Trainer<MultiLayerPerceptron, Float> mlpTrainer = Trainer.of(initializer, objective, optimizer, regime);
         mlpTrainer.train(mlp, trainingSet);
 

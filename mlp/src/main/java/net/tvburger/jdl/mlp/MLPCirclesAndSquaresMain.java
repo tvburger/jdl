@@ -1,6 +1,6 @@
 package net.tvburger.jdl.mlp;
 
-import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
+import net.tvburger.jdl.common.utils.Floats;
 import net.tvburger.jdl.datasets.LinesAndCircles;
 import net.tvburger.jdl.model.DataSet;
 import net.tvburger.jdl.model.nn.training.initializers.XavierInitializer;
@@ -16,20 +16,20 @@ import net.tvburger.jdl.plots.listeners.EpochRmePlotter;
 
 import java.util.Arrays;
 
-public class MLPMark1Main {
+public class MLPCirclesAndSquaresMain {
 
     public static void main(String[] args) {
-        MultiLayerPerceptron mlp = MultiLayerPerceptron.create(Activations.sigmoid(), Activations.linear(), 400, 512, 8);
+        MultiLayerPerceptron mlp = MultiLayerPerceptron.create(Activations.sigmoid(), Activations.sigmoid(), 400, 8);
 
         DataSet<Float> dataSet = new LinesAndCircles().load();
         DataSet<Float> trainingSet = dataSet.subset(10, dataSet.size());
         DataSet<Float> testSet = dataSet.subset(0, 10);
         EpochRmePlotter epochRmePlotter = new EpochRmePlotter();
         epochRmePlotter.display();
-        Regime regime = Regimes.epochs(2,
+        Regime regime = Regimes.epochs(100,
                 epochRmePlotter.attach("Training Set (" + trainingSet.size() + ")"),
-                epochRmePlotter.attach("Test Set (" + testSet.size() + ")", testSet)).stochastic();
-        Optimizer<? super MultiLayerPerceptron, Float> optimizer = NeuralNetworkOptimizers.vanilla();
+                epochRmePlotter.attach("Test Set (" + testSet.size() + ")", testSet)).batch();
+        Optimizer<? super MultiLayerPerceptron, Float> optimizer = NeuralNetworkOptimizers.adaGrad(0.1f);
         Trainer<MultiLayerPerceptron, Float> trainer = Trainer.of(new XavierInitializer(), Objectives.bCE(mlp.getCurrentNumberType()), optimizer, regime);
         trainer.train(mlp, trainingSet);
 
@@ -38,11 +38,12 @@ public class MLPMark1Main {
         int wrong = 0;
         for (DataSet.Sample<Float> sample : testSet) {
             i++;
-            Float[] estimate = mlp.estimate(sample.features());
-            if (Arrays.equals(estimate, sample.targetOutputs())) {
+            boolean[] estimate = Floats.toBooleans(mlp.estimate(sample.features()), 0.5f);
+            boolean[] target = Floats.toBooleans(sample.targetOutputs(), 0.5f);
+            if (Arrays.equals(estimate, target)) {
                 correct++;
             } else {
-                String label = createLabel(i, sample, estimate);
+                String label = createLabel(i, target, estimate);
                 ImageViewer image = ImageViewer.fromPerceptronImage(label, sample);
                 image.display();
                 wrong++;
@@ -50,23 +51,24 @@ public class MLPMark1Main {
         }
         if (wrong == 0) {
             DataSet.Sample<Float> sample = testSet.samples().getFirst();
-            Float[] estimate = mlp.estimate(sample.features());
-            String label = createLabel(1, sample, estimate);
+            boolean[] estimate = Floats.toBooleans(mlp.estimate(sample.features()), 0.5f);
+            boolean[] target = Floats.toBooleans(sample.targetOutputs(), 0.5f);
+            String label = createLabel(1, target, estimate);
             ImageViewer image = ImageViewer.fromPerceptronImage(label, sample);
             image.display();
         }
         System.out.println("Correct: " + correct + ", Wrong: " + wrong + ", Total: " + (correct + wrong));
     }
 
-    private static String createLabel(int i, DataSet.Sample<Float> sample, Float[] estimate) {
+    private static String createLabel(int i, boolean[] target, boolean[] estimate) {
         String label = "";
         boolean wrong = false;
-        label += estimate[0] == 1.0f ? "Circle " : "Line ";
-        if (!JavaNumberTypeSupport.FLOAT.equals(sample.targetOutputs()[0], estimate[0])) {
+        label += estimate[0] ? "Circle " : "Line ";
+        if (target[0] != estimate[0]) {
             wrong = true;
         }
-        label += estimate[1] == 1.0f ? "Left" : "Right";
-        if (!JavaNumberTypeSupport.FLOAT.equals(sample.targetOutputs()[1], estimate[1])) {
+        label += estimate[1] ? "Left" : "Right";
+        if (target[1] != estimate[1]) {
             wrong = true;
         }
         return i + ". " + (wrong ? "X: " : "V: ") + label;

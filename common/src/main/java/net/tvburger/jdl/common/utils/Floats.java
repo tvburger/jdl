@@ -69,18 +69,18 @@ public final class Floats {
      * @param floats the floats to convert
      * @return the corresponding booleans
      */
-    public static boolean[] toBooleans(float[] floats) {
+    public static boolean[] toBooleans(float[] floats, float threshold) {
         boolean[] booleans = new boolean[floats.length];
         for (int i = 0; i < floats.length; i++) {
-            booleans[i] = floats[i] > 0.0f;
+            booleans[i] = floats[i] >= threshold;
         }
         return booleans;
     }
 
-    public static boolean[] toBooleans(Float[] floats) {
+    public static boolean[] toBooleans(Float[] floats, float threshold) {
         boolean[] booleans = new boolean[floats.length];
         for (int i = 0; i < floats.length; i++) {
-            booleans[i] = floats[i] > 0.0f;
+            booleans[i] = floats[i] >= threshold;
         }
         return booleans;
     }

@@ -39,7 +39,7 @@ public class AdalineMain {
         for (DataSet.Sample<Float> sample : testSet) {
             i++;
             boolean[] estimate = adaline.classify(sample.features());
-            boolean[] target = Floats.toBooleans(sample.targetOutputs());
+            boolean[] target = Floats.toBooleans(sample.targetOutputs(), 0.0f);
             if (!Arrays.equals(target, estimate)) {
                 wrong++;
                 String label = createLabel(i, target, estimate);
@@ -52,7 +52,7 @@ public class AdalineMain {
         if (wrong == 0) {
             DataSet.Sample<Float> sample = testSet.samples().getFirst();
             boolean[] estimate = adaline.classify(sample.features());
-            boolean[] target = Floats.toBooleans(sample.targetOutputs());
+            boolean[] target = Floats.toBooleans(sample.targetOutputs(), 0.0f);
             String label = createLabel(1, target, estimate);
             ImageViewer image = ImageViewer.fromPerceptronImage(label, fromMinusSet(sample));
             image.display();

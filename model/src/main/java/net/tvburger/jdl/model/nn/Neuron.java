@@ -176,7 +176,7 @@ public class Neuron implements TrainableScalarFunction<Float> {
     public Float getWeight(Neuron source) {
         for (int d = 1; d <= inputNodes.size(); d++) {
             if (inputNodes.get(d - 1) == source) {
-                return neuronFunction.getParameter(d - 1);
+                return neuronFunction.getParameter(d);
             }
         }
         return null;

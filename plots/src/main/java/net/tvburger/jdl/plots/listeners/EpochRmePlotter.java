@@ -25,6 +25,7 @@ public class EpochRmePlotter implements DataRenderer {
 
     public static EpochRegime.EpochCompletionListener createListener(String name) {
         EpochRmePlotter plot = new EpochRmePlotter();
+        plot.display();
         return plot.attach(name == null ? plot.createUniqueModelName() : name);
     }
 
