@@ -14,10 +14,10 @@ public final class DoubleSupport implements JavaNumberTypeSupport<Double> {
     }
 
     @Override
-    public Double[] createArray(int length) {
+    public Array<Double> createArray(int length) {
         Double[] doubles = new Double[length];
         Arrays.fill(doubles, 0.0);
-        return doubles;
+        return Array.of(doubles);
     }
 
     @Override
@@ -134,5 +134,10 @@ public final class DoubleSupport implements JavaNumberTypeSupport<Double> {
     @Override
     public boolean isInstance(Object value) {
         return value instanceof Double;
+    }
+
+    @Override
+    public int compare(Double o1, Double o2) {
+        return Double.compare(o1, o2);
     }
 }

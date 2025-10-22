@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model.scalars;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.patterns.Strategy;
 
@@ -17,7 +18,7 @@ import net.tvburger.jdl.common.patterns.Strategy;
 public class AffineTransformation<N extends Number> extends LinearCombination<N> {
 
     private final JavaNumberTypeSupport<N> typeSupport;
-    private N bias;
+    private Array<N> parameters;
 
     /**
      * Creates a new {@code AffineTransformation} with the specified number of input dimensions.
@@ -29,7 +30,7 @@ public class AffineTransformation<N extends Number> extends LinearCombination<N>
      * @return a new {@code AffineTransformation} instance with zero-initialized parameters
      */
     public static <N extends Number> AffineTransformation<N> create(int dimensions, JavaNumberTypeSupport<N> typeSupport) {
-        return new AffineTransformation<>(typeSupport.zero(), typeSupport.createArray(dimensions), typeSupport);
+        return new AffineTransformation<>(typeSupport.createArray(dimensions + 1), typeSupport);
     }
 
 
@@ -39,13 +40,12 @@ public class AffineTransformation<N extends Number> extends LinearCombination<N>
      * The first element of the array is treated as the bias, while the subsequent
      * elements are the weights.
      *
-     * @param bias    the bias parameter
-     * @param weights the weight parameters
+     * @param parameters the parameters
      */
-    public AffineTransformation(N bias, N[] weights, JavaNumberTypeSupport<N> typeSupport) {
-        super(weights, typeSupport);
+    public AffineTransformation(Array<N> parameters, JavaNumberTypeSupport<N> typeSupport) {
+        super(parameters.slice(1), typeSupport);
         this.typeSupport = typeSupport;
-        this.bias = bias;
+        this.parameters = parameters;
     }
 
     /**
@@ -61,8 +61,8 @@ public class AffineTransformation<N extends Number> extends LinearCombination<N>
      * @throws IllegalArgumentException if {@code inputs.length != arity()}
      */
     @Override
-    public N estimateScalar(N[] inputs) {
-        return typeSupport.add(bias, super.estimateScalar(inputs));
+    public N estimateScalar(Array<N> inputs) {
+        return typeSupport.add(getBias(), super.estimateScalar(inputs));
     }
 
     /**
@@ -79,10 +79,12 @@ public class AffineTransformation<N extends Number> extends LinearCombination<N>
      * @return the gradient vector (bias gradient followed by weight parameterGradients)
      */
     @Override
-    public N[] calculateParameterGradients(N[] inputs) {
-        N[] gradients = typeSupport.createArray(1 + arity());
-        gradients[0] = typeSupport.one();
-        if (arity() > 0) System.arraycopy(super.calculateParameterGradients(inputs), 0, gradients, 1, arity());
+    public Array<N> calculateParameterGradients(Array<N> inputs) {
+        Array<N> gradients = typeSupport.createArray(1 + arity());
+        gradients.set(0, typeSupport.one());
+        if (arity() > 0) {
+            gradients.set(super.calculateParameterGradients(inputs), 1);
+        }
         return gradients;
     }
 
@@ -101,12 +103,7 @@ public class AffineTransformation<N extends Number> extends LinearCombination<N>
      * @return the parameter array
      */
     @Override
-    public N[] getParameters() {
-        N[] parameters = typeSupport.createArray(1 + arity());
-        parameters[0] = bias;
-        if (arity() > 0) {
-            System.arraycopy(super.getParameters(), 0, parameters, 1, arity());
-        }
+    public Array<N> getParameters() {
         return parameters;
     }
 
@@ -115,18 +112,16 @@ public class AffineTransformation<N extends Number> extends LinearCombination<N>
      */
     @Override
     public N getParameter(int p) {
-        return p == 0 ? getBias() : getWeight(p);
+        return parameters.get(p);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void setParameters(N[] values) {
-        setBias(values[0]);
-        for (int d = 1; d < values.length; d++) {
-            setWeight(d, values[d]);
-        }
+    public void setParameters(Array<N> values) {
+        parameters = values;
+        super.setParameters(values.slice(1));
     }
 
     /**
@@ -134,21 +129,16 @@ public class AffineTransformation<N extends Number> extends LinearCombination<N>
      */
     @Override
     public void setParameter(int p, N value) {
-        if (p == 0) {
-            setBias(value);
-        } else {
-            setWeight(p, value);
-        }
+        parameters.set(p, value);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void adjustParameters(N[] deltas) {
-        adjustBias(deltas[0]);
-        for (int d = 1; d < deltas.length; d++) {
-            adjustWeight(d, deltas[d]);
+    public void adjustParameters(Array<N> deltas) {
+        for (int p = 0; p < parameters.length(); p++) {
+            adjustParameter(p, deltas.get(p));
         }
     }
 
@@ -157,11 +147,7 @@ public class AffineTransformation<N extends Number> extends LinearCombination<N>
      */
     @Override
     public void adjustParameter(int p, N delta) {
-        if (p == 0) {
-            adjustBias(delta);
-        } else {
-            adjustWeight(p, delta);
-        }
+        parameters.set(p, typeSupport.add(parameters.get(p), delta));
     }
 
     /**
@@ -170,7 +156,7 @@ public class AffineTransformation<N extends Number> extends LinearCombination<N>
      * @return the bias value (0.0f if there are no parameters)
      */
     public N getBias() {
-        return bias;
+        return parameters.get(0);
     }
 
     /**
@@ -179,7 +165,7 @@ public class AffineTransformation<N extends Number> extends LinearCombination<N>
      * @param bias the new bias value
      */
     public void setBias(N bias) {
-        this.bias = bias;
+        parameters.set(0, bias);
     }
 
     /**
@@ -188,7 +174,7 @@ public class AffineTransformation<N extends Number> extends LinearCombination<N>
      * @param delta the adjustment value
      */
     public void adjustBias(N delta) {
-        bias = typeSupport.add(bias, delta);
+        adjustParameter(0, delta);
     }
 
 }

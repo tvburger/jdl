@@ -13,31 +13,32 @@
 <div class="source-container">
 <pre><span class="source-line-no">001</span><span id="line-1">package net.tvburger.jdl.model.scalars;</span>
 <span class="source-line-no">002</span><span id="line-2"></span>
-<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.patterns.Strategy;</span>
-<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.model.training.TrainableFunction;</span>
-<span class="source-line-no">005</span><span id="line-5"></span>
-<span class="source-line-no">006</span><span id="line-6">/**</span>
-<span class="source-line-no">007</span><span id="line-7"> * A scalar-valued function that is both {@link TrainableFunction} and</span>
-<span class="source-line-no">008</span><span id="line-8"> * {@link ScalarEstimationFunction}.</span>
-<span class="source-line-no">009</span><span id="line-9"> * &lt;p&gt;</span>
-<span class="source-line-no">010</span><span id="line-10"> * Implementations represent functions {@code f(x; θ)} with trainable parameters θ</span>
-<span class="source-line-no">011</span><span id="line-11"> * that produce a scalar output for a given input vector. This interface provides</span>
-<span class="source-line-no">012</span><span id="line-12"> * a way to compute parameter parameterGradients needed for training via backpropagation.</span>
-<span class="source-line-no">013</span><span id="line-13"> */</span>
-<span class="source-line-no">014</span><span id="line-14">@Strategy(Strategy.Role.INTERFACE)</span>
-<span class="source-line-no">015</span><span id="line-15">public interface TrainableScalarFunction&lt;N extends Number&gt; extends TrainableFunction&lt;N&gt;, ScalarEstimationFunction&lt;N&gt; {</span>
-<span class="source-line-no">016</span><span id="line-16"></span>
-<span class="source-line-no">017</span><span id="line-17">    /**</span>
-<span class="source-line-no">018</span><span id="line-18">     * Calculates the parameterGradients of the scalar function with respect to its</span>
-<span class="source-line-no">019</span><span id="line-19">     * trainable parameters, given the input values.</span>
-<span class="source-line-no">020</span><span id="line-20">     *</span>
-<span class="source-line-no">021</span><span id="line-21">     * @param inputs the input feature vector to the function</span>
-<span class="source-line-no">022</span><span id="line-22">     * @return an array of partial derivatives</span>
-<span class="source-line-no">023</span><span id="line-23">     * {@code ∂f/∂θ_k} for each parameter θ_k</span>
-<span class="source-line-no">024</span><span id="line-24">     */</span>
-<span class="source-line-no">025</span><span id="line-25">    N[] calculateParameterGradients(N[] inputs);</span>
-<span class="source-line-no">026</span><span id="line-26"></span>
-<span class="source-line-no">027</span><span id="line-27">}</span>
+<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.numbers.Array;</span>
+<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.patterns.Strategy;</span>
+<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.model.training.TrainableFunction;</span>
+<span class="source-line-no">006</span><span id="line-6"></span>
+<span class="source-line-no">007</span><span id="line-7">/**</span>
+<span class="source-line-no">008</span><span id="line-8"> * A scalar-valued function that is both {@link TrainableFunction} and</span>
+<span class="source-line-no">009</span><span id="line-9"> * {@link ScalarEstimationFunction}.</span>
+<span class="source-line-no">010</span><span id="line-10"> * &lt;p&gt;</span>
+<span class="source-line-no">011</span><span id="line-11"> * Implementations represent functions {@code f(x; θ)} with trainable parameters θ</span>
+<span class="source-line-no">012</span><span id="line-12"> * that produce a scalar output for a given input vector. This interface provides</span>
+<span class="source-line-no">013</span><span id="line-13"> * a way to compute parameter parameterGradients needed for training via backpropagation.</span>
+<span class="source-line-no">014</span><span id="line-14"> */</span>
+<span class="source-line-no">015</span><span id="line-15">@Strategy(Strategy.Role.INTERFACE)</span>
+<span class="source-line-no">016</span><span id="line-16">public interface TrainableScalarFunction&lt;N extends Number&gt; extends TrainableFunction&lt;N&gt;, ScalarEstimationFunction&lt;N&gt; {</span>
+<span class="source-line-no">017</span><span id="line-17"></span>
+<span class="source-line-no">018</span><span id="line-18">    /**</span>
+<span class="source-line-no">019</span><span id="line-19">     * Calculates the parameterGradients of the scalar function with respect to its</span>
+<span class="source-line-no">020</span><span id="line-20">     * trainable parameters, given the input values.</span>
+<span class="source-line-no">021</span><span id="line-21">     *</span>
+<span class="source-line-no">022</span><span id="line-22">     * @param inputs the input feature vector to the function</span>
+<span class="source-line-no">023</span><span id="line-23">     * @return an array of partial derivatives</span>
+<span class="source-line-no">024</span><span id="line-24">     * {@code ∂f/∂θ_k} for each parameter θ_k</span>
+<span class="source-line-no">025</span><span id="line-25">     */</span>
+<span class="source-line-no">026</span><span id="line-26">    Array&lt;N&gt; calculateParameterGradients(Array&lt;N&gt; inputs);</span>
+<span class="source-line-no">027</span><span id="line-27"></span>
+<span class="source-line-no">028</span><span id="line-28">}</span>
 
 
 

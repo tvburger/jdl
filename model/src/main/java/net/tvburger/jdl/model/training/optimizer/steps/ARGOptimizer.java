@@ -1,8 +1,9 @@
 package net.tvburger.jdl.model.training.optimizer.steps;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
+import net.tvburger.jdl.linalg.TypedVector;
 import net.tvburger.jdl.linalg.Vector;
-import net.tvburger.jdl.linalg.Vectors;
 import net.tvburger.jdl.model.scalars.LinearCombination;
 import net.tvburger.jdl.model.training.optimizer.LearningRateConfigurable;
 import net.tvburger.jdl.model.training.optimizer.UpdateStep;
@@ -21,7 +22,7 @@ import java.util.WeakHashMap;
  */
 public class ARGOptimizer<N extends Number> implements UpdateStep<LinearCombination<N>, N>, LearningRateConfigurable<N> {
 
-    private final Map<LinearCombination<N>, N[]> accumulatedGradients = new WeakHashMap<>();
+    private final Map<LinearCombination<N>, Array<N>> accumulatedGradients = new WeakHashMap<>();
 
     private N learningRate;
 
@@ -31,23 +32,23 @@ public class ARGOptimizer<N extends Number> implements UpdateStep<LinearCombinat
 
     @Override
     public Vector<N> calculateUpdate(Vector<N> gradients, LinearCombination<N> model, int step, Set<ExplicitRegularization<N>> regularizations) {
-        N[] accumulatedGradients = this.accumulatedGradients.computeIfAbsent(model, k -> model.getCurrentNumberType().createArray(model.getParameterCount()));
-        JavaNumberTypeSupport<N> typeSupport = model.getCurrentNumberType();
+        Array<N> accumulatedGradients = this.accumulatedGradients.computeIfAbsent(model, k -> model.getNumberTypeSupport().createArray(model.getParameterCount()));
+        JavaNumberTypeSupport<N> typeSupport = model.getNumberTypeSupport();
 
-        N[] parameters = model.getParameters();
-        Vector<N> thetas = Vectors.of(model.getCurrentNumberType(), parameters).transpose();
+        Array<N> parameters = model.getParameters();
+        Vector<N> thetas = new TypedVector<>(parameters, true, model.getNumberTypeSupport());
         Vector<N> regularizationGradients = Regularizations.applyExplicitRegularization(regularizations, thetas, gradients);
 
         for (int i = 0; i < regularizationGradients.getDimensions(); i++) {
             N newGradient = regularizationGradients.get(i + 1);
-            if (typeSupport.hasSameSign(newGradient, accumulatedGradients[i])) {
-                accumulatedGradients[i] = typeSupport.add(accumulatedGradients[i], newGradient);
+            if (typeSupport.hasSameSign(newGradient, accumulatedGradients.get(i))) {
+                accumulatedGradients.set(i, typeSupport.add(accumulatedGradients.get(i), newGradient));
             } else {
-                accumulatedGradients[i] = newGradient;
+                accumulatedGradients.set(i, newGradient);
             }
         }
 
-        return Vectors.of(typeSupport, accumulatedGradients).transpose().multiply(model.getCurrentNumberType().negate(learningRate));
+        return new TypedVector<>(accumulatedGradients, true, model.getNumberTypeSupport()).multiply(model.getNumberTypeSupport().negate(learningRate));
     }
 
     @Override

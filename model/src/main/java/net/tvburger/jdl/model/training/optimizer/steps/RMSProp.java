@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model.training.optimizer.steps;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.utils.SimpleHolder;
 import net.tvburger.jdl.linalg.TypedVector;
@@ -32,13 +33,13 @@ public class RMSProp<N extends Number> implements UpdateStep<LinearCombination<N
 
     @Override
     public Vector<N> calculateUpdate(Vector<N> gradients, LinearCombination<N> model, int step, Set<ExplicitRegularization<N>> regularizations) {
-        JavaNumberTypeSupport<N> typeSupport = model.getCurrentNumberType();
+        JavaNumberTypeSupport<N> typeSupport = model.getNumberTypeSupport();
 
         SimpleHolder<TypedVector<N>> accumulatedSquaredGradients = this.adaptions.computeIfAbsent(model, k -> SimpleHolder.create());
         TypedVector<N> g2 = accumulatedSquaredGradients.get();
 
-        N[] parameters = model.getParameters();
-        Vector<N> thetas = Vectors.of(model.getCurrentNumberType(), parameters).transpose();
+        Array<N> parameters = model.getParameters();
+        Vector<N> thetas = new TypedVector<>(parameters, true, model.getNumberTypeSupport());
         TypedVector<N> regularizationGradients = (TypedVector<N>) Regularizations.applyExplicitRegularization(regularizations, thetas, gradients);
 
         // Accumulate squared gradients
@@ -51,7 +52,7 @@ public class RMSProp<N extends Number> implements UpdateStep<LinearCombination<N
         TypedVector<N> g2Sqrt = Vectors.squareRoot(g2); // element wise sqrt
         TypedVector<N> denom = g2Sqrt.add(typeSupport.epsilon()); // epsilon is scalar, broadcasts
 
-        return Vectors.divide(regularizationGradients, denom).multiply(model.getCurrentNumberType().negate(learningRate));
+        return Vectors.divide(regularizationGradients, denom).multiply(model.getNumberTypeSupport().negate(learningRate));
     }
 
     @Override

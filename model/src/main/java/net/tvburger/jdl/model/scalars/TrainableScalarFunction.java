@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model.scalars;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.patterns.Strategy;
 import net.tvburger.jdl.model.training.TrainableFunction;
 
@@ -22,6 +23,6 @@ public interface TrainableScalarFunction<N extends Number> extends TrainableFunc
      * @return an array of partial derivatives
      * {@code ∂f/∂θ_k} for each parameter θ_k
      */
-    N[] calculateParameterGradients(N[] inputs);
+    Array<N> calculateParameterGradients(Array<N> inputs);
 
 }

@@ -1,5 +1,6 @@
 package net.tvburger.jdl.linear.basis;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.numbers.NumberTypeAgnostic;
 import net.tvburger.jdl.common.patterns.Strategy;
@@ -36,11 +37,11 @@ public interface BasisFunction<N extends Number> extends NumberTypeAgnostic<N> {
         /**
          * {@inheritDoc}
          */
-        public N[] extractFeatures(N input) {
+        public Array<N> extractFeatures(N input) {
             int m = basis.size();
-            N[] features = typeSupport.createArray(m);
+            Array<N> features = typeSupport.createArray(m);
             for (int i = 0; i < m; i++) {
-                features[i] = basis.get(i).apply(input);
+                features.set(i, basis.get(i).apply(input));
             }
             return features;
         }

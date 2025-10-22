@@ -13,135 +13,136 @@
 <div class="source-container">
 <pre><span class="source-line-no">001</span><span id="line-1">package net.tvburger.jdl.model.training.optimizer.steps;</span>
 <span class="source-line-no">002</span><span id="line-2"></span>
-<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;</span>
-<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.utils.Pair;</span>
-<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.linalg.TypedVector;</span>
-<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.linalg.Vector;</span>
-<span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.linalg.Vectors;</span>
-<span class="source-line-no">008</span><span id="line-8">import net.tvburger.jdl.model.HyperparameterConfigurable;</span>
-<span class="source-line-no">009</span><span id="line-9">import net.tvburger.jdl.model.scalars.LinearCombination;</span>
-<span class="source-line-no">010</span><span id="line-10">import net.tvburger.jdl.model.training.optimizer.LearningRateConfigurable;</span>
-<span class="source-line-no">011</span><span id="line-11">import net.tvburger.jdl.model.training.optimizer.UpdateStep;</span>
-<span class="source-line-no">012</span><span id="line-12">import net.tvburger.jdl.model.training.regularization.ExplicitRegularization;</span>
-<span class="source-line-no">013</span><span id="line-13">import net.tvburger.jdl.model.training.regularization.Regularizations;</span>
-<span class="source-line-no">014</span><span id="line-14"></span>
-<span class="source-line-no">015</span><span id="line-15">import java.util.Map;</span>
-<span class="source-line-no">016</span><span id="line-16">import java.util.Set;</span>
-<span class="source-line-no">017</span><span id="line-17">import java.util.WeakHashMap;</span>
-<span class="source-line-no">018</span><span id="line-18"></span>
-<span class="source-line-no">019</span><span id="line-19">public class AdamW&lt;N extends Number&gt; implements UpdateStep&lt;LinearCombination&lt;N&gt;, N&gt;, LearningRateConfigurable&lt;N&gt;, HyperparameterConfigurable {</span>
-<span class="source-line-no">020</span><span id="line-20"></span>
-<span class="source-line-no">021</span><span id="line-21">    public static final String HP_BETA_1 = "beta1";</span>
-<span class="source-line-no">022</span><span id="line-22">    public static final String HP_BETA_2 = "beta2";</span>
-<span class="source-line-no">023</span><span id="line-23">    public static final String HP_LAMBDA = "lambda";</span>
-<span class="source-line-no">024</span><span id="line-24"></span>
-<span class="source-line-no">025</span><span id="line-25">    private final Map&lt;LinearCombination&lt;N&gt;, Pair&lt;TypedVector&lt;N&gt;, TypedVector&lt;N&gt;&gt;&gt; adaptions = new WeakHashMap&lt;&gt;();</span>
-<span class="source-line-no">026</span><span id="line-26"></span>
-<span class="source-line-no">027</span><span id="line-27">    private N learningRate;</span>
-<span class="source-line-no">028</span><span id="line-28">    private N beta1;</span>
-<span class="source-line-no">029</span><span id="line-29">    private N beta2;</span>
-<span class="source-line-no">030</span><span id="line-30">    private N lambda;</span>
-<span class="source-line-no">031</span><span id="line-31"></span>
-<span class="source-line-no">032</span><span id="line-32">    public AdamW(N learningRate, N beta1, N beta2, N lambda) {</span>
-<span class="source-line-no">033</span><span id="line-33">        this.learningRate = learningRate;</span>
-<span class="source-line-no">034</span><span id="line-34">        this.beta1 = beta1;</span>
-<span class="source-line-no">035</span><span id="line-35">        this.beta2 = beta2;</span>
-<span class="source-line-no">036</span><span id="line-36">        this.lambda = lambda;</span>
-<span class="source-line-no">037</span><span id="line-37">    }</span>
-<span class="source-line-no">038</span><span id="line-38"></span>
-<span class="source-line-no">039</span><span id="line-39">    @Override</span>
-<span class="source-line-no">040</span><span id="line-40">    public Vector&lt;N&gt; calculateUpdate(Vector&lt;N&gt; gradients, LinearCombination&lt;N&gt; model, int step, Set&lt;ExplicitRegularization&lt;N&gt;&gt; regularizations) {</span>
-<span class="source-line-no">041</span><span id="line-41">        JavaNumberTypeSupport&lt;N&gt; typeSupport = model.getCurrentNumberType();</span>
-<span class="source-line-no">042</span><span id="line-42"></span>
-<span class="source-line-no">043</span><span id="line-43">        Pair&lt;TypedVector&lt;N&gt;, TypedVector&lt;N&gt;&gt; adaptions = this.adaptions.computeIfAbsent(model, k -&gt; Pair.mutable(null, null));</span>
-<span class="source-line-no">044</span><span id="line-44">        TypedVector&lt;N&gt; m = adaptions.left();</span>
-<span class="source-line-no">045</span><span id="line-45">        TypedVector&lt;N&gt; v = adaptions.right();</span>
-<span class="source-line-no">046</span><span id="line-46"></span>
-<span class="source-line-no">047</span><span id="line-47">        N[] parameters = model.getParameters();</span>
-<span class="source-line-no">048</span><span id="line-48">        Vector&lt;N&gt; thetas = Vectors.of(model.getCurrentNumberType(), parameters).transpose();</span>
-<span class="source-line-no">049</span><span id="line-49">        TypedVector&lt;N&gt; regularizationGradients = (TypedVector&lt;N&gt;) Regularizations.applyExplicitRegularization(regularizations, thetas, gradients);</span>
-<span class="source-line-no">050</span><span id="line-50"></span>
-<span class="source-line-no">051</span><span id="line-51">        // m = β1 * m + (1 - β1) * g</span>
-<span class="source-line-no">052</span><span id="line-52">        TypedVector&lt;N&gt; secondTermM = regularizationGradients.multiply(typeSupport.subtract(typeSupport.one(), beta1));</span>
-<span class="source-line-no">053</span><span id="line-53">        m = m == null ? secondTermM : m.multiply(beta1).add(secondTermM);</span>
-<span class="source-line-no">054</span><span id="line-54"></span>
-<span class="source-line-no">055</span><span id="line-55">        // v = β2 * v + (1 - β2) * g^2</span>
-<span class="source-line-no">056</span><span id="line-56">        TypedVector&lt;N&gt; gradientSquared = Vectors.squared(regularizationGradients);</span>
-<span class="source-line-no">057</span><span id="line-57">        TypedVector&lt;N&gt; secondTermV = gradientSquared.multiply(typeSupport.subtract(typeSupport.one(), beta2));</span>
-<span class="source-line-no">058</span><span id="line-58">        v = v == null ? secondTermV : v.multiply(beta2).add(secondTermV);</span>
-<span class="source-line-no">059</span><span id="line-59"></span>
-<span class="source-line-no">060</span><span id="line-60">        // Store the results</span>
-<span class="source-line-no">061</span><span id="line-61">        adaptions.setLeft(m);</span>
-<span class="source-line-no">062</span><span id="line-62">        adaptions.setRight(v);</span>
-<span class="source-line-no">063</span><span id="line-63"></span>
-<span class="source-line-no">064</span><span id="line-64">        // Bias correction</span>
-<span class="source-line-no">065</span><span id="line-65">        N beta1T = typeSupport.pow(this.beta1, step);</span>
-<span class="source-line-no">066</span><span id="line-66">        N beta2T = typeSupport.pow(this.beta2, step);</span>
-<span class="source-line-no">067</span><span id="line-67">        N oneMinusBeta1T = typeSupport.subtract(typeSupport.one(), beta1T);</span>
-<span class="source-line-no">068</span><span id="line-68">        N oneMinusBeta2T = typeSupport.subtract(typeSupport.one(), beta2T);</span>
-<span class="source-line-no">069</span><span id="line-69"></span>
-<span class="source-line-no">070</span><span id="line-70">        TypedVector&lt;N&gt; mHat = m.multiply(typeSupport.inverse(oneMinusBeta1T));</span>
-<span class="source-line-no">071</span><span id="line-71">        TypedVector&lt;N&gt; vHat = v.multiply(typeSupport.inverse(oneMinusBeta2T));</span>
-<span class="source-line-no">072</span><span id="line-72"></span>
-<span class="source-line-no">073</span><span id="line-73">        // θ = θ - α * m̂ / (sqrt(v̂) + ε)</span>
-<span class="source-line-no">074</span><span id="line-74">        TypedVector&lt;N&gt; vHatSqrt = Vectors.squareRoot(vHat); // element wise sqrt</span>
-<span class="source-line-no">075</span><span id="line-75">        TypedVector&lt;N&gt; denom = vHatSqrt.add(typeSupport.epsilon()); // epsilon is scalar, broadcasts</span>
-<span class="source-line-no">076</span><span id="line-76"></span>
-<span class="source-line-no">077</span><span id="line-77">        // Weight decay</span>
-<span class="source-line-no">078</span><span id="line-78">        TypedVector&lt;N&gt; weightDecayTerm = Vectors.of(model.getCurrentNumberType(), parameters).transpose().multiply(lambda);</span>
-<span class="source-line-no">079</span><span id="line-79">        return Vectors.divide(mHat, denom).add(weightDecayTerm).multiply(model.getCurrentNumberType().negate(learningRate));</span>
-<span class="source-line-no">080</span><span id="line-80">    }</span>
-<span class="source-line-no">081</span><span id="line-81"></span>
-<span class="source-line-no">082</span><span id="line-82">    @Override</span>
-<span class="source-line-no">083</span><span id="line-83">    public Map&lt;String, Object&gt; getHyperparameters() {</span>
-<span class="source-line-no">084</span><span id="line-84">        return Map.of(</span>
-<span class="source-line-no">085</span><span id="line-85">                HP_LEARNING_RATE, learningRate,</span>
-<span class="source-line-no">086</span><span id="line-86">                HP_BETA_1, beta1,</span>
-<span class="source-line-no">087</span><span id="line-87">                HP_BETA_2, beta2,</span>
-<span class="source-line-no">088</span><span id="line-88">                HP_LAMBDA, lambda);</span>
-<span class="source-line-no">089</span><span id="line-89">    }</span>
-<span class="source-line-no">090</span><span id="line-90"></span>
-<span class="source-line-no">091</span><span id="line-91">    @SuppressWarnings("unchecked")</span>
-<span class="source-line-no">092</span><span id="line-92">    @Override</span>
-<span class="source-line-no">093</span><span id="line-93">    public void setHyperparameter(String name, Object value) {</span>
-<span class="source-line-no">094</span><span id="line-94">        if (HP_LEARNING_RATE.equals(name)) {</span>
-<span class="source-line-no">095</span><span id="line-95">            this.learningRate = (N) value;</span>
-<span class="source-line-no">096</span><span id="line-96">        }</span>
-<span class="source-line-no">097</span><span id="line-97">        if (HP_BETA_1.equals(name)) {</span>
-<span class="source-line-no">098</span><span id="line-98">            this.beta1 = (N) value;</span>
-<span class="source-line-no">099</span><span id="line-99">        }</span>
-<span class="source-line-no">100</span><span id="line-100">        if (HP_BETA_2.equals(name)) {</span>
-<span class="source-line-no">101</span><span id="line-101">            this.beta2 = (N) value;</span>
-<span class="source-line-no">102</span><span id="line-102">        }</span>
-<span class="source-line-no">103</span><span id="line-103">        if (HP_LAMBDA.equals(name)) {</span>
-<span class="source-line-no">104</span><span id="line-104">            this.lambda = (N) value;</span>
-<span class="source-line-no">105</span><span id="line-105">        }</span>
-<span class="source-line-no">106</span><span id="line-106">    }</span>
-<span class="source-line-no">107</span><span id="line-107"></span>
-<span class="source-line-no">108</span><span id="line-108">    public N getBeta1() {</span>
-<span class="source-line-no">109</span><span id="line-109">        return beta1;</span>
-<span class="source-line-no">110</span><span id="line-110">    }</span>
-<span class="source-line-no">111</span><span id="line-111"></span>
-<span class="source-line-no">112</span><span id="line-112">    public void setBeta1(N beta1) {</span>
-<span class="source-line-no">113</span><span id="line-113">        this.beta1 = beta1;</span>
-<span class="source-line-no">114</span><span id="line-114">    }</span>
-<span class="source-line-no">115</span><span id="line-115"></span>
-<span class="source-line-no">116</span><span id="line-116">    public N getBeta2() {</span>
-<span class="source-line-no">117</span><span id="line-117">        return beta2;</span>
-<span class="source-line-no">118</span><span id="line-118">    }</span>
-<span class="source-line-no">119</span><span id="line-119"></span>
-<span class="source-line-no">120</span><span id="line-120">    public void setBeta2(N beta2) {</span>
-<span class="source-line-no">121</span><span id="line-121">        this.beta2 = beta2;</span>
-<span class="source-line-no">122</span><span id="line-122">    }</span>
-<span class="source-line-no">123</span><span id="line-123"></span>
-<span class="source-line-no">124</span><span id="line-124">    public N getLambda() {</span>
-<span class="source-line-no">125</span><span id="line-125">        return lambda;</span>
-<span class="source-line-no">126</span><span id="line-126">    }</span>
-<span class="source-line-no">127</span><span id="line-127"></span>
-<span class="source-line-no">128</span><span id="line-128">    public void setLambda(N lambda) {</span>
-<span class="source-line-no">129</span><span id="line-129">        this.lambda = lambda;</span>
-<span class="source-line-no">130</span><span id="line-130">    }</span>
-<span class="source-line-no">131</span><span id="line-131">}</span>
+<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.numbers.Array;</span>
+<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;</span>
+<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.common.utils.Pair;</span>
+<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.linalg.TypedVector;</span>
+<span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.linalg.Vector;</span>
+<span class="source-line-no">008</span><span id="line-8">import net.tvburger.jdl.linalg.Vectors;</span>
+<span class="source-line-no">009</span><span id="line-9">import net.tvburger.jdl.model.HyperparameterConfigurable;</span>
+<span class="source-line-no">010</span><span id="line-10">import net.tvburger.jdl.model.scalars.LinearCombination;</span>
+<span class="source-line-no">011</span><span id="line-11">import net.tvburger.jdl.model.training.optimizer.LearningRateConfigurable;</span>
+<span class="source-line-no">012</span><span id="line-12">import net.tvburger.jdl.model.training.optimizer.UpdateStep;</span>
+<span class="source-line-no">013</span><span id="line-13">import net.tvburger.jdl.model.training.regularization.ExplicitRegularization;</span>
+<span class="source-line-no">014</span><span id="line-14">import net.tvburger.jdl.model.training.regularization.Regularizations;</span>
+<span class="source-line-no">015</span><span id="line-15"></span>
+<span class="source-line-no">016</span><span id="line-16">import java.util.Map;</span>
+<span class="source-line-no">017</span><span id="line-17">import java.util.Set;</span>
+<span class="source-line-no">018</span><span id="line-18">import java.util.WeakHashMap;</span>
+<span class="source-line-no">019</span><span id="line-19"></span>
+<span class="source-line-no">020</span><span id="line-20">public class AdamW&lt;N extends Number&gt; implements UpdateStep&lt;LinearCombination&lt;N&gt;, N&gt;, LearningRateConfigurable&lt;N&gt;, HyperparameterConfigurable {</span>
+<span class="source-line-no">021</span><span id="line-21"></span>
+<span class="source-line-no">022</span><span id="line-22">    public static final String HP_BETA_1 = "beta1";</span>
+<span class="source-line-no">023</span><span id="line-23">    public static final String HP_BETA_2 = "beta2";</span>
+<span class="source-line-no">024</span><span id="line-24">    public static final String HP_LAMBDA = "lambda";</span>
+<span class="source-line-no">025</span><span id="line-25"></span>
+<span class="source-line-no">026</span><span id="line-26">    private final Map&lt;LinearCombination&lt;N&gt;, Pair&lt;TypedVector&lt;N&gt;, TypedVector&lt;N&gt;&gt;&gt; adaptions = new WeakHashMap&lt;&gt;();</span>
+<span class="source-line-no">027</span><span id="line-27"></span>
+<span class="source-line-no">028</span><span id="line-28">    private N learningRate;</span>
+<span class="source-line-no">029</span><span id="line-29">    private N beta1;</span>
+<span class="source-line-no">030</span><span id="line-30">    private N beta2;</span>
+<span class="source-line-no">031</span><span id="line-31">    private N lambda;</span>
+<span class="source-line-no">032</span><span id="line-32"></span>
+<span class="source-line-no">033</span><span id="line-33">    public AdamW(N learningRate, N beta1, N beta2, N lambda) {</span>
+<span class="source-line-no">034</span><span id="line-34">        this.learningRate = learningRate;</span>
+<span class="source-line-no">035</span><span id="line-35">        this.beta1 = beta1;</span>
+<span class="source-line-no">036</span><span id="line-36">        this.beta2 = beta2;</span>
+<span class="source-line-no">037</span><span id="line-37">        this.lambda = lambda;</span>
+<span class="source-line-no">038</span><span id="line-38">    }</span>
+<span class="source-line-no">039</span><span id="line-39"></span>
+<span class="source-line-no">040</span><span id="line-40">    @Override</span>
+<span class="source-line-no">041</span><span id="line-41">    public Vector&lt;N&gt; calculateUpdate(Vector&lt;N&gt; gradients, LinearCombination&lt;N&gt; model, int step, Set&lt;ExplicitRegularization&lt;N&gt;&gt; regularizations) {</span>
+<span class="source-line-no">042</span><span id="line-42">        JavaNumberTypeSupport&lt;N&gt; typeSupport = model.getNumberTypeSupport();</span>
+<span class="source-line-no">043</span><span id="line-43"></span>
+<span class="source-line-no">044</span><span id="line-44">        Pair&lt;TypedVector&lt;N&gt;, TypedVector&lt;N&gt;&gt; adaptions = this.adaptions.computeIfAbsent(model, k -&gt; Pair.mutable(null, null));</span>
+<span class="source-line-no">045</span><span id="line-45">        TypedVector&lt;N&gt; m = adaptions.left();</span>
+<span class="source-line-no">046</span><span id="line-46">        TypedVector&lt;N&gt; v = adaptions.right();</span>
+<span class="source-line-no">047</span><span id="line-47"></span>
+<span class="source-line-no">048</span><span id="line-48">        Array&lt;N&gt; parameters = model.getParameters();</span>
+<span class="source-line-no">049</span><span id="line-49">        Vector&lt;N&gt; thetas = new TypedVector&lt;&gt;(parameters, true, model.getNumberTypeSupport());</span>
+<span class="source-line-no">050</span><span id="line-50">        TypedVector&lt;N&gt; regularizationGradients = (TypedVector&lt;N&gt;) Regularizations.applyExplicitRegularization(regularizations, thetas, gradients);</span>
+<span class="source-line-no">051</span><span id="line-51"></span>
+<span class="source-line-no">052</span><span id="line-52">        // m = β1 * m + (1 - β1) * g</span>
+<span class="source-line-no">053</span><span id="line-53">        TypedVector&lt;N&gt; secondTermM = regularizationGradients.multiply(typeSupport.subtract(typeSupport.one(), beta1));</span>
+<span class="source-line-no">054</span><span id="line-54">        m = m == null ? secondTermM : m.multiply(beta1).add(secondTermM);</span>
+<span class="source-line-no">055</span><span id="line-55"></span>
+<span class="source-line-no">056</span><span id="line-56">        // v = β2 * v + (1 - β2) * g^2</span>
+<span class="source-line-no">057</span><span id="line-57">        TypedVector&lt;N&gt; gradientSquared = Vectors.squared(regularizationGradients);</span>
+<span class="source-line-no">058</span><span id="line-58">        TypedVector&lt;N&gt; secondTermV = gradientSquared.multiply(typeSupport.subtract(typeSupport.one(), beta2));</span>
+<span class="source-line-no">059</span><span id="line-59">        v = v == null ? secondTermV : v.multiply(beta2).add(secondTermV);</span>
+<span class="source-line-no">060</span><span id="line-60"></span>
+<span class="source-line-no">061</span><span id="line-61">        // Store the results</span>
+<span class="source-line-no">062</span><span id="line-62">        adaptions.setLeft(m);</span>
+<span class="source-line-no">063</span><span id="line-63">        adaptions.setRight(v);</span>
+<span class="source-line-no">064</span><span id="line-64"></span>
+<span class="source-line-no">065</span><span id="line-65">        // Bias correction</span>
+<span class="source-line-no">066</span><span id="line-66">        N beta1T = typeSupport.pow(this.beta1, step);</span>
+<span class="source-line-no">067</span><span id="line-67">        N beta2T = typeSupport.pow(this.beta2, step);</span>
+<span class="source-line-no">068</span><span id="line-68">        N oneMinusBeta1T = typeSupport.subtract(typeSupport.one(), beta1T);</span>
+<span class="source-line-no">069</span><span id="line-69">        N oneMinusBeta2T = typeSupport.subtract(typeSupport.one(), beta2T);</span>
+<span class="source-line-no">070</span><span id="line-70"></span>
+<span class="source-line-no">071</span><span id="line-71">        TypedVector&lt;N&gt; mHat = m.multiply(typeSupport.inverse(oneMinusBeta1T));</span>
+<span class="source-line-no">072</span><span id="line-72">        TypedVector&lt;N&gt; vHat = v.multiply(typeSupport.inverse(oneMinusBeta2T));</span>
+<span class="source-line-no">073</span><span id="line-73"></span>
+<span class="source-line-no">074</span><span id="line-74">        // θ = θ - α * m̂ / (sqrt(v̂) + ε)</span>
+<span class="source-line-no">075</span><span id="line-75">        TypedVector&lt;N&gt; vHatSqrt = Vectors.squareRoot(vHat); // element wise sqrt</span>
+<span class="source-line-no">076</span><span id="line-76">        TypedVector&lt;N&gt; denom = vHatSqrt.add(typeSupport.epsilon()); // epsilon is scalar, broadcasts</span>
+<span class="source-line-no">077</span><span id="line-77"></span>
+<span class="source-line-no">078</span><span id="line-78">        // Weight decay</span>
+<span class="source-line-no">079</span><span id="line-79">        TypedVector&lt;N&gt; weightDecayTerm = new TypedVector&lt;&gt;(parameters, true, model.getNumberTypeSupport()).multiply(lambda);</span>
+<span class="source-line-no">080</span><span id="line-80">        return Vectors.divide(mHat, denom).add(weightDecayTerm).multiply(model.getNumberTypeSupport().negate(learningRate));</span>
+<span class="source-line-no">081</span><span id="line-81">    }</span>
+<span class="source-line-no">082</span><span id="line-82"></span>
+<span class="source-line-no">083</span><span id="line-83">    @Override</span>
+<span class="source-line-no">084</span><span id="line-84">    public Map&lt;String, Object&gt; getHyperparameters() {</span>
+<span class="source-line-no">085</span><span id="line-85">        return Map.of(</span>
+<span class="source-line-no">086</span><span id="line-86">                HP_LEARNING_RATE, learningRate,</span>
+<span class="source-line-no">087</span><span id="line-87">                HP_BETA_1, beta1,</span>
+<span class="source-line-no">088</span><span id="line-88">                HP_BETA_2, beta2,</span>
+<span class="source-line-no">089</span><span id="line-89">                HP_LAMBDA, lambda);</span>
+<span class="source-line-no">090</span><span id="line-90">    }</span>
+<span class="source-line-no">091</span><span id="line-91"></span>
+<span class="source-line-no">092</span><span id="line-92">    @SuppressWarnings("unchecked")</span>
+<span class="source-line-no">093</span><span id="line-93">    @Override</span>
+<span class="source-line-no">094</span><span id="line-94">    public void setHyperparameter(String name, Object value) {</span>
+<span class="source-line-no">095</span><span id="line-95">        if (HP_LEARNING_RATE.equals(name)) {</span>
+<span class="source-line-no">096</span><span id="line-96">            this.learningRate = (N) value;</span>
+<span class="source-line-no">097</span><span id="line-97">        }</span>
+<span class="source-line-no">098</span><span id="line-98">        if (HP_BETA_1.equals(name)) {</span>
+<span class="source-line-no">099</span><span id="line-99">            this.beta1 = (N) value;</span>
+<span class="source-line-no">100</span><span id="line-100">        }</span>
+<span class="source-line-no">101</span><span id="line-101">        if (HP_BETA_2.equals(name)) {</span>
+<span class="source-line-no">102</span><span id="line-102">            this.beta2 = (N) value;</span>
+<span class="source-line-no">103</span><span id="line-103">        }</span>
+<span class="source-line-no">104</span><span id="line-104">        if (HP_LAMBDA.equals(name)) {</span>
+<span class="source-line-no">105</span><span id="line-105">            this.lambda = (N) value;</span>
+<span class="source-line-no">106</span><span id="line-106">        }</span>
+<span class="source-line-no">107</span><span id="line-107">    }</span>
+<span class="source-line-no">108</span><span id="line-108"></span>
+<span class="source-line-no">109</span><span id="line-109">    public N getBeta1() {</span>
+<span class="source-line-no">110</span><span id="line-110">        return beta1;</span>
+<span class="source-line-no">111</span><span id="line-111">    }</span>
+<span class="source-line-no">112</span><span id="line-112"></span>
+<span class="source-line-no">113</span><span id="line-113">    public void setBeta1(N beta1) {</span>
+<span class="source-line-no">114</span><span id="line-114">        this.beta1 = beta1;</span>
+<span class="source-line-no">115</span><span id="line-115">    }</span>
+<span class="source-line-no">116</span><span id="line-116"></span>
+<span class="source-line-no">117</span><span id="line-117">    public N getBeta2() {</span>
+<span class="source-line-no">118</span><span id="line-118">        return beta2;</span>
+<span class="source-line-no">119</span><span id="line-119">    }</span>
+<span class="source-line-no">120</span><span id="line-120"></span>
+<span class="source-line-no">121</span><span id="line-121">    public void setBeta2(N beta2) {</span>
+<span class="source-line-no">122</span><span id="line-122">        this.beta2 = beta2;</span>
+<span class="source-line-no">123</span><span id="line-123">    }</span>
+<span class="source-line-no">124</span><span id="line-124"></span>
+<span class="source-line-no">125</span><span id="line-125">    public N getLambda() {</span>
+<span class="source-line-no">126</span><span id="line-126">        return lambda;</span>
+<span class="source-line-no">127</span><span id="line-127">    }</span>
+<span class="source-line-no">128</span><span id="line-128"></span>
+<span class="source-line-no">129</span><span id="line-129">    public void setLambda(N lambda) {</span>
+<span class="source-line-no">130</span><span id="line-130">        this.lambda = lambda;</span>
+<span class="source-line-no">131</span><span id="line-131">    }</span>
+<span class="source-line-no">132</span><span id="line-132">}</span>
 
 
 

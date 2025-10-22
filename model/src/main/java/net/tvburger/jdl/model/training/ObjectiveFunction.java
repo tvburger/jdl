@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model.training;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.patterns.DomainObject;
 import net.tvburger.jdl.common.patterns.Strategy;
 import net.tvburger.jdl.common.utils.Pair;
@@ -50,13 +51,13 @@ public interface ObjectiveFunction<N extends Number> extends LossFunction<N> {
      *              {@code float[]} arrays (estimated vs target)
      * @return the aggregated loss value for the batch
      */
-    N calculateLossWithoutRegularizationPenalty(List<Pair<N[], N[]>> batch);
+    N calculateLossWithoutRegularizationPenalty(List<Pair<Array<N>, Array<N>>> batch);
 
-    default N calculateLoss(List<Pair<N[], N[]>> batch, N[] parameters) {
-        return getCurrentNumberType().add(calculateLossWithoutRegularizationPenalty(batch), calculateRegularizationPenalty(parameters));
+    default N calculateLoss(List<Pair<Array<N>, Array<N>>> batch, Array<N> parameters) {
+        return getNumberTypeSupport().add(calculateLossWithoutRegularizationPenalty(batch), calculateRegularizationPenalty(parameters));
     }
 
-    N calculateRegularizationPenalty(N[] parameters);
+    N calculateRegularizationPenalty(Array<N> parameters);
 
     /**
      * Determines the parameterGradients of the objective function with respect to
@@ -73,7 +74,7 @@ public interface ObjectiveFunction<N extends Number> extends LossFunction<N> {
      * @param target    the expected target values for the sample
      * @return an array of parameterGradients, one per dimension of the input
      */
-    N[] calculateGradient_dJ_da(int samples, N[] estimated, N[] target);
+    Array<N> calculateGradient_dJ_da(int samples, Array<N> estimated, Array<N> target);
 
     N regularizedGradient(N parameter);
 

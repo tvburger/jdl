@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model.training.regimes;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.patterns.StaticFactory;
 import net.tvburger.jdl.common.patterns.Strategy;
@@ -110,10 +111,10 @@ public class ObjectiveReportingRegime extends DelegatedRegime {
 
     @SuppressWarnings("unchecked")
     private <E extends TrainableFunction<N>, N extends Number> void train(E estimationFunction, DataSet<N> trainingSet, ObjectiveFunction<N> objective, Optimizer<? super E, N> optimizer, Integer step) {
-        JavaNumberTypeSupport<N> typeSupport = estimationFunction.getCurrentNumberType();
+        JavaNumberTypeSupport<N> typeSupport = estimationFunction.getNumberTypeSupport();
         N previousLoss;
         if (objective != null && step == 1) {
-            List<Pair<N[], N[]>> batch = trainingSet.samples().stream().map(s -> Pair.of(estimationFunction.estimate(s.features()), s.targetOutputs())).toList();
+            List<Pair<Array<N>, Array<N>>> batch = trainingSet.samples().stream().map(s -> Pair.of(estimationFunction.estimate(s.features()), s.targetOutputs())).toList();
             previousLoss = objective.calculateLoss(batch, estimationFunction.getParameters());
             if (isDumpingLossValues()) {
                 System.out.printf("[Measurement %4d] Aggregated loss = %.4s (baseline)%n", 0, previousLoss);
@@ -127,7 +128,7 @@ public class ObjectiveReportingRegime extends DelegatedRegime {
             regime.train(estimationFunction, trainingSet, objective, optimizer, step);
         }
         if (objective != null) {
-            List<Pair<N[], N[]>> batch = trainingSet.samples().stream().map(s -> Pair.of(estimationFunction.estimate(s.features()), s.targetOutputs())).toList();
+            List<Pair<Array<N>, Array<N>>> batch = trainingSet.samples().stream().map(s -> Pair.of(estimationFunction.estimate(s.features()), s.targetOutputs())).toList();
             currentLoss = objective.calculateLoss(batch, estimationFunction.getParameters());
             improvement = typeSupport.multiply(typeSupport.divide(typeSupport.subtract(previousLoss, (N) currentLoss), previousLoss), -100);
             if (isDumpingLossValues()) {

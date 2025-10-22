@@ -13,60 +13,61 @@
 <div class="source-container">
 <pre><span class="source-line-no">001</span><span id="line-1">package net.tvburger.jdl.model;</span>
 <span class="source-line-no">002</span><span id="line-2"></span>
-<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.numbers.NumberTypeAgnostic;</span>
-<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.patterns.DomainObject;</span>
-<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.common.patterns.Strategy;</span>
-<span class="source-line-no">006</span><span id="line-6"></span>
-<span class="source-line-no">007</span><span id="line-7">/**</span>
-<span class="source-line-no">008</span><span id="line-8"> * The {@link #estimate(N[])} method defines the contract for mapping input values</span>
-<span class="source-line-no">009</span><span id="line-9"> * to output values according to a specific estimation algorithm.</span>
-<span class="source-line-no">010</span><span id="line-10"> * Different implementations may use linear, non-linear, or domain-specific (symbolic AI) logic.</span>
-<span class="source-line-no">011</span><span id="line-11"> */</span>
-<span class="source-line-no">012</span><span id="line-12">@DomainObject</span>
-<span class="source-line-no">013</span><span id="line-13">@Strategy(Strategy.Role.INTERFACE)</span>
-<span class="source-line-no">014</span><span id="line-14">public interface EstimationFunction&lt;N extends Number&gt; extends NumberTypeAgnostic&lt;N&gt; {</span>
-<span class="source-line-no">015</span><span id="line-15"></span>
-<span class="source-line-no">016</span><span id="line-16">    /**</span>
-<span class="source-line-no">017</span><span id="line-17">     * Applies the estimation algorithm to the given input vector.</span>
-<span class="source-line-no">018</span><span id="line-18">     *</span>
-<span class="source-line-no">019</span><span id="line-19">     * @param inputs an array of input values (e.g., features, signals)</span>
-<span class="source-line-no">020</span><span id="line-20">     * @return an array of output values computed by the estimation function</span>
-<span class="source-line-no">021</span><span id="line-21">     */</span>
-<span class="source-line-no">022</span><span id="line-22">    N[] estimate(N[] inputs);</span>
-<span class="source-line-no">023</span><span id="line-23"></span>
-<span class="source-line-no">024</span><span id="line-24">    /**</span>
-<span class="source-line-no">025</span><span id="line-25">     * Returns the &lt;b&gt;arity&lt;/b&gt; of this function, i.e. the number of inputs</span>
-<span class="source-line-no">026</span><span id="line-26">     * (independent variables or features) it expects.</span>
-<span class="source-line-no">027</span><span id="line-27">     * &lt;p&gt;</span>
-<span class="source-line-no">028</span><span id="line-28">     * For example:</span>
-<span class="source-line-no">029</span><span id="line-29">     * &lt;ul&gt;</span>
-<span class="source-line-no">030</span><span id="line-30">     *   &lt;li&gt;A univariate function {@code f(x)} has arity 1.&lt;/li&gt;</span>
-<span class="source-line-no">031</span><span id="line-31">     *   &lt;li&gt;A multivariate function {@code f(x, y, z)} has arity 3.&lt;/li&gt;</span>
-<span class="source-line-no">032</span><span id="line-32">     *   &lt;li&gt;In machine learning, this corresponds to the input feature dimension.&lt;/li&gt;</span>
-<span class="source-line-no">033</span><span id="line-33">     * &lt;/ul&gt;</span>
-<span class="source-line-no">034</span><span id="line-34">     *</span>
-<span class="source-line-no">035</span><span id="line-35">     * @return the number of inputs (arity) this function accepts</span>
-<span class="source-line-no">036</span><span id="line-36">     */</span>
-<span class="source-line-no">037</span><span id="line-37">    int arity();</span>
-<span class="source-line-no">038</span><span id="line-38"></span>
+<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.numbers.Array;</span>
+<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.numbers.NumberTypeAgnostic;</span>
+<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.common.patterns.DomainObject;</span>
+<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.common.patterns.Strategy;</span>
+<span class="source-line-no">007</span><span id="line-7"></span>
+<span class="source-line-no">008</span><span id="line-8">/**</span>
+<span class="source-line-no">009</span><span id="line-9"> * The {@link #estimate(N[])} method defines the contract for mapping input values</span>
+<span class="source-line-no">010</span><span id="line-10"> * to output values according to a specific estimation algorithm.</span>
+<span class="source-line-no">011</span><span id="line-11"> * Different implementations may use linear, non-linear, or domain-specific (symbolic AI) logic.</span>
+<span class="source-line-no">012</span><span id="line-12"> */</span>
+<span class="source-line-no">013</span><span id="line-13">@DomainObject</span>
+<span class="source-line-no">014</span><span id="line-14">@Strategy(Strategy.Role.INTERFACE)</span>
+<span class="source-line-no">015</span><span id="line-15">public interface EstimationFunction&lt;N extends Number&gt; extends NumberTypeAgnostic&lt;N&gt; {</span>
+<span class="source-line-no">016</span><span id="line-16"></span>
+<span class="source-line-no">017</span><span id="line-17">    /**</span>
+<span class="source-line-no">018</span><span id="line-18">     * Applies the estimation algorithm to the given input vector.</span>
+<span class="source-line-no">019</span><span id="line-19">     *</span>
+<span class="source-line-no">020</span><span id="line-20">     * @param inputs an array of input values (e.g., features, signals)</span>
+<span class="source-line-no">021</span><span id="line-21">     * @return an array of output values computed by the estimation function</span>
+<span class="source-line-no">022</span><span id="line-22">     */</span>
+<span class="source-line-no">023</span><span id="line-23">    Array&lt;N&gt; estimate(Array&lt;N&gt; inputs);</span>
+<span class="source-line-no">024</span><span id="line-24"></span>
+<span class="source-line-no">025</span><span id="line-25">    /**</span>
+<span class="source-line-no">026</span><span id="line-26">     * Returns the &lt;b&gt;arity&lt;/b&gt; of this function, i.e. the number of inputs</span>
+<span class="source-line-no">027</span><span id="line-27">     * (independent variables or features) it expects.</span>
+<span class="source-line-no">028</span><span id="line-28">     * &lt;p&gt;</span>
+<span class="source-line-no">029</span><span id="line-29">     * For example:</span>
+<span class="source-line-no">030</span><span id="line-30">     * &lt;ul&gt;</span>
+<span class="source-line-no">031</span><span id="line-31">     *   &lt;li&gt;A univariate function {@code f(x)} has arity 1.&lt;/li&gt;</span>
+<span class="source-line-no">032</span><span id="line-32">     *   &lt;li&gt;A multivariate function {@code f(x, y, z)} has arity 3.&lt;/li&gt;</span>
+<span class="source-line-no">033</span><span id="line-33">     *   &lt;li&gt;In machine learning, this corresponds to the input feature dimension.&lt;/li&gt;</span>
+<span class="source-line-no">034</span><span id="line-34">     * &lt;/ul&gt;</span>
+<span class="source-line-no">035</span><span id="line-35">     *</span>
+<span class="source-line-no">036</span><span id="line-36">     * @return the number of inputs (arity) this function accepts</span>
+<span class="source-line-no">037</span><span id="line-37">     */</span>
+<span class="source-line-no">038</span><span id="line-38">    int arity();</span>
 <span class="source-line-no">039</span><span id="line-39"></span>
-<span class="source-line-no">040</span><span id="line-40">    /**</span>
-<span class="source-line-no">041</span><span id="line-41">     * Returns the &lt;b&gt;co-arity&lt;/b&gt; of this function, i.e. the number of outputs</span>
-<span class="source-line-no">042</span><span id="line-42">     * (dependent variables or results) it produces.</span>
-<span class="source-line-no">043</span><span id="line-43">     * &lt;p&gt;</span>
-<span class="source-line-no">044</span><span id="line-44">     * For example:</span>
-<span class="source-line-no">045</span><span id="line-45">     * &lt;ul&gt;</span>
-<span class="source-line-no">046</span><span id="line-46">     *   &lt;li&gt;A scalar-valued function {@code f(x, y)} → ℝ has co-arity 1.&lt;/li&gt;</span>
-<span class="source-line-no">047</span><span id="line-47">     *   &lt;li&gt;A vector-valued function {@code f(x, y)} → ℝ² has co-arity 2.&lt;/li&gt;</span>
-<span class="source-line-no">048</span><span id="line-48">     *   &lt;li&gt;In machine learning, this corresponds to the output dimension</span>
-<span class="source-line-no">049</span><span id="line-49">     *       (e.g., number of labels or regression targets).&lt;/li&gt;</span>
-<span class="source-line-no">050</span><span id="line-50">     * &lt;/ul&gt;</span>
-<span class="source-line-no">051</span><span id="line-51">     *</span>
-<span class="source-line-no">052</span><span id="line-52">     * @return the number of outputs (co-arity) this function produces</span>
-<span class="source-line-no">053</span><span id="line-53">     */</span>
-<span class="source-line-no">054</span><span id="line-54">    int coArity();</span>
-<span class="source-line-no">055</span><span id="line-55"></span>
-<span class="source-line-no">056</span><span id="line-56">}</span>
+<span class="source-line-no">040</span><span id="line-40"></span>
+<span class="source-line-no">041</span><span id="line-41">    /**</span>
+<span class="source-line-no">042</span><span id="line-42">     * Returns the &lt;b&gt;co-arity&lt;/b&gt; of this function, i.e. the number of outputs</span>
+<span class="source-line-no">043</span><span id="line-43">     * (dependent variables or results) it produces.</span>
+<span class="source-line-no">044</span><span id="line-44">     * &lt;p&gt;</span>
+<span class="source-line-no">045</span><span id="line-45">     * For example:</span>
+<span class="source-line-no">046</span><span id="line-46">     * &lt;ul&gt;</span>
+<span class="source-line-no">047</span><span id="line-47">     *   &lt;li&gt;A scalar-valued function {@code f(x, y)} → ℝ has co-arity 1.&lt;/li&gt;</span>
+<span class="source-line-no">048</span><span id="line-48">     *   &lt;li&gt;A vector-valued function {@code f(x, y)} → ℝ² has co-arity 2.&lt;/li&gt;</span>
+<span class="source-line-no">049</span><span id="line-49">     *   &lt;li&gt;In machine learning, this corresponds to the output dimension</span>
+<span class="source-line-no">050</span><span id="line-50">     *       (e.g., number of labels or regression targets).&lt;/li&gt;</span>
+<span class="source-line-no">051</span><span id="line-51">     * &lt;/ul&gt;</span>
+<span class="source-line-no">052</span><span id="line-52">     *</span>
+<span class="source-line-no">053</span><span id="line-53">     * @return the number of outputs (co-arity) this function produces</span>
+<span class="source-line-no">054</span><span id="line-54">     */</span>
+<span class="source-line-no">055</span><span id="line-55">    int coArity();</span>
+<span class="source-line-no">056</span><span id="line-56"></span>
+<span class="source-line-no">057</span><span id="line-57">}</span>
 
 
 

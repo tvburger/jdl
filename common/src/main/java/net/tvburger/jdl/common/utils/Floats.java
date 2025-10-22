@@ -1,5 +1,6 @@
 package net.tvburger.jdl.common.utils;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.patterns.StaticUtility;
 
 /**
@@ -47,8 +48,8 @@ public final class Floats {
      * @param f the floats to put in the array
      * @return the array
      */
-    public static Float[] of(Float... f) {
-        return f;
+    public static Array<Float> of(Float... f) {
+        return Array.of(f);
     }
 
     /**
@@ -69,10 +70,10 @@ public final class Floats {
      * @param floats the floats to convert
      * @return the corresponding booleans
      */
-    public static boolean[] toBooleans(float[] floats, float threshold) {
-        boolean[] booleans = new boolean[floats.length];
-        for (int i = 0; i < floats.length; i++) {
-            booleans[i] = floats[i] >= threshold;
+    public static Array<Boolean> toBooleans(Array<Float> floats, float threshold) {
+        Array<Boolean> booleans = Array.of(new Boolean[floats.length()]);
+        for (int i = 0; i < floats.length(); i++) {
+            booleans.set(i, floats.get(i) >= threshold);
         }
         return booleans;
     }

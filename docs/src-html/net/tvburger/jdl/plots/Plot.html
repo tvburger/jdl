@@ -112,7 +112,7 @@
 <span class="source-line-no">099</span><span id="line-99">    public &lt;N extends Number&gt; Pair&lt;float[], float[]&gt; computeXY(UnaryEstimationFunction&lt;N&gt; function, int n) {</span>
 <span class="source-line-no">100</span><span id="line-100">        float min = 0.0f;</span>
 <span class="source-line-no">101</span><span id="line-101">        float max = 1.0f;</span>
-<span class="source-line-no">102</span><span id="line-102">        JavaNumberTypeSupport&lt;N&gt; typeSupport = function.getCurrentNumberType();</span>
+<span class="source-line-no">102</span><span id="line-102">        JavaNumberTypeSupport&lt;N&gt; typeSupport = function.getNumberTypeSupport();</span>
 <span class="source-line-no">103</span><span id="line-103">        N range = typeSupport.subtract(typeSupport.valueOf(max), typeSupport.valueOf(min));</span>
 <span class="source-line-no">104</span><span id="line-104">        N counter = typeSupport.zero();</span>
 <span class="source-line-no">105</span><span id="line-105">        N n_min_1 = typeSupport.valueOf(n - 1);</span>
@@ -132,8 +132,8 @@
 <span class="source-line-no">119</span><span id="line-119">        float[] x = new float[dataSet.size()];</span>
 <span class="source-line-no">120</span><span id="line-120">        float[] y = new float[x.length];</span>
 <span class="source-line-no">121</span><span id="line-121">        for (int i = 0; i &lt; dataSet.size(); i++) {</span>
-<span class="source-line-no">122</span><span id="line-122">            x[i] = dataSet.samples().get(i).features()[0].floatValue();</span>
-<span class="source-line-no">123</span><span id="line-123">            y[i] = dataSet.samples().get(i).targetOutputs()[0].floatValue();</span>
+<span class="source-line-no">122</span><span id="line-122">            x[i] = dataSet.samples().get(i).features().get(0).floatValue();</span>
+<span class="source-line-no">123</span><span id="line-123">            y[i] = dataSet.samples().get(i).targetOutputs().get(0).floatValue();</span>
 <span class="source-line-no">124</span><span id="line-124">        }</span>
 <span class="source-line-no">125</span><span id="line-125">        setPoints(name, x, y);</span>
 <span class="source-line-no">126</span><span id="line-126">    }</span>

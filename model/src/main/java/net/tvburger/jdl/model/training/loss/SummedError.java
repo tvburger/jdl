@@ -80,7 +80,7 @@ public class SummedError<N extends Number> implements SampleLossFunction<N>, Bat
      * {@inheritDoc}
      */
     @Override
-    public JavaNumberTypeSupport<N> getCurrentNumberType() {
+    public JavaNumberTypeSupport<N> getNumberTypeSupport() {
         return typeSupport;
     }
 }

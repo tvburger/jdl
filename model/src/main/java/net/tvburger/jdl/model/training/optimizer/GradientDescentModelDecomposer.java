@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model.training.optimizer;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.patterns.Strategy;
 import net.tvburger.jdl.linalg.Vector;
 import net.tvburger.jdl.model.scalars.LinearCombination;
@@ -13,6 +14,6 @@ public interface GradientDescentModelDecomposer<E extends TrainableFunction<N>, 
     record GradientDecomposition<N extends Number>(LinearCombination<N> linearCombination, Vector<N> parameterGradients) {
     }
 
-    Stream<GradientDecomposition<N>> calculateDecompositionGradients(E model, Vector<N> objectiveGradients, N[] inputs);
+    Stream<GradientDecomposition<N>> calculateDecompositionGradients(E model, Vector<N> objectiveGradients, Array<N> inputs);
 
 }

@@ -1,5 +1,6 @@
 package net.tvburger.jdl.linalg;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 
 import java.util.Arrays;
@@ -16,7 +17,7 @@ public class TypedMatrix<N extends Number> implements Matrix<N> {
     }
 
     @Override
-    public JavaNumberTypeSupport<N> getCurrentNumberType() {
+    public JavaNumberTypeSupport<N> getNumberTypeSupport() {
         return typeSupport;
     }
 
@@ -84,15 +85,15 @@ public class TypedMatrix<N extends Number> implements Matrix<N> {
         TypedMatrix<N> multiplied = multiply(vector.asMatrix());
         TypedVector<N> newVector;
         if (multiplied.m() == 1) {
-            N[] vectorValues = typeSupport.createArray(multiplied.n());
-            for (int j = 0; j < vectorValues.length; j++) {
-                vectorValues[j] = multiplied.values[0][j];
+            Array<N> vectorValues = typeSupport.createArray(multiplied.n());
+            for (int j = 0; j < vectorValues.length(); j++) {
+                vectorValues.set(j, multiplied.values[0][j]);
             }
             newVector = new TypedVector<>(vectorValues, false, typeSupport);
         } else {
-            N[] vectorValues = typeSupport.createArray(multiplied.m());
-            for (int i = 0; i < vectorValues.length; i++) {
-                vectorValues[i] = multiplied.values[i][0];
+            Array<N> vectorValues = typeSupport.createArray(multiplied.m());
+            for (int i = 0; i < vectorValues.length(); i++) {
+                vectorValues.set(i, multiplied.values[i][0]);
             }
             newVector = new TypedVector<>(vectorValues, true, typeSupport);
         }

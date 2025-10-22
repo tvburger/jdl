@@ -13,26 +13,27 @@
 <div class="source-container">
 <pre><span class="source-line-no">001</span><span id="line-1">package net.tvburger.jdl.model.distances;</span>
 <span class="source-line-no">002</span><span id="line-2"></span>
-<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.patterns.DomainObject;</span>
-<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.patterns.Strategy;</span>
-<span class="source-line-no">005</span><span id="line-5"></span>
-<span class="source-line-no">006</span><span id="line-6">/**</span>
-<span class="source-line-no">007</span><span id="line-7"> * This class represents a specific distance metrics to calculate the distances.</span>
-<span class="source-line-no">008</span><span id="line-8"> */</span>
-<span class="source-line-no">009</span><span id="line-9">@DomainObject</span>
-<span class="source-line-no">010</span><span id="line-10">@Strategy(Strategy.Role.INTERFACE)</span>
-<span class="source-line-no">011</span><span id="line-11">public interface DistanceMetric {</span>
-<span class="source-line-no">012</span><span id="line-12"></span>
-<span class="source-line-no">013</span><span id="line-13">    /**</span>
-<span class="source-line-no">014</span><span id="line-14">     * Calculates the distance between the 2 points</span>
-<span class="source-line-no">015</span><span id="line-15">     *</span>
-<span class="source-line-no">016</span><span id="line-16">     * @param point1 point1 to compare</span>
-<span class="source-line-no">017</span><span id="line-17">     * @param point2 point2 to compare</span>
-<span class="source-line-no">018</span><span id="line-18">     * @return the difference between point1 and point2</span>
-<span class="source-line-no">019</span><span id="line-19">     */</span>
-<span class="source-line-no">020</span><span id="line-20">    float distance(Float[] point1, Float[] point2);</span>
-<span class="source-line-no">021</span><span id="line-21"></span>
-<span class="source-line-no">022</span><span id="line-22">}</span>
+<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.numbers.Array;</span>
+<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.patterns.DomainObject;</span>
+<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.common.patterns.Strategy;</span>
+<span class="source-line-no">006</span><span id="line-6"></span>
+<span class="source-line-no">007</span><span id="line-7">/**</span>
+<span class="source-line-no">008</span><span id="line-8"> * This class represents a specific distance metrics to calculate the distances.</span>
+<span class="source-line-no">009</span><span id="line-9"> */</span>
+<span class="source-line-no">010</span><span id="line-10">@DomainObject</span>
+<span class="source-line-no">011</span><span id="line-11">@Strategy(Strategy.Role.INTERFACE)</span>
+<span class="source-line-no">012</span><span id="line-12">public interface DistanceMetric {</span>
+<span class="source-line-no">013</span><span id="line-13"></span>
+<span class="source-line-no">014</span><span id="line-14">    /**</span>
+<span class="source-line-no">015</span><span id="line-15">     * Calculates the distance between the 2 points</span>
+<span class="source-line-no">016</span><span id="line-16">     *</span>
+<span class="source-line-no">017</span><span id="line-17">     * @param point1 point1 to compare</span>
+<span class="source-line-no">018</span><span id="line-18">     * @param point2 point2 to compare</span>
+<span class="source-line-no">019</span><span id="line-19">     * @return the difference between point1 and point2</span>
+<span class="source-line-no">020</span><span id="line-20">     */</span>
+<span class="source-line-no">021</span><span id="line-21">    float distance(Array&lt;Float&gt; point1, Array&lt;Float&gt; point2);</span>
+<span class="source-line-no">022</span><span id="line-22"></span>
+<span class="source-line-no">023</span><span id="line-23">}</span>
 
 
 

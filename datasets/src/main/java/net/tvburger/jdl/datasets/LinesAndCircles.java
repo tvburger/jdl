@@ -1,5 +1,6 @@
 package net.tvburger.jdl.datasets;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.model.DataSet;
 
 import java.util.ArrayList;
@@ -23,10 +24,10 @@ public class LinesAndCircles implements DataSet.Loader<Float> {
                     }
                     float circle = "circle".equals(elements[2]) ? 1.0f : 0.0f;
                     float left = "left".equals(elements[3]) ? 1.0f : 0.0f;
-                    Float[] targetOutputs = new Float[]{circle, left, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-                    Float[] features = new Float[400];
+                    Array<Float> targetOutputs = Array.of(new Float[]{circle, left, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f});
+                    Array<Float> features = Array.of(new Float[400]);
                     for (int i = 0; i < 400; i++) {
-                        features[i] = "0".equals(elements[i + 4]) ? 0.0f : 1.0f;
+                        features.set(i, "0".equals(elements[i + 4]) ? 0.0f : 1.0f);
                     }
                     samples.add(new DataSet.Sample<>(features, targetOutputs));
                 }

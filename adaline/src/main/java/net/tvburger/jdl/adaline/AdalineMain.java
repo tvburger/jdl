@@ -1,5 +1,6 @@
 package net.tvburger.jdl.adaline;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.utils.Floats;
 import net.tvburger.jdl.datasets.LinesAndCircles;
@@ -12,8 +13,6 @@ import net.tvburger.jdl.model.training.regimes.ChainedRegime;
 import net.tvburger.jdl.model.training.regimes.Regimes;
 import net.tvburger.jdl.plots.ImageViewer;
 import net.tvburger.jdl.plots.listeners.EpochRmePlotter;
-
-import java.util.Arrays;
 
 public class AdalineMain {
 
@@ -38,9 +37,9 @@ public class AdalineMain {
         int wrong = 0;
         for (DataSet.Sample<Float> sample : testSet) {
             i++;
-            boolean[] estimate = adaline.classify(sample.features());
-            boolean[] target = Floats.toBooleans(sample.targetOutputs(), 0.0f);
-            if (!Arrays.equals(target, estimate)) {
+            Array<Boolean> estimate = adaline.classify(sample.features());
+            Array<Boolean> target = Floats.toBooleans(sample.targetOutputs(), 0.0f);
+            if (!Array.equals(target, estimate)) {
                 wrong++;
                 String label = createLabel(i, target, estimate);
                 ImageViewer image = ImageViewer.fromPerceptronImage(label, fromMinusSet(sample));
@@ -51,8 +50,8 @@ public class AdalineMain {
         }
         if (wrong == 0) {
             DataSet.Sample<Float> sample = testSet.samples().getFirst();
-            boolean[] estimate = adaline.classify(sample.features());
-            boolean[] target = Floats.toBooleans(sample.targetOutputs(), 0.0f);
+            Array<Boolean> estimate = adaline.classify(sample.features());
+            Array<Boolean> target = Floats.toBooleans(sample.targetOutputs(), 0.0f);
             String label = createLabel(1, target, estimate);
             ImageViewer image = ImageViewer.fromPerceptronImage(label, fromMinusSet(sample));
             image.display();
@@ -61,24 +60,24 @@ public class AdalineMain {
     }
 
     private static DataSet.Sample<Float> fromMinusSet(DataSet.Sample<Float> sample) {
-        Float[] features = sample.features();
-        for (int i = 0; i < features.length; i++) {
-            if (Floats.equals(features[i], -1.0f)) {
-                features[i] = 0.0f;
+        Array<Float> features = sample.features();
+        for (int i = 0; i < features.length(); i++) {
+            if (Floats.equals(features.get(i), -1.0f)) {
+                features.set(i, 0.0f);
             }
         }
         return new DataSet.Sample<>(features, sample.targetOutputs());
     }
 
-    private static String createLabel(int i, boolean[] target, boolean[] estimate) {
+    private static String createLabel(int i, Array<Boolean> target, Array<Boolean> estimate) {
         String label = "";
         boolean wrong = false;
-        label += estimate[0] ? "Circle " : "Line ";
-        if (target[0] != estimate[0]) {
+        label += estimate.get(0) ? "Circle " : "Line ";
+        if (target.get(0) != estimate.get(0)) {
             wrong = true;
         }
-        label += estimate[1] ? "Left" : "Right";
-        if (target[1] != estimate[1]) {
+        label += estimate.get(1) ? "Left" : "Right";
+        if (target.get(1) != estimate.get(1)) {
             wrong = true;
         }
         return i + ". " + (wrong ? "X: " : "V: ") + label;

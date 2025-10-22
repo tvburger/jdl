@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model.nn;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.patterns.DomainObject;
 import net.tvburger.jdl.common.patterns.Entity;
 import net.tvburger.jdl.model.EstimationFunction;
@@ -106,7 +107,7 @@ public interface NeuralNetwork extends TrainableFunction<Float> {
      *
      * @return a flat array of parameters
      */
-    Float[] getParameters();
+    Array<Float> getParameters();
 
     /**
      * Accepts a {@link net.tvburger.jdl.model.nn.NeuronVisitor} to traverse
@@ -116,6 +117,7 @@ public interface NeuralNetwork extends TrainableFunction<Float> {
      *
      * @param visitor the visitor to apply to this network
      */
+    @Deprecated
     void accept(NeuronVisitor visitor);
 
 }

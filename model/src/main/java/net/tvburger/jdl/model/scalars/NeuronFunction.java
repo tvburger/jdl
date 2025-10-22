@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model.scalars;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.patterns.Strategy;
 import net.tvburger.jdl.model.scalars.activations.ActivationFunction;
@@ -67,7 +68,7 @@ public class NeuronFunction implements TrainableScalarFunction<Float> {
 
     /**
      * Estimates the scalar output by first computing the weighted sum
-     * (via {@link LinearCombination#estimateScalar(Number[])})
+     * (via {@link LinearCombination#estimateScalar(Array)})
      * and then applying the activation function.
      *
      * @param inputs the input feature vector
@@ -75,7 +76,7 @@ public class NeuronFunction implements TrainableScalarFunction<Float> {
      * @throws IllegalArgumentException if {@code inputs.length != arity()}
      */
     @Override
-    public Float estimateScalar(Float[] inputs) {
+    public Float estimateScalar(Array<Float> inputs) {
         return activationFunction.activate(linearCombination.estimateScalar(inputs));
     }
 
@@ -85,7 +86,7 @@ public class NeuronFunction implements TrainableScalarFunction<Float> {
      * <p>
      * Concretely:
      * <ul>
-     *   <li>First calls {@link #calculateParameterGradients_df_dp(Float[])}
+     *   <li>First calls {@link #calculateParameterGradients_df_dp(Array)}
      *       to compute parameterGradients of the pre-activation linear function
      *       (bias + weighted inputs).</li>
      *   <li>Then multiplies each gradient by the derivative of the activation
@@ -95,29 +96,26 @@ public class NeuronFunction implements TrainableScalarFunction<Float> {
      * @param inputs the input feature vector
      * @return the gradient vector (bias gradient followed by weight parameterGradients)
      */
-    public Float[] calculateParameterGradients(Float[] inputs) {
-        Float[] gradients = calculateParameterGradients_df_dp(inputs);
+    public Array<Float> calculateParameterGradients(Array<Float> inputs) {
+        Array<Float> gradients = calculateParameterGradients_df_dp(inputs);
         float activationGradient = activationFunction.determineGradientForOutput(estimateScalar(inputs));
-        for (int p = 0; p < gradients.length; p++) {
-            gradients[p] *= activationGradient;
-        }
-        return gradients;
+        return gradients.apply(v -> v * activationGradient);
     }
 
     /**
      * Calculates the parameter parameterGradients of the underlying linear combination
      * (pre-activation function). This is equivalent to
-     * {@link LinearCombination#calculateParameterGradients(Number[])}.
+     * {@link LinearCombination#calculateParameterGradients(Array)}.
      *
      * @param inputs the input feature vector
      * @return the gradient vector of the linear function
      */
-    public Float[] calculateParameterGradients_df_dp(Float[] inputs) {
+    public Array<Float> calculateParameterGradients_df_dp(Array<Float> inputs) {
         return linearCombination.calculateParameterGradients(inputs);
     }
 
     @Override
-    public JavaNumberTypeSupport<Float> getCurrentNumberType() {
+    public JavaNumberTypeSupport<Float> getNumberTypeSupport() {
         return JavaNumberTypeSupport.FLOAT;
     }
 
@@ -141,7 +139,7 @@ public class NeuronFunction implements TrainableScalarFunction<Float> {
      * {@inheritDoc}
      */
     @Override
-    public Float[] getParameters() {
+    public Array<Float> getParameters() {
         return linearCombination.getParameters();
     }
 
@@ -157,7 +155,7 @@ public class NeuronFunction implements TrainableScalarFunction<Float> {
      * {@inheritDoc}
      */
     @Override
-    public void setParameters(Float[] values) {
+    public void setParameters(Array<Float> values) {
         linearCombination.setParameters(values);
     }
 
@@ -173,7 +171,7 @@ public class NeuronFunction implements TrainableScalarFunction<Float> {
      * {@inheritDoc}
      */
     @Override
-    public void adjustParameters(Float[] deltas) {
+    public void adjustParameters(Array<Float> deltas) {
         linearCombination.adjustParameters(deltas);
     }
 
@@ -190,14 +188,14 @@ public class NeuronFunction implements TrainableScalarFunction<Float> {
      */
     @Override
     public String toString() {
-        Float[] parameters = getParameters();
+        Array<Float> parameters = getParameters();
         StringBuilder sb = new StringBuilder();
         sb.append(activationFunction.getClass().getSimpleName());
-        sb.append("(").append(parameters[0] < 0.0f ? "" : '+').append(parameters[0]);
-        for (int i = 1; i < parameters.length && i < 7; i++) {
-            sb.append(':').append(String.format("%.2f", parameters[i]));
+        sb.append("(").append(parameters.get(0) < 0.0f ? "" : '+').append(parameters.get(0));
+        for (int i = 1; i < parameters.length() && i < 7; i++) {
+            sb.append(':').append(String.format("%.2f", parameters.get(i)));
         }
-        if (parameters.length > 7) {
+        if (parameters.length() > 7) {
             sb.append(":...");
         }
         return sb.append(')').toString();

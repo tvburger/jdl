@@ -99,7 +99,7 @@ public class Plot implements DataRenderer {
     public <N extends Number> Pair<float[], float[]> computeXY(UnaryEstimationFunction<N> function, int n) {
         float min = 0.0f;
         float max = 1.0f;
-        JavaNumberTypeSupport<N> typeSupport = function.getCurrentNumberType();
+        JavaNumberTypeSupport<N> typeSupport = function.getNumberTypeSupport();
         N range = typeSupport.subtract(typeSupport.valueOf(max), typeSupport.valueOf(min));
         N counter = typeSupport.zero();
         N n_min_1 = typeSupport.valueOf(n - 1);
@@ -119,8 +119,8 @@ public class Plot implements DataRenderer {
         float[] x = new float[dataSet.size()];
         float[] y = new float[x.length];
         for (int i = 0; i < dataSet.size(); i++) {
-            x[i] = dataSet.samples().get(i).features()[0].floatValue();
-            y[i] = dataSet.samples().get(i).targetOutputs()[0].floatValue();
+            x[i] = dataSet.samples().get(i).features().get(0).floatValue();
+            y[i] = dataSet.samples().get(i).targetOutputs().get(0).floatValue();
         }
         setPoints(name, x, y);
     }

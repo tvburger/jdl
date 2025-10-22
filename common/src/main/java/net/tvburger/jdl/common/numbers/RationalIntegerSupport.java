@@ -20,10 +20,10 @@ public final class RationalIntegerSupport implements JavaNumberTypeSupport<Ratio
 
     @SuppressWarnings("unchecked")
     @Override
-    public Rational<Integer>[] createArray(int length) {
+    public Array<Rational<Integer>> createArray(int length) {
         Rational<Integer>[] array = (Rational<Integer>[]) new Rational<?>[length];
         Arrays.fill(array, ZERO);
-        return array;
+        return Array.of(array);
     }
 
     @SuppressWarnings("unchecked")

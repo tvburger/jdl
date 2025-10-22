@@ -13,91 +13,90 @@
 <div class="source-container">
 <pre><span class="source-line-no">001</span><span id="line-1">package net.tvburger.jdl.adaline;</span>
 <span class="source-line-no">002</span><span id="line-2"></span>
-<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;</span>
-<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.utils.Floats;</span>
-<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.datasets.LinesAndCircles;</span>
-<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.datasets.LogicalDataSets;</span>
-<span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.model.DataSet;</span>
-<span class="source-line-no">008</span><span id="line-8">import net.tvburger.jdl.model.training.ObjectiveFunction;</span>
-<span class="source-line-no">009</span><span id="line-9">import net.tvburger.jdl.model.training.Trainer;</span>
-<span class="source-line-no">010</span><span id="line-10">import net.tvburger.jdl.model.training.loss.Objectives;</span>
-<span class="source-line-no">011</span><span id="line-11">import net.tvburger.jdl.model.training.regimes.ChainedRegime;</span>
-<span class="source-line-no">012</span><span id="line-12">import net.tvburger.jdl.model.training.regimes.Regimes;</span>
-<span class="source-line-no">013</span><span id="line-13">import net.tvburger.jdl.plots.ImageViewer;</span>
-<span class="source-line-no">014</span><span id="line-14">import net.tvburger.jdl.plots.listeners.EpochRmePlotter;</span>
-<span class="source-line-no">015</span><span id="line-15"></span>
-<span class="source-line-no">016</span><span id="line-16">import java.util.Arrays;</span>
-<span class="source-line-no">017</span><span id="line-17"></span>
-<span class="source-line-no">018</span><span id="line-18">public class AdalineMain {</span>
-<span class="source-line-no">019</span><span id="line-19"></span>
-<span class="source-line-no">020</span><span id="line-20">    public static void main(String[] args) {</span>
-<span class="source-line-no">021</span><span id="line-21">        DataSet&lt;Float&gt; dataSet = LogicalDataSets.toMinusSet(new LinesAndCircles().load());</span>
-<span class="source-line-no">022</span><span id="line-22">        DataSet&lt;Float&gt; trainingSet = dataSet.subset(10, dataSet.size());</span>
-<span class="source-line-no">023</span><span id="line-23">        DataSet&lt;Float&gt; testSet = dataSet.subset(0, 10);</span>
-<span class="source-line-no">024</span><span id="line-24"></span>
-<span class="source-line-no">025</span><span id="line-25">        Adaline adaline = Adaline.create(400, 8);</span>
-<span class="source-line-no">026</span><span id="line-26">        ObjectiveFunction&lt;Float&gt; objective = Objectives.mSE(JavaNumberTypeSupport.FLOAT);</span>
-<span class="source-line-no">027</span><span id="line-27">        LeastMeanSquares leastMeanSquares = new LeastMeanSquares(0.01f);</span>
-<span class="source-line-no">028</span><span id="line-28">        EpochRmePlotter epochRmePlotter = new EpochRmePlotter();</span>
-<span class="source-line-no">029</span><span id="line-29">        epochRmePlotter.display();</span>
-<span class="source-line-no">030</span><span id="line-30">        ChainedRegime regime = Regimes.epochs(100,</span>
-<span class="source-line-no">031</span><span id="line-31">                epochRmePlotter.attach("Training Set (" + trainingSet.size() + ")"),</span>
-<span class="source-line-no">032</span><span id="line-32">                epochRmePlotter.attach("Test Set (" + testSet.size() + ")", testSet)).stochastic();</span>
-<span class="source-line-no">033</span><span id="line-33">        Trainer&lt;Adaline, Float&gt; adalineTrainer = Trainer.of(new AdalineInitializer(), objective, leastMeanSquares, regime);</span>
-<span class="source-line-no">034</span><span id="line-34">        adalineTrainer.train(adaline, trainingSet);</span>
-<span class="source-line-no">035</span><span id="line-35"></span>
-<span class="source-line-no">036</span><span id="line-36">        int i = 0;</span>
-<span class="source-line-no">037</span><span id="line-37">        int correct = 0;</span>
-<span class="source-line-no">038</span><span id="line-38">        int wrong = 0;</span>
-<span class="source-line-no">039</span><span id="line-39">        for (DataSet.Sample&lt;Float&gt; sample : testSet) {</span>
-<span class="source-line-no">040</span><span id="line-40">            i++;</span>
-<span class="source-line-no">041</span><span id="line-41">            boolean[] estimate = adaline.classify(sample.features());</span>
-<span class="source-line-no">042</span><span id="line-42">            boolean[] target = Floats.toBooleans(sample.targetOutputs(), 0.0f);</span>
-<span class="source-line-no">043</span><span id="line-43">            if (!Arrays.equals(target, estimate)) {</span>
-<span class="source-line-no">044</span><span id="line-44">                wrong++;</span>
-<span class="source-line-no">045</span><span id="line-45">                String label = createLabel(i, target, estimate);</span>
-<span class="source-line-no">046</span><span id="line-46">                ImageViewer image = ImageViewer.fromPerceptronImage(label, fromMinusSet(sample));</span>
-<span class="source-line-no">047</span><span id="line-47">                image.display();</span>
-<span class="source-line-no">048</span><span id="line-48">            } else {</span>
-<span class="source-line-no">049</span><span id="line-49">                correct++;</span>
-<span class="source-line-no">050</span><span id="line-50">            }</span>
-<span class="source-line-no">051</span><span id="line-51">        }</span>
-<span class="source-line-no">052</span><span id="line-52">        if (wrong == 0) {</span>
-<span class="source-line-no">053</span><span id="line-53">            DataSet.Sample&lt;Float&gt; sample = testSet.samples().getFirst();</span>
-<span class="source-line-no">054</span><span id="line-54">            boolean[] estimate = adaline.classify(sample.features());</span>
-<span class="source-line-no">055</span><span id="line-55">            boolean[] target = Floats.toBooleans(sample.targetOutputs(), 0.0f);</span>
-<span class="source-line-no">056</span><span id="line-56">            String label = createLabel(1, target, estimate);</span>
-<span class="source-line-no">057</span><span id="line-57">            ImageViewer image = ImageViewer.fromPerceptronImage(label, fromMinusSet(sample));</span>
-<span class="source-line-no">058</span><span id="line-58">            image.display();</span>
-<span class="source-line-no">059</span><span id="line-59">        }</span>
-<span class="source-line-no">060</span><span id="line-60">        System.out.println("Correct: " + correct + ", Wrong: " + wrong + ", Total: " + (correct + wrong));</span>
-<span class="source-line-no">061</span><span id="line-61">    }</span>
-<span class="source-line-no">062</span><span id="line-62"></span>
-<span class="source-line-no">063</span><span id="line-63">    private static DataSet.Sample&lt;Float&gt; fromMinusSet(DataSet.Sample&lt;Float&gt; sample) {</span>
-<span class="source-line-no">064</span><span id="line-64">        Float[] features = sample.features();</span>
-<span class="source-line-no">065</span><span id="line-65">        for (int i = 0; i &lt; features.length; i++) {</span>
-<span class="source-line-no">066</span><span id="line-66">            if (Floats.equals(features[i], -1.0f)) {</span>
-<span class="source-line-no">067</span><span id="line-67">                features[i] = 0.0f;</span>
-<span class="source-line-no">068</span><span id="line-68">            }</span>
-<span class="source-line-no">069</span><span id="line-69">        }</span>
-<span class="source-line-no">070</span><span id="line-70">        return new DataSet.Sample&lt;&gt;(features, sample.targetOutputs());</span>
-<span class="source-line-no">071</span><span id="line-71">    }</span>
-<span class="source-line-no">072</span><span id="line-72"></span>
-<span class="source-line-no">073</span><span id="line-73">    private static String createLabel(int i, boolean[] target, boolean[] estimate) {</span>
-<span class="source-line-no">074</span><span id="line-74">        String label = "";</span>
-<span class="source-line-no">075</span><span id="line-75">        boolean wrong = false;</span>
-<span class="source-line-no">076</span><span id="line-76">        label += estimate[0] ? "Circle " : "Line ";</span>
-<span class="source-line-no">077</span><span id="line-77">        if (target[0] != estimate[0]) {</span>
-<span class="source-line-no">078</span><span id="line-78">            wrong = true;</span>
-<span class="source-line-no">079</span><span id="line-79">        }</span>
-<span class="source-line-no">080</span><span id="line-80">        label += estimate[1] ? "Left" : "Right";</span>
-<span class="source-line-no">081</span><span id="line-81">        if (target[1] != estimate[1]) {</span>
-<span class="source-line-no">082</span><span id="line-82">            wrong = true;</span>
-<span class="source-line-no">083</span><span id="line-83">        }</span>
-<span class="source-line-no">084</span><span id="line-84">        return i + ". " + (wrong ? "X: " : "V: ") + label;</span>
-<span class="source-line-no">085</span><span id="line-85">    }</span>
-<span class="source-line-no">086</span><span id="line-86"></span>
-<span class="source-line-no">087</span><span id="line-87">}</span>
+<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.numbers.Array;</span>
+<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;</span>
+<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.common.utils.Floats;</span>
+<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.datasets.LinesAndCircles;</span>
+<span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.datasets.LogicalDataSets;</span>
+<span class="source-line-no">008</span><span id="line-8">import net.tvburger.jdl.model.DataSet;</span>
+<span class="source-line-no">009</span><span id="line-9">import net.tvburger.jdl.model.training.ObjectiveFunction;</span>
+<span class="source-line-no">010</span><span id="line-10">import net.tvburger.jdl.model.training.Trainer;</span>
+<span class="source-line-no">011</span><span id="line-11">import net.tvburger.jdl.model.training.loss.Objectives;</span>
+<span class="source-line-no">012</span><span id="line-12">import net.tvburger.jdl.model.training.regimes.ChainedRegime;</span>
+<span class="source-line-no">013</span><span id="line-13">import net.tvburger.jdl.model.training.regimes.Regimes;</span>
+<span class="source-line-no">014</span><span id="line-14">import net.tvburger.jdl.plots.ImageViewer;</span>
+<span class="source-line-no">015</span><span id="line-15">import net.tvburger.jdl.plots.listeners.EpochRmePlotter;</span>
+<span class="source-line-no">016</span><span id="line-16"></span>
+<span class="source-line-no">017</span><span id="line-17">public class AdalineMain {</span>
+<span class="source-line-no">018</span><span id="line-18"></span>
+<span class="source-line-no">019</span><span id="line-19">    public static void main(String[] args) {</span>
+<span class="source-line-no">020</span><span id="line-20">        DataSet&lt;Float&gt; dataSet = LogicalDataSets.toMinusSet(new LinesAndCircles().load());</span>
+<span class="source-line-no">021</span><span id="line-21">        DataSet&lt;Float&gt; trainingSet = dataSet.subset(10, dataSet.size());</span>
+<span class="source-line-no">022</span><span id="line-22">        DataSet&lt;Float&gt; testSet = dataSet.subset(0, 10);</span>
+<span class="source-line-no">023</span><span id="line-23"></span>
+<span class="source-line-no">024</span><span id="line-24">        Adaline adaline = Adaline.create(400, 8);</span>
+<span class="source-line-no">025</span><span id="line-25">        ObjectiveFunction&lt;Float&gt; objective = Objectives.mSE(JavaNumberTypeSupport.FLOAT);</span>
+<span class="source-line-no">026</span><span id="line-26">        LeastMeanSquares leastMeanSquares = new LeastMeanSquares(0.01f);</span>
+<span class="source-line-no">027</span><span id="line-27">        EpochRmePlotter epochRmePlotter = new EpochRmePlotter();</span>
+<span class="source-line-no">028</span><span id="line-28">        epochRmePlotter.display();</span>
+<span class="source-line-no">029</span><span id="line-29">        ChainedRegime regime = Regimes.epochs(100,</span>
+<span class="source-line-no">030</span><span id="line-30">                epochRmePlotter.attach("Training Set (" + trainingSet.size() + ")"),</span>
+<span class="source-line-no">031</span><span id="line-31">                epochRmePlotter.attach("Test Set (" + testSet.size() + ")", testSet)).stochastic();</span>
+<span class="source-line-no">032</span><span id="line-32">        Trainer&lt;Adaline, Float&gt; adalineTrainer = Trainer.of(new AdalineInitializer(), objective, leastMeanSquares, regime);</span>
+<span class="source-line-no">033</span><span id="line-33">        adalineTrainer.train(adaline, trainingSet);</span>
+<span class="source-line-no">034</span><span id="line-34"></span>
+<span class="source-line-no">035</span><span id="line-35">        int i = 0;</span>
+<span class="source-line-no">036</span><span id="line-36">        int correct = 0;</span>
+<span class="source-line-no">037</span><span id="line-37">        int wrong = 0;</span>
+<span class="source-line-no">038</span><span id="line-38">        for (DataSet.Sample&lt;Float&gt; sample : testSet) {</span>
+<span class="source-line-no">039</span><span id="line-39">            i++;</span>
+<span class="source-line-no">040</span><span id="line-40">            Array&lt;Boolean&gt; estimate = adaline.classify(sample.features());</span>
+<span class="source-line-no">041</span><span id="line-41">            Array&lt;Boolean&gt; target = Floats.toBooleans(sample.targetOutputs(), 0.0f);</span>
+<span class="source-line-no">042</span><span id="line-42">            if (!Array.equals(target, estimate)) {</span>
+<span class="source-line-no">043</span><span id="line-43">                wrong++;</span>
+<span class="source-line-no">044</span><span id="line-44">                String label = createLabel(i, target, estimate);</span>
+<span class="source-line-no">045</span><span id="line-45">                ImageViewer image = ImageViewer.fromPerceptronImage(label, fromMinusSet(sample));</span>
+<span class="source-line-no">046</span><span id="line-46">                image.display();</span>
+<span class="source-line-no">047</span><span id="line-47">            } else {</span>
+<span class="source-line-no">048</span><span id="line-48">                correct++;</span>
+<span class="source-line-no">049</span><span id="line-49">            }</span>
+<span class="source-line-no">050</span><span id="line-50">        }</span>
+<span class="source-line-no">051</span><span id="line-51">        if (wrong == 0) {</span>
+<span class="source-line-no">052</span><span id="line-52">            DataSet.Sample&lt;Float&gt; sample = testSet.samples().getFirst();</span>
+<span class="source-line-no">053</span><span id="line-53">            Array&lt;Boolean&gt; estimate = adaline.classify(sample.features());</span>
+<span class="source-line-no">054</span><span id="line-54">            Array&lt;Boolean&gt; target = Floats.toBooleans(sample.targetOutputs(), 0.0f);</span>
+<span class="source-line-no">055</span><span id="line-55">            String label = createLabel(1, target, estimate);</span>
+<span class="source-line-no">056</span><span id="line-56">            ImageViewer image = ImageViewer.fromPerceptronImage(label, fromMinusSet(sample));</span>
+<span class="source-line-no">057</span><span id="line-57">            image.display();</span>
+<span class="source-line-no">058</span><span id="line-58">        }</span>
+<span class="source-line-no">059</span><span id="line-59">        System.out.println("Correct: " + correct + ", Wrong: " + wrong + ", Total: " + (correct + wrong));</span>
+<span class="source-line-no">060</span><span id="line-60">    }</span>
+<span class="source-line-no">061</span><span id="line-61"></span>
+<span class="source-line-no">062</span><span id="line-62">    private static DataSet.Sample&lt;Float&gt; fromMinusSet(DataSet.Sample&lt;Float&gt; sample) {</span>
+<span class="source-line-no">063</span><span id="line-63">        Array&lt;Float&gt; features = sample.features();</span>
+<span class="source-line-no">064</span><span id="line-64">        for (int i = 0; i &lt; features.length(); i++) {</span>
+<span class="source-line-no">065</span><span id="line-65">            if (Floats.equals(features.get(i), -1.0f)) {</span>
+<span class="source-line-no">066</span><span id="line-66">                features.set(i, 0.0f);</span>
+<span class="source-line-no">067</span><span id="line-67">            }</span>
+<span class="source-line-no">068</span><span id="line-68">        }</span>
+<span class="source-line-no">069</span><span id="line-69">        return new DataSet.Sample&lt;&gt;(features, sample.targetOutputs());</span>
+<span class="source-line-no">070</span><span id="line-70">    }</span>
+<span class="source-line-no">071</span><span id="line-71"></span>
+<span class="source-line-no">072</span><span id="line-72">    private static String createLabel(int i, Array&lt;Boolean&gt; target, Array&lt;Boolean&gt; estimate) {</span>
+<span class="source-line-no">073</span><span id="line-73">        String label = "";</span>
+<span class="source-line-no">074</span><span id="line-74">        boolean wrong = false;</span>
+<span class="source-line-no">075</span><span id="line-75">        label += estimate.get(0) ? "Circle " : "Line ";</span>
+<span class="source-line-no">076</span><span id="line-76">        if (target.get(0) != estimate.get(0)) {</span>
+<span class="source-line-no">077</span><span id="line-77">            wrong = true;</span>
+<span class="source-line-no">078</span><span id="line-78">        }</span>
+<span class="source-line-no">079</span><span id="line-79">        label += estimate.get(1) ? "Left" : "Right";</span>
+<span class="source-line-no">080</span><span id="line-80">        if (target.get(1) != estimate.get(1)) {</span>
+<span class="source-line-no">081</span><span id="line-81">            wrong = true;</span>
+<span class="source-line-no">082</span><span id="line-82">        }</span>
+<span class="source-line-no">083</span><span id="line-83">        return i + ". " + (wrong ? "X: " : "V: ") + label;</span>
+<span class="source-line-no">084</span><span id="line-84">    }</span>
+<span class="source-line-no">085</span><span id="line-85"></span>
+<span class="source-line-no">086</span><span id="line-86">}</span>
 
 
 

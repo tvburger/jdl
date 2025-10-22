@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.patterns.*;
 
 import java.util.*;
@@ -38,7 +39,7 @@ public record DataSet<N extends Number>(List<Sample<N>> samples) implements Iter
      */
     @DomainObject
     @ValueObject
-    public record Sample<N extends Number>(N[] features, N[] targetOutputs) {
+    public record Sample<N extends Number>(Array<N> features, Array<N> targetOutputs) {
 
         /**
          * Utility method to create a sample
@@ -48,7 +49,7 @@ public record DataSet<N extends Number>(List<Sample<N>> samples) implements Iter
          * @return the sample
          */
         @StaticFactory
-        public static <N extends Number> DataSet.Sample<N> of(N[] feature, N[] targetOutput) {
+        public static <N extends Number> DataSet.Sample<N> of(Array<N> feature, Array<N> targetOutput) {
             return new DataSet.Sample<>(feature, targetOutput);
         }
 
@@ -64,7 +65,7 @@ public record DataSet<N extends Number>(List<Sample<N>> samples) implements Iter
          * @return the number of input features in this sample
          */
         public int featureCount() {
-            return features.length;
+            return features.length();
         }
 
         /**
@@ -79,7 +80,7 @@ public record DataSet<N extends Number>(List<Sample<N>> samples) implements Iter
          * @return the number of target outputs in this sample
          */
         public int targetCount() {
-            return targetOutputs.length;
+            return targetOutputs.length();
         }
 
         /**
@@ -107,7 +108,7 @@ public record DataSet<N extends Number>(List<Sample<N>> samples) implements Iter
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Sample<?> sample = (Sample<?>) o;
-            return Arrays.equals(features, sample.features) && Arrays.equals(targetOutputs, sample.targetOutputs);
+            return Array.equals(features, sample.features) && Array.equals(targetOutputs, sample.targetOutputs);
         }
 
         /**
@@ -115,8 +116,8 @@ public record DataSet<N extends Number>(List<Sample<N>> samples) implements Iter
          */
         @Override
         public int hashCode() {
-            int result = Arrays.hashCode(features);
-            result = 31 * result + Arrays.hashCode(targetOutputs);
+            int result = Array.hashCode(features);
+            result = 31 * result + Array.hashCode(targetOutputs);
             return result;
         }
 
@@ -126,8 +127,8 @@ public record DataSet<N extends Number>(List<Sample<N>> samples) implements Iter
         @Override
         public String toString() {
             return "Sample{" +
-                    "features=" + Arrays.toString(features) +
-                    ", targetOutputs=" + Arrays.toString(targetOutputs) +
+                    "features=" + Array.toString(features) +
+                    ", targetOutputs=" + Array.toString(targetOutputs) +
                     '}';
         }
 
@@ -151,7 +152,7 @@ public record DataSet<N extends Number>(List<Sample<N>> samples) implements Iter
                 }
             }
         }
-        return new DataSet(List.of(sample));
+        return new DataSet<>(List.of(sample));
     }
 
     /**
@@ -196,7 +197,7 @@ public record DataSet<N extends Number>(List<Sample<N>> samples) implements Iter
      * @param features      the inputs for the sample
      * @param targetOutputs the expected outputs for the sample
      */
-    public void addSample(N[] features, N[] targetOutputs) {
+    public void addSample(Array<N> features, Array<N> targetOutputs) {
         addSample(Sample.of(features, targetOutputs));
     }
 

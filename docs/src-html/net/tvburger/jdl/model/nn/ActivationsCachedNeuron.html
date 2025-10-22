@@ -13,109 +13,110 @@
 <div class="source-container">
 <pre><span class="source-line-no">001</span><span id="line-1">package net.tvburger.jdl.model.nn;</span>
 <span class="source-line-no">002</span><span id="line-2"></span>
-<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;</span>
-<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.patterns.Decorator;</span>
-<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.model.scalars.AffineTransformation;</span>
-<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.model.scalars.NeuronFunction;</span>
-<span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.model.scalars.activations.ActivationFunction;</span>
-<span class="source-line-no">008</span><span id="line-8">import net.tvburger.jdl.model.scalars.activations.Activations;</span>
-<span class="source-line-no">009</span><span id="line-9"></span>
-<span class="source-line-no">010</span><span id="line-10">import java.util.LinkedList;</span>
-<span class="source-line-no">011</span><span id="line-11">import java.util.List;</span>
-<span class="source-line-no">012</span><span id="line-12"></span>
-<span class="source-line-no">013</span><span id="line-13">/**</span>
-<span class="source-line-no">014</span><span id="line-14"> * A {@link Neuron} that caches activations for later retrieval.</span>
-<span class="source-line-no">015</span><span id="line-15"> *</span>
-<span class="source-line-no">016</span><span id="line-16"> * &lt;p&gt;This neuron extends the base {@link Neuron} class and stores a list of</span>
-<span class="source-line-no">017</span><span id="line-17"> * {@link Activation} objects, which contain the input values, target digit,</span>
-<span class="source-line-no">018</span><span id="line-18"> * output, and gradient for each activation. This is useful for</span>
-<span class="source-line-no">019</span><span id="line-19"> * &lt;strong&gt;backpropagation, debugging, or analysis&lt;/strong&gt; of the neuron’s behavior over time.</span>
-<span class="source-line-no">020</span><span id="line-20"> *</span>
-<span class="source-line-no">021</span><span id="line-21"> * &lt;p&gt;The class is annotated with {@link Decorator} to indicate that it</span>
-<span class="source-line-no">022</span><span id="line-22"> * enhances the standard neuron with caching functionality.</span>
-<span class="source-line-no">023</span><span id="line-23"> *</span>
-<span class="source-line-no">024</span><span id="line-24"> * @see Neuron</span>
-<span class="source-line-no">025</span><span id="line-25"> * @see ActivationFunction</span>
-<span class="source-line-no">026</span><span id="line-26"> */</span>
-<span class="source-line-no">027</span><span id="line-27">@Decorator</span>
-<span class="source-line-no">028</span><span id="line-28">public class ActivationsCachedNeuron extends Neuron {</span>
-<span class="source-line-no">029</span><span id="line-29"></span>
-<span class="source-line-no">030</span><span id="line-30">    public static ActivationsCachedNeuron create(String name, List&lt;? extends Neuron&gt; inputNodes) {</span>
-<span class="source-line-no">031</span><span id="line-31">        return create(name, inputNodes, Activations.linear());</span>
-<span class="source-line-no">032</span><span id="line-32">    }</span>
-<span class="source-line-no">033</span><span id="line-33"></span>
-<span class="source-line-no">034</span><span id="line-34">    public static ActivationsCachedNeuron create(String name, List&lt;? extends Neuron&gt; inputNodes, ActivationFunction activationFunction) {</span>
-<span class="source-line-no">035</span><span id="line-35">        return new ActivationsCachedNeuron(name, inputNodes, new NeuronFunction(AffineTransformation.create(inputNodes.size(), JavaNumberTypeSupport.FLOAT), activationFunction));</span>
-<span class="source-line-no">036</span><span id="line-36">    }</span>
-<span class="source-line-no">037</span><span id="line-37"></span>
-<span class="source-line-no">038</span><span id="line-38">    /**</span>
-<span class="source-line-no">039</span><span id="line-39">     * Represents a single activation of a neuron.</span>
-<span class="source-line-no">040</span><span id="line-40">     *</span>
-<span class="source-line-no">041</span><span id="line-41">     * &lt;p&gt;Stores the following information for each activation:</span>
-<span class="source-line-no">042</span><span id="line-42">     * &lt;ul&gt;</span>
-<span class="source-line-no">043</span><span id="line-43">     *     &lt;li&gt;{@code inputs} – the input values received by this neuron during activation&lt;/li&gt;</span>
-<span class="source-line-no">044</span><span id="line-44">     *     &lt;li&gt;{@code output} – the output produced by the neuron&lt;/li&gt;</span>
-<span class="source-line-no">045</span><span id="line-45">     *     &lt;li&gt;{@code parameterGradients_df_dp} – the gradient calculated for this output (useful for learning)&lt;/li&gt;</span>
-<span class="source-line-no">046</span><span id="line-46">     * &lt;/ul&gt;</span>
-<span class="source-line-no">047</span><span id="line-47">     */</span>
-<span class="source-line-no">048</span><span id="line-48">    public record Activation(Float[] inputs, float output, Float[] parameterGradients_df_dp) {</span>
-<span class="source-line-no">049</span><span id="line-49"></span>
-<span class="source-line-no">050</span><span id="line-50">    }</span>
-<span class="source-line-no">051</span><span id="line-51"></span>
-<span class="source-line-no">052</span><span id="line-52">    /**</span>
-<span class="source-line-no">053</span><span id="line-53">     * The list of cached activations for this neuron.</span>
-<span class="source-line-no">054</span><span id="line-54">     */</span>
-<span class="source-line-no">055</span><span id="line-55">    private final List&lt;Activation&gt; cachedActivations = new LinkedList&lt;&gt;();</span>
-<span class="source-line-no">056</span><span id="line-56"></span>
-<span class="source-line-no">057</span><span id="line-57">    /**</span>
-<span class="source-line-no">058</span><span id="line-58">     * Constructs a new neuron with caching capabilities.</span>
-<span class="source-line-no">059</span><span id="line-59">     *</span>
-<span class="source-line-no">060</span><span id="line-60">     * @param name           the name of the neuron</span>
-<span class="source-line-no">061</span><span id="line-61">     * @param inputs         the list of input neurons</span>
-<span class="source-line-no">062</span><span id="line-62">     * @param neuronFunction the function used by this neuron</span>
-<span class="source-line-no">063</span><span id="line-63">     */</span>
-<span class="source-line-no">064</span><span id="line-64">    public ActivationsCachedNeuron(String name, List&lt;? extends Neuron&gt; inputs, NeuronFunction neuronFunction) {</span>
-<span class="source-line-no">065</span><span id="line-65">        super(name, inputs, neuronFunction);</span>
-<span class="source-line-no">066</span><span id="line-66">    }</span>
-<span class="source-line-no">067</span><span id="line-67"></span>
-<span class="source-line-no">068</span><span id="line-68">    /**</span>
-<span class="source-line-no">069</span><span id="line-69">     * Activates the neuron and caches the result.</span>
-<span class="source-line-no">070</span><span id="line-70">     *</span>
-<span class="source-line-no">071</span><span id="line-71">     * &lt;p&gt;If the neuron is already activated, this method does nothing.</span>
-<span class="source-line-no">072</span><span id="line-72">     * Otherwise, it performs the standard {@link Neuron#activate()} operation</span>
-<span class="source-line-no">073</span><span id="line-73">     * and stores an {@link Activation} record in the cache containing:</span>
-<span class="source-line-no">074</span><span id="line-74">     * inputs, logit, output, and gradient.</span>
-<span class="source-line-no">075</span><span id="line-75">     */</span>
-<span class="source-line-no">076</span><span id="line-76">    public synchronized void activate() {</span>
-<span class="source-line-no">077</span><span id="line-77">        if (isActivated()) {</span>
-<span class="source-line-no">078</span><span id="line-78">            return;</span>
-<span class="source-line-no">079</span><span id="line-79">        }</span>
-<span class="source-line-no">080</span><span id="line-80">        super.activate();</span>
-<span class="source-line-no">081</span><span id="line-81">        Float[] inputValues = getInputValues();</span>
-<span class="source-line-no">082</span><span id="line-82">        float output = getOutput();</span>
-<span class="source-line-no">083</span><span id="line-83">        cachedActivations.add(new Activation(inputValues, output, getNeuronFunction().calculateParameterGradients_df_dp(inputValues)));</span>
-<span class="source-line-no">084</span><span id="line-84">    }</span>
-<span class="source-line-no">085</span><span id="line-85"></span>
-<span class="source-line-no">086</span><span id="line-86">    /**</span>
-<span class="source-line-no">087</span><span id="line-87">     * Returns the cached activations.</span>
-<span class="source-line-no">088</span><span id="line-88">     *</span>
-<span class="source-line-no">089</span><span id="line-89">     * @return the list of {@link Activation} records representing past activations</span>
-<span class="source-line-no">090</span><span id="line-90">     */</span>
-<span class="source-line-no">091</span><span id="line-91">    public List&lt;Activation&gt; getCache() {</span>
-<span class="source-line-no">092</span><span id="line-92">        return cachedActivations;</span>
-<span class="source-line-no">093</span><span id="line-93">    }</span>
-<span class="source-line-no">094</span><span id="line-94"></span>
-<span class="source-line-no">095</span><span id="line-95">    /**</span>
-<span class="source-line-no">096</span><span id="line-96">     * Clears all cached activations.</span>
-<span class="source-line-no">097</span><span id="line-97">     *</span>
-<span class="source-line-no">098</span><span id="line-98">     * &lt;p&gt;This method is synchronized to ensure thread safety when modifying</span>
-<span class="source-line-no">099</span><span id="line-99">     * the cache.</span>
-<span class="source-line-no">100</span><span id="line-100">     */</span>
-<span class="source-line-no">101</span><span id="line-101">    public synchronized void clearCache() {</span>
-<span class="source-line-no">102</span><span id="line-102">        cachedActivations.clear();</span>
-<span class="source-line-no">103</span><span id="line-103">    }</span>
-<span class="source-line-no">104</span><span id="line-104"></span>
-<span class="source-line-no">105</span><span id="line-105">}</span>
+<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.numbers.Array;</span>
+<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;</span>
+<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.common.patterns.Decorator;</span>
+<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.model.scalars.AffineTransformation;</span>
+<span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.model.scalars.NeuronFunction;</span>
+<span class="source-line-no">008</span><span id="line-8">import net.tvburger.jdl.model.scalars.activations.ActivationFunction;</span>
+<span class="source-line-no">009</span><span id="line-9">import net.tvburger.jdl.model.scalars.activations.Activations;</span>
+<span class="source-line-no">010</span><span id="line-10"></span>
+<span class="source-line-no">011</span><span id="line-11">import java.util.LinkedList;</span>
+<span class="source-line-no">012</span><span id="line-12">import java.util.List;</span>
+<span class="source-line-no">013</span><span id="line-13"></span>
+<span class="source-line-no">014</span><span id="line-14">/**</span>
+<span class="source-line-no">015</span><span id="line-15"> * A {@link Neuron} that caches activations for later retrieval.</span>
+<span class="source-line-no">016</span><span id="line-16"> *</span>
+<span class="source-line-no">017</span><span id="line-17"> * &lt;p&gt;This neuron extends the base {@link Neuron} class and stores a list of</span>
+<span class="source-line-no">018</span><span id="line-18"> * {@link Activation} objects, which contain the input values, target digit,</span>
+<span class="source-line-no">019</span><span id="line-19"> * output, and gradient for each activation. This is useful for</span>
+<span class="source-line-no">020</span><span id="line-20"> * &lt;strong&gt;backpropagation, debugging, or analysis&lt;/strong&gt; of the neuron’s behavior over time.</span>
+<span class="source-line-no">021</span><span id="line-21"> *</span>
+<span class="source-line-no">022</span><span id="line-22"> * &lt;p&gt;The class is annotated with {@link Decorator} to indicate that it</span>
+<span class="source-line-no">023</span><span id="line-23"> * enhances the standard neuron with caching functionality.</span>
+<span class="source-line-no">024</span><span id="line-24"> *</span>
+<span class="source-line-no">025</span><span id="line-25"> * @see Neuron</span>
+<span class="source-line-no">026</span><span id="line-26"> * @see ActivationFunction</span>
+<span class="source-line-no">027</span><span id="line-27"> */</span>
+<span class="source-line-no">028</span><span id="line-28">@Decorator</span>
+<span class="source-line-no">029</span><span id="line-29">public class ActivationsCachedNeuron extends Neuron {</span>
+<span class="source-line-no">030</span><span id="line-30"></span>
+<span class="source-line-no">031</span><span id="line-31">    public static ActivationsCachedNeuron create(String name, List&lt;? extends Neuron&gt; inputNodes) {</span>
+<span class="source-line-no">032</span><span id="line-32">        return create(name, inputNodes, Activations.linear());</span>
+<span class="source-line-no">033</span><span id="line-33">    }</span>
+<span class="source-line-no">034</span><span id="line-34"></span>
+<span class="source-line-no">035</span><span id="line-35">    public static ActivationsCachedNeuron create(String name, List&lt;? extends Neuron&gt; inputNodes, ActivationFunction activationFunction) {</span>
+<span class="source-line-no">036</span><span id="line-36">        return new ActivationsCachedNeuron(name, inputNodes, new NeuronFunction(AffineTransformation.create(inputNodes.size(), JavaNumberTypeSupport.FLOAT), activationFunction));</span>
+<span class="source-line-no">037</span><span id="line-37">    }</span>
+<span class="source-line-no">038</span><span id="line-38"></span>
+<span class="source-line-no">039</span><span id="line-39">    /**</span>
+<span class="source-line-no">040</span><span id="line-40">     * Represents a single activation of a neuron.</span>
+<span class="source-line-no">041</span><span id="line-41">     *</span>
+<span class="source-line-no">042</span><span id="line-42">     * &lt;p&gt;Stores the following information for each activation:</span>
+<span class="source-line-no">043</span><span id="line-43">     * &lt;ul&gt;</span>
+<span class="source-line-no">044</span><span id="line-44">     *     &lt;li&gt;{@code inputs} – the input values received by this neuron during activation&lt;/li&gt;</span>
+<span class="source-line-no">045</span><span id="line-45">     *     &lt;li&gt;{@code output} – the output produced by the neuron&lt;/li&gt;</span>
+<span class="source-line-no">046</span><span id="line-46">     *     &lt;li&gt;{@code parameterGradients_df_dp} – the gradient calculated for this output (useful for learning)&lt;/li&gt;</span>
+<span class="source-line-no">047</span><span id="line-47">     * &lt;/ul&gt;</span>
+<span class="source-line-no">048</span><span id="line-48">     */</span>
+<span class="source-line-no">049</span><span id="line-49">    public record Activation(Array&lt;Float&gt; inputs, float output, Array&lt;Float&gt; parameterGradients_df_dp) {</span>
+<span class="source-line-no">050</span><span id="line-50"></span>
+<span class="source-line-no">051</span><span id="line-51">    }</span>
+<span class="source-line-no">052</span><span id="line-52"></span>
+<span class="source-line-no">053</span><span id="line-53">    /**</span>
+<span class="source-line-no">054</span><span id="line-54">     * The list of cached activations for this neuron.</span>
+<span class="source-line-no">055</span><span id="line-55">     */</span>
+<span class="source-line-no">056</span><span id="line-56">    private final List&lt;Activation&gt; cachedActivations = new LinkedList&lt;&gt;();</span>
+<span class="source-line-no">057</span><span id="line-57"></span>
+<span class="source-line-no">058</span><span id="line-58">    /**</span>
+<span class="source-line-no">059</span><span id="line-59">     * Constructs a new neuron with caching capabilities.</span>
+<span class="source-line-no">060</span><span id="line-60">     *</span>
+<span class="source-line-no">061</span><span id="line-61">     * @param name           the name of the neuron</span>
+<span class="source-line-no">062</span><span id="line-62">     * @param inputs         the list of input neurons</span>
+<span class="source-line-no">063</span><span id="line-63">     * @param neuronFunction the function used by this neuron</span>
+<span class="source-line-no">064</span><span id="line-64">     */</span>
+<span class="source-line-no">065</span><span id="line-65">    public ActivationsCachedNeuron(String name, List&lt;? extends Neuron&gt; inputs, NeuronFunction neuronFunction) {</span>
+<span class="source-line-no">066</span><span id="line-66">        super(name, inputs, neuronFunction);</span>
+<span class="source-line-no">067</span><span id="line-67">    }</span>
+<span class="source-line-no">068</span><span id="line-68"></span>
+<span class="source-line-no">069</span><span id="line-69">    /**</span>
+<span class="source-line-no">070</span><span id="line-70">     * Activates the neuron and caches the result.</span>
+<span class="source-line-no">071</span><span id="line-71">     *</span>
+<span class="source-line-no">072</span><span id="line-72">     * &lt;p&gt;If the neuron is already activated, this method does nothing.</span>
+<span class="source-line-no">073</span><span id="line-73">     * Otherwise, it performs the standard {@link Neuron#activate()} operation</span>
+<span class="source-line-no">074</span><span id="line-74">     * and stores an {@link Activation} record in the cache containing:</span>
+<span class="source-line-no">075</span><span id="line-75">     * inputs, logit, output, and gradient.</span>
+<span class="source-line-no">076</span><span id="line-76">     */</span>
+<span class="source-line-no">077</span><span id="line-77">    public synchronized void activate() {</span>
+<span class="source-line-no">078</span><span id="line-78">        if (isActivated()) {</span>
+<span class="source-line-no">079</span><span id="line-79">            return;</span>
+<span class="source-line-no">080</span><span id="line-80">        }</span>
+<span class="source-line-no">081</span><span id="line-81">        super.activate();</span>
+<span class="source-line-no">082</span><span id="line-82">        Array&lt;Float&gt; inputValues = getInputValues();</span>
+<span class="source-line-no">083</span><span id="line-83">        float output = getOutput();</span>
+<span class="source-line-no">084</span><span id="line-84">        cachedActivations.add(new Activation(inputValues, output, getNeuronFunction().calculateParameterGradients_df_dp(inputValues)));</span>
+<span class="source-line-no">085</span><span id="line-85">    }</span>
+<span class="source-line-no">086</span><span id="line-86"></span>
+<span class="source-line-no">087</span><span id="line-87">    /**</span>
+<span class="source-line-no">088</span><span id="line-88">     * Returns the cached activations.</span>
+<span class="source-line-no">089</span><span id="line-89">     *</span>
+<span class="source-line-no">090</span><span id="line-90">     * @return the list of {@link Activation} records representing past activations</span>
+<span class="source-line-no">091</span><span id="line-91">     */</span>
+<span class="source-line-no">092</span><span id="line-92">    public List&lt;Activation&gt; getCache() {</span>
+<span class="source-line-no">093</span><span id="line-93">        return cachedActivations;</span>
+<span class="source-line-no">094</span><span id="line-94">    }</span>
+<span class="source-line-no">095</span><span id="line-95"></span>
+<span class="source-line-no">096</span><span id="line-96">    /**</span>
+<span class="source-line-no">097</span><span id="line-97">     * Clears all cached activations.</span>
+<span class="source-line-no">098</span><span id="line-98">     *</span>
+<span class="source-line-no">099</span><span id="line-99">     * &lt;p&gt;This method is synchronized to ensure thread safety when modifying</span>
+<span class="source-line-no">100</span><span id="line-100">     * the cache.</span>
+<span class="source-line-no">101</span><span id="line-101">     */</span>
+<span class="source-line-no">102</span><span id="line-102">    public synchronized void clearCache() {</span>
+<span class="source-line-no">103</span><span id="line-103">        cachedActivations.clear();</span>
+<span class="source-line-no">104</span><span id="line-104">    }</span>
+<span class="source-line-no">105</span><span id="line-105"></span>
+<span class="source-line-no">106</span><span id="line-106">}</span>
 
 
 

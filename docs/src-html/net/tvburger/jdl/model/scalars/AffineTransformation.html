@@ -13,52 +13,52 @@
 <div class="source-container">
 <pre><span class="source-line-no">001</span><span id="line-1">package net.tvburger.jdl.model.scalars;</span>
 <span class="source-line-no">002</span><span id="line-2"></span>
-<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;</span>
-<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.patterns.Strategy;</span>
-<span class="source-line-no">005</span><span id="line-5"></span>
-<span class="source-line-no">006</span><span id="line-6">/**</span>
-<span class="source-line-no">007</span><span id="line-7"> * A simple linear scalar model of the form:</span>
-<span class="source-line-no">008</span><span id="line-8"> * &lt;pre&gt;</span>
-<span class="source-line-no">009</span><span id="line-9"> *   f(x) = bias + Σ w_i * x_i</span>
-<span class="source-line-no">010</span><span id="line-10"> * &lt;/pre&gt;</span>
-<span class="source-line-no">011</span><span id="line-11"> * where the bias and weights are trainable parameters.</span>
-<span class="source-line-no">012</span><span id="line-12"> * &lt;p&gt;</span>
-<span class="source-line-no">013</span><span id="line-13"> * This class supports forward estimation of the scalar output as well as</span>
-<span class="source-line-no">014</span><span id="line-14"> * calculation of parameter parameterGradients required for gradient-based training.</span>
-<span class="source-line-no">015</span><span id="line-15"> */</span>
-<span class="source-line-no">016</span><span id="line-16">@Strategy(Strategy.Role.CONCRETE)</span>
-<span class="source-line-no">017</span><span id="line-17">public class AffineTransformation&lt;N extends Number&gt; extends LinearCombination&lt;N&gt; {</span>
-<span class="source-line-no">018</span><span id="line-18"></span>
-<span class="source-line-no">019</span><span id="line-19">    private final JavaNumberTypeSupport&lt;N&gt; typeSupport;</span>
-<span class="source-line-no">020</span><span id="line-20">    private N bias;</span>
-<span class="source-line-no">021</span><span id="line-21"></span>
-<span class="source-line-no">022</span><span id="line-22">    /**</span>
-<span class="source-line-no">023</span><span id="line-23">     * Creates a new {@code AffineTransformation} with the specified number of input dimensions.</span>
-<span class="source-line-no">024</span><span id="line-24">     * &lt;p&gt;</span>
-<span class="source-line-no">025</span><span id="line-25">     * The underlying parameter vector will have length {@code dimensions + 1},</span>
-<span class="source-line-no">026</span><span id="line-26">     * with the first element reserved for the bias and the rest for the weights.</span>
-<span class="source-line-no">027</span><span id="line-27">     *</span>
-<span class="source-line-no">028</span><span id="line-28">     * @param dimensions number of input features</span>
-<span class="source-line-no">029</span><span id="line-29">     * @return a new {@code AffineTransformation} instance with zero-initialized parameters</span>
-<span class="source-line-no">030</span><span id="line-30">     */</span>
-<span class="source-line-no">031</span><span id="line-31">    public static &lt;N extends Number&gt; AffineTransformation&lt;N&gt; create(int dimensions, JavaNumberTypeSupport&lt;N&gt; typeSupport) {</span>
-<span class="source-line-no">032</span><span id="line-32">        return new AffineTransformation&lt;&gt;(typeSupport.zero(), typeSupport.createArray(dimensions), typeSupport);</span>
-<span class="source-line-no">033</span><span id="line-33">    }</span>
-<span class="source-line-no">034</span><span id="line-34"></span>
+<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.numbers.Array;</span>
+<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;</span>
+<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.common.patterns.Strategy;</span>
+<span class="source-line-no">006</span><span id="line-6"></span>
+<span class="source-line-no">007</span><span id="line-7">/**</span>
+<span class="source-line-no">008</span><span id="line-8"> * A simple linear scalar model of the form:</span>
+<span class="source-line-no">009</span><span id="line-9"> * &lt;pre&gt;</span>
+<span class="source-line-no">010</span><span id="line-10"> *   f(x) = bias + Σ w_i * x_i</span>
+<span class="source-line-no">011</span><span id="line-11"> * &lt;/pre&gt;</span>
+<span class="source-line-no">012</span><span id="line-12"> * where the bias and weights are trainable parameters.</span>
+<span class="source-line-no">013</span><span id="line-13"> * &lt;p&gt;</span>
+<span class="source-line-no">014</span><span id="line-14"> * This class supports forward estimation of the scalar output as well as</span>
+<span class="source-line-no">015</span><span id="line-15"> * calculation of parameter parameterGradients required for gradient-based training.</span>
+<span class="source-line-no">016</span><span id="line-16"> */</span>
+<span class="source-line-no">017</span><span id="line-17">@Strategy(Strategy.Role.CONCRETE)</span>
+<span class="source-line-no">018</span><span id="line-18">public class AffineTransformation&lt;N extends Number&gt; extends LinearCombination&lt;N&gt; {</span>
+<span class="source-line-no">019</span><span id="line-19"></span>
+<span class="source-line-no">020</span><span id="line-20">    private final JavaNumberTypeSupport&lt;N&gt; typeSupport;</span>
+<span class="source-line-no">021</span><span id="line-21">    private Array&lt;N&gt; parameters;</span>
+<span class="source-line-no">022</span><span id="line-22"></span>
+<span class="source-line-no">023</span><span id="line-23">    /**</span>
+<span class="source-line-no">024</span><span id="line-24">     * Creates a new {@code AffineTransformation} with the specified number of input dimensions.</span>
+<span class="source-line-no">025</span><span id="line-25">     * &lt;p&gt;</span>
+<span class="source-line-no">026</span><span id="line-26">     * The underlying parameter vector will have length {@code dimensions + 1},</span>
+<span class="source-line-no">027</span><span id="line-27">     * with the first element reserved for the bias and the rest for the weights.</span>
+<span class="source-line-no">028</span><span id="line-28">     *</span>
+<span class="source-line-no">029</span><span id="line-29">     * @param dimensions number of input features</span>
+<span class="source-line-no">030</span><span id="line-30">     * @return a new {@code AffineTransformation} instance with zero-initialized parameters</span>
+<span class="source-line-no">031</span><span id="line-31">     */</span>
+<span class="source-line-no">032</span><span id="line-32">    public static &lt;N extends Number&gt; AffineTransformation&lt;N&gt; create(int dimensions, JavaNumberTypeSupport&lt;N&gt; typeSupport) {</span>
+<span class="source-line-no">033</span><span id="line-33">        return new AffineTransformation&lt;&gt;(typeSupport.createArray(dimensions + 1), typeSupport);</span>
+<span class="source-line-no">034</span><span id="line-34">    }</span>
 <span class="source-line-no">035</span><span id="line-35"></span>
-<span class="source-line-no">036</span><span id="line-36">    /**</span>
-<span class="source-line-no">037</span><span id="line-37">     * Constructs a {@code AffineTransformation} with the given parameter vector.</span>
-<span class="source-line-no">038</span><span id="line-38">     * &lt;p&gt;</span>
-<span class="source-line-no">039</span><span id="line-39">     * The first element of the array is treated as the bias, while the subsequent</span>
-<span class="source-line-no">040</span><span id="line-40">     * elements are the weights.</span>
-<span class="source-line-no">041</span><span id="line-41">     *</span>
-<span class="source-line-no">042</span><span id="line-42">     * @param bias    the bias parameter</span>
-<span class="source-line-no">043</span><span id="line-43">     * @param weights the weight parameters</span>
+<span class="source-line-no">036</span><span id="line-36"></span>
+<span class="source-line-no">037</span><span id="line-37">    /**</span>
+<span class="source-line-no">038</span><span id="line-38">     * Constructs a {@code AffineTransformation} with the given parameter vector.</span>
+<span class="source-line-no">039</span><span id="line-39">     * &lt;p&gt;</span>
+<span class="source-line-no">040</span><span id="line-40">     * The first element of the array is treated as the bias, while the subsequent</span>
+<span class="source-line-no">041</span><span id="line-41">     * elements are the weights.</span>
+<span class="source-line-no">042</span><span id="line-42">     *</span>
+<span class="source-line-no">043</span><span id="line-43">     * @param parameters the parameters</span>
 <span class="source-line-no">044</span><span id="line-44">     */</span>
-<span class="source-line-no">045</span><span id="line-45">    public AffineTransformation(N bias, N[] weights, JavaNumberTypeSupport&lt;N&gt; typeSupport) {</span>
-<span class="source-line-no">046</span><span id="line-46">        super(weights, typeSupport);</span>
+<span class="source-line-no">045</span><span id="line-45">    public AffineTransformation(Array&lt;N&gt; parameters, JavaNumberTypeSupport&lt;N&gt; typeSupport) {</span>
+<span class="source-line-no">046</span><span id="line-46">        super(parameters.slice(1), typeSupport);</span>
 <span class="source-line-no">047</span><span id="line-47">        this.typeSupport = typeSupport;</span>
-<span class="source-line-no">048</span><span id="line-48">        this.bias = bias;</span>
+<span class="source-line-no">048</span><span id="line-48">        this.parameters = parameters;</span>
 <span class="source-line-no">049</span><span id="line-49">    }</span>
 <span class="source-line-no">050</span><span id="line-50"></span>
 <span class="source-line-no">051</span><span id="line-51">    /**</span>
@@ -74,8 +74,8 @@
 <span class="source-line-no">061</span><span id="line-61">     * @throws IllegalArgumentException if {@code inputs.length != arity()}</span>
 <span class="source-line-no">062</span><span id="line-62">     */</span>
 <span class="source-line-no">063</span><span id="line-63">    @Override</span>
-<span class="source-line-no">064</span><span id="line-64">    public N estimateScalar(N[] inputs) {</span>
-<span class="source-line-no">065</span><span id="line-65">        return typeSupport.add(bias, super.estimateScalar(inputs));</span>
+<span class="source-line-no">064</span><span id="line-64">    public N estimateScalar(Array&lt;N&gt; inputs) {</span>
+<span class="source-line-no">065</span><span id="line-65">        return typeSupport.add(getBias(), super.estimateScalar(inputs));</span>
 <span class="source-line-no">066</span><span id="line-66">    }</span>
 <span class="source-line-no">067</span><span id="line-67"></span>
 <span class="source-line-no">068</span><span id="line-68">    /**</span>
@@ -92,119 +92,105 @@
 <span class="source-line-no">079</span><span id="line-79">     * @return the gradient vector (bias gradient followed by weight parameterGradients)</span>
 <span class="source-line-no">080</span><span id="line-80">     */</span>
 <span class="source-line-no">081</span><span id="line-81">    @Override</span>
-<span class="source-line-no">082</span><span id="line-82">    public N[] calculateParameterGradients(N[] inputs) {</span>
-<span class="source-line-no">083</span><span id="line-83">        N[] gradients = typeSupport.createArray(1 + arity());</span>
-<span class="source-line-no">084</span><span id="line-84">        gradients[0] = typeSupport.one();</span>
-<span class="source-line-no">085</span><span id="line-85">        if (arity() &gt; 0) System.arraycopy(super.calculateParameterGradients(inputs), 0, gradients, 1, arity());</span>
-<span class="source-line-no">086</span><span id="line-86">        return gradients;</span>
-<span class="source-line-no">087</span><span id="line-87">    }</span>
-<span class="source-line-no">088</span><span id="line-88"></span>
-<span class="source-line-no">089</span><span id="line-89">    /**</span>
-<span class="source-line-no">090</span><span id="line-90">     * {@inheritDoc}</span>
-<span class="source-line-no">091</span><span id="line-91">     */</span>
-<span class="source-line-no">092</span><span id="line-92">    @Override</span>
-<span class="source-line-no">093</span><span id="line-93">    public int getParameterCount() {</span>
-<span class="source-line-no">094</span><span id="line-94">        return super.getParameterCount() + 1;</span>
-<span class="source-line-no">095</span><span id="line-95">    }</span>
-<span class="source-line-no">096</span><span id="line-96"></span>
-<span class="source-line-no">097</span><span id="line-97">    /**</span>
-<span class="source-line-no">098</span><span id="line-98">     * Returns the full parameter vector of this model.</span>
-<span class="source-line-no">099</span><span id="line-99">     * The first element is the bias, the rest are the weights.</span>
-<span class="source-line-no">100</span><span id="line-100">     *</span>
-<span class="source-line-no">101</span><span id="line-101">     * @return the parameter array</span>
-<span class="source-line-no">102</span><span id="line-102">     */</span>
-<span class="source-line-no">103</span><span id="line-103">    @Override</span>
-<span class="source-line-no">104</span><span id="line-104">    public N[] getParameters() {</span>
-<span class="source-line-no">105</span><span id="line-105">        N[] parameters = typeSupport.createArray(1 + arity());</span>
-<span class="source-line-no">106</span><span id="line-106">        parameters[0] = bias;</span>
-<span class="source-line-no">107</span><span id="line-107">        if (arity() &gt; 0) {</span>
-<span class="source-line-no">108</span><span id="line-108">            System.arraycopy(super.getParameters(), 0, parameters, 1, arity());</span>
-<span class="source-line-no">109</span><span id="line-109">        }</span>
-<span class="source-line-no">110</span><span id="line-110">        return parameters;</span>
-<span class="source-line-no">111</span><span id="line-111">    }</span>
-<span class="source-line-no">112</span><span id="line-112"></span>
-<span class="source-line-no">113</span><span id="line-113">    /**</span>
-<span class="source-line-no">114</span><span id="line-114">     * {@inheritDoc}</span>
-<span class="source-line-no">115</span><span id="line-115">     */</span>
-<span class="source-line-no">116</span><span id="line-116">    @Override</span>
-<span class="source-line-no">117</span><span id="line-117">    public N getParameter(int p) {</span>
-<span class="source-line-no">118</span><span id="line-118">        return p == 0 ? getBias() : getWeight(p);</span>
-<span class="source-line-no">119</span><span id="line-119">    }</span>
-<span class="source-line-no">120</span><span id="line-120"></span>
-<span class="source-line-no">121</span><span id="line-121">    /**</span>
-<span class="source-line-no">122</span><span id="line-122">     * {@inheritDoc}</span>
-<span class="source-line-no">123</span><span id="line-123">     */</span>
-<span class="source-line-no">124</span><span id="line-124">    @Override</span>
-<span class="source-line-no">125</span><span id="line-125">    public void setParameters(N[] values) {</span>
-<span class="source-line-no">126</span><span id="line-126">        setBias(values[0]);</span>
-<span class="source-line-no">127</span><span id="line-127">        for (int d = 1; d &lt; values.length; d++) {</span>
-<span class="source-line-no">128</span><span id="line-128">            setWeight(d, values[d]);</span>
-<span class="source-line-no">129</span><span id="line-129">        }</span>
-<span class="source-line-no">130</span><span id="line-130">    }</span>
-<span class="source-line-no">131</span><span id="line-131"></span>
-<span class="source-line-no">132</span><span id="line-132">    /**</span>
-<span class="source-line-no">133</span><span id="line-133">     * {@inheritDoc}</span>
-<span class="source-line-no">134</span><span id="line-134">     */</span>
-<span class="source-line-no">135</span><span id="line-135">    @Override</span>
-<span class="source-line-no">136</span><span id="line-136">    public void setParameter(int p, N value) {</span>
-<span class="source-line-no">137</span><span id="line-137">        if (p == 0) {</span>
-<span class="source-line-no">138</span><span id="line-138">            setBias(value);</span>
-<span class="source-line-no">139</span><span id="line-139">        } else {</span>
-<span class="source-line-no">140</span><span id="line-140">            setWeight(p, value);</span>
-<span class="source-line-no">141</span><span id="line-141">        }</span>
-<span class="source-line-no">142</span><span id="line-142">    }</span>
-<span class="source-line-no">143</span><span id="line-143"></span>
-<span class="source-line-no">144</span><span id="line-144">    /**</span>
-<span class="source-line-no">145</span><span id="line-145">     * {@inheritDoc}</span>
-<span class="source-line-no">146</span><span id="line-146">     */</span>
-<span class="source-line-no">147</span><span id="line-147">    @Override</span>
-<span class="source-line-no">148</span><span id="line-148">    public void adjustParameters(N[] deltas) {</span>
-<span class="source-line-no">149</span><span id="line-149">        adjustBias(deltas[0]);</span>
-<span class="source-line-no">150</span><span id="line-150">        for (int d = 1; d &lt; deltas.length; d++) {</span>
-<span class="source-line-no">151</span><span id="line-151">            adjustWeight(d, deltas[d]);</span>
-<span class="source-line-no">152</span><span id="line-152">        }</span>
-<span class="source-line-no">153</span><span id="line-153">    }</span>
-<span class="source-line-no">154</span><span id="line-154"></span>
-<span class="source-line-no">155</span><span id="line-155">    /**</span>
-<span class="source-line-no">156</span><span id="line-156">     * {@inheritDoc}</span>
+<span class="source-line-no">082</span><span id="line-82">    public Array&lt;N&gt; calculateParameterGradients(Array&lt;N&gt; inputs) {</span>
+<span class="source-line-no">083</span><span id="line-83">        Array&lt;N&gt; gradients = typeSupport.createArray(1 + arity());</span>
+<span class="source-line-no">084</span><span id="line-84">        gradients.set(0, typeSupport.one());</span>
+<span class="source-line-no">085</span><span id="line-85">        if (arity() &gt; 0) {</span>
+<span class="source-line-no">086</span><span id="line-86">            gradients.set(super.calculateParameterGradients(inputs), 1);</span>
+<span class="source-line-no">087</span><span id="line-87">        }</span>
+<span class="source-line-no">088</span><span id="line-88">        return gradients;</span>
+<span class="source-line-no">089</span><span id="line-89">    }</span>
+<span class="source-line-no">090</span><span id="line-90"></span>
+<span class="source-line-no">091</span><span id="line-91">    /**</span>
+<span class="source-line-no">092</span><span id="line-92">     * {@inheritDoc}</span>
+<span class="source-line-no">093</span><span id="line-93">     */</span>
+<span class="source-line-no">094</span><span id="line-94">    @Override</span>
+<span class="source-line-no">095</span><span id="line-95">    public int getParameterCount() {</span>
+<span class="source-line-no">096</span><span id="line-96">        return super.getParameterCount() + 1;</span>
+<span class="source-line-no">097</span><span id="line-97">    }</span>
+<span class="source-line-no">098</span><span id="line-98"></span>
+<span class="source-line-no">099</span><span id="line-99">    /**</span>
+<span class="source-line-no">100</span><span id="line-100">     * Returns the full parameter vector of this model.</span>
+<span class="source-line-no">101</span><span id="line-101">     * The first element is the bias, the rest are the weights.</span>
+<span class="source-line-no">102</span><span id="line-102">     *</span>
+<span class="source-line-no">103</span><span id="line-103">     * @return the parameter array</span>
+<span class="source-line-no">104</span><span id="line-104">     */</span>
+<span class="source-line-no">105</span><span id="line-105">    @Override</span>
+<span class="source-line-no">106</span><span id="line-106">    public Array&lt;N&gt; getParameters() {</span>
+<span class="source-line-no">107</span><span id="line-107">        return parameters;</span>
+<span class="source-line-no">108</span><span id="line-108">    }</span>
+<span class="source-line-no">109</span><span id="line-109"></span>
+<span class="source-line-no">110</span><span id="line-110">    /**</span>
+<span class="source-line-no">111</span><span id="line-111">     * {@inheritDoc}</span>
+<span class="source-line-no">112</span><span id="line-112">     */</span>
+<span class="source-line-no">113</span><span id="line-113">    @Override</span>
+<span class="source-line-no">114</span><span id="line-114">    public N getParameter(int p) {</span>
+<span class="source-line-no">115</span><span id="line-115">        return parameters.get(p);</span>
+<span class="source-line-no">116</span><span id="line-116">    }</span>
+<span class="source-line-no">117</span><span id="line-117"></span>
+<span class="source-line-no">118</span><span id="line-118">    /**</span>
+<span class="source-line-no">119</span><span id="line-119">     * {@inheritDoc}</span>
+<span class="source-line-no">120</span><span id="line-120">     */</span>
+<span class="source-line-no">121</span><span id="line-121">    @Override</span>
+<span class="source-line-no">122</span><span id="line-122">    public void setParameters(Array&lt;N&gt; values) {</span>
+<span class="source-line-no">123</span><span id="line-123">        parameters = values;</span>
+<span class="source-line-no">124</span><span id="line-124">        super.setParameters(values.slice(1));</span>
+<span class="source-line-no">125</span><span id="line-125">    }</span>
+<span class="source-line-no">126</span><span id="line-126"></span>
+<span class="source-line-no">127</span><span id="line-127">    /**</span>
+<span class="source-line-no">128</span><span id="line-128">     * {@inheritDoc}</span>
+<span class="source-line-no">129</span><span id="line-129">     */</span>
+<span class="source-line-no">130</span><span id="line-130">    @Override</span>
+<span class="source-line-no">131</span><span id="line-131">    public void setParameter(int p, N value) {</span>
+<span class="source-line-no">132</span><span id="line-132">        parameters.set(p, value);</span>
+<span class="source-line-no">133</span><span id="line-133">    }</span>
+<span class="source-line-no">134</span><span id="line-134"></span>
+<span class="source-line-no">135</span><span id="line-135">    /**</span>
+<span class="source-line-no">136</span><span id="line-136">     * {@inheritDoc}</span>
+<span class="source-line-no">137</span><span id="line-137">     */</span>
+<span class="source-line-no">138</span><span id="line-138">    @Override</span>
+<span class="source-line-no">139</span><span id="line-139">    public void adjustParameters(Array&lt;N&gt; deltas) {</span>
+<span class="source-line-no">140</span><span id="line-140">        for (int p = 0; p &lt; parameters.length(); p++) {</span>
+<span class="source-line-no">141</span><span id="line-141">            adjustParameter(p, deltas.get(p));</span>
+<span class="source-line-no">142</span><span id="line-142">        }</span>
+<span class="source-line-no">143</span><span id="line-143">    }</span>
+<span class="source-line-no">144</span><span id="line-144"></span>
+<span class="source-line-no">145</span><span id="line-145">    /**</span>
+<span class="source-line-no">146</span><span id="line-146">     * {@inheritDoc}</span>
+<span class="source-line-no">147</span><span id="line-147">     */</span>
+<span class="source-line-no">148</span><span id="line-148">    @Override</span>
+<span class="source-line-no">149</span><span id="line-149">    public void adjustParameter(int p, N delta) {</span>
+<span class="source-line-no">150</span><span id="line-150">        parameters.set(p, typeSupport.add(parameters.get(p), delta));</span>
+<span class="source-line-no">151</span><span id="line-151">    }</span>
+<span class="source-line-no">152</span><span id="line-152"></span>
+<span class="source-line-no">153</span><span id="line-153">    /**</span>
+<span class="source-line-no">154</span><span id="line-154">     * Returns the bias parameter.</span>
+<span class="source-line-no">155</span><span id="line-155">     *</span>
+<span class="source-line-no">156</span><span id="line-156">     * @return the bias value (0.0f if there are no parameters)</span>
 <span class="source-line-no">157</span><span id="line-157">     */</span>
-<span class="source-line-no">158</span><span id="line-158">    @Override</span>
-<span class="source-line-no">159</span><span id="line-159">    public void adjustParameter(int p, N delta) {</span>
-<span class="source-line-no">160</span><span id="line-160">        if (p == 0) {</span>
-<span class="source-line-no">161</span><span id="line-161">            adjustBias(delta);</span>
-<span class="source-line-no">162</span><span id="line-162">        } else {</span>
-<span class="source-line-no">163</span><span id="line-163">            adjustWeight(p, delta);</span>
-<span class="source-line-no">164</span><span id="line-164">        }</span>
-<span class="source-line-no">165</span><span id="line-165">    }</span>
-<span class="source-line-no">166</span><span id="line-166"></span>
-<span class="source-line-no">167</span><span id="line-167">    /**</span>
-<span class="source-line-no">168</span><span id="line-168">     * Returns the bias parameter.</span>
-<span class="source-line-no">169</span><span id="line-169">     *</span>
-<span class="source-line-no">170</span><span id="line-170">     * @return the bias value (0.0f if there are no parameters)</span>
-<span class="source-line-no">171</span><span id="line-171">     */</span>
-<span class="source-line-no">172</span><span id="line-172">    public N getBias() {</span>
-<span class="source-line-no">173</span><span id="line-173">        return bias;</span>
-<span class="source-line-no">174</span><span id="line-174">    }</span>
-<span class="source-line-no">175</span><span id="line-175"></span>
-<span class="source-line-no">176</span><span id="line-176">    /**</span>
-<span class="source-line-no">177</span><span id="line-177">     * Sets the bias parameter.</span>
-<span class="source-line-no">178</span><span id="line-178">     *</span>
-<span class="source-line-no">179</span><span id="line-179">     * @param bias the new bias value</span>
-<span class="source-line-no">180</span><span id="line-180">     */</span>
-<span class="source-line-no">181</span><span id="line-181">    public void setBias(N bias) {</span>
-<span class="source-line-no">182</span><span id="line-182">        this.bias = bias;</span>
-<span class="source-line-no">183</span><span id="line-183">    }</span>
-<span class="source-line-no">184</span><span id="line-184"></span>
-<span class="source-line-no">185</span><span id="line-185">    /**</span>
-<span class="source-line-no">186</span><span id="line-186">     * Adjusts the bias parameter by adding {@code delta}.</span>
-<span class="source-line-no">187</span><span id="line-187">     *</span>
-<span class="source-line-no">188</span><span id="line-188">     * @param delta the adjustment value</span>
-<span class="source-line-no">189</span><span id="line-189">     */</span>
-<span class="source-line-no">190</span><span id="line-190">    public void adjustBias(N delta) {</span>
-<span class="source-line-no">191</span><span id="line-191">        bias = typeSupport.add(bias, delta);</span>
-<span class="source-line-no">192</span><span id="line-192">    }</span>
-<span class="source-line-no">193</span><span id="line-193"></span>
-<span class="source-line-no">194</span><span id="line-194">}</span>
+<span class="source-line-no">158</span><span id="line-158">    public N getBias() {</span>
+<span class="source-line-no">159</span><span id="line-159">        return parameters.get(0);</span>
+<span class="source-line-no">160</span><span id="line-160">    }</span>
+<span class="source-line-no">161</span><span id="line-161"></span>
+<span class="source-line-no">162</span><span id="line-162">    /**</span>
+<span class="source-line-no">163</span><span id="line-163">     * Sets the bias parameter.</span>
+<span class="source-line-no">164</span><span id="line-164">     *</span>
+<span class="source-line-no">165</span><span id="line-165">     * @param bias the new bias value</span>
+<span class="source-line-no">166</span><span id="line-166">     */</span>
+<span class="source-line-no">167</span><span id="line-167">    public void setBias(N bias) {</span>
+<span class="source-line-no">168</span><span id="line-168">        parameters.set(0, bias);</span>
+<span class="source-line-no">169</span><span id="line-169">    }</span>
+<span class="source-line-no">170</span><span id="line-170"></span>
+<span class="source-line-no">171</span><span id="line-171">    /**</span>
+<span class="source-line-no">172</span><span id="line-172">     * Adjusts the bias parameter by adding {@code delta}.</span>
+<span class="source-line-no">173</span><span id="line-173">     *</span>
+<span class="source-line-no">174</span><span id="line-174">     * @param delta the adjustment value</span>
+<span class="source-line-no">175</span><span id="line-175">     */</span>
+<span class="source-line-no">176</span><span id="line-176">    public void adjustBias(N delta) {</span>
+<span class="source-line-no">177</span><span id="line-177">        adjustParameter(0, delta);</span>
+<span class="source-line-no">178</span><span id="line-178">    }</span>
+<span class="source-line-no">179</span><span id="line-179"></span>
+<span class="source-line-no">180</span><span id="line-180">}</span>
 
 
 

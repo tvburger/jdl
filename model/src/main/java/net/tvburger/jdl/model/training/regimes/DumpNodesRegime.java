@@ -31,6 +31,7 @@ import net.tvburger.jdl.model.training.TrainableFunction;
  * @see NeuralNetworks#dump(NeuralNetwork, boolean)
  * @see DelegatedRegime
  */
+@Deprecated
 @Strategy(Strategy.Role.CONCRETE)
 public class DumpNodesRegime extends DelegatedRegime {
 

@@ -1,11 +1,12 @@
 package net.tvburger.jdl.linear.main;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.utils.Pair;
 import net.tvburger.jdl.common.utils.SimpleHolder;
 import net.tvburger.jdl.datasets.SyntheticDataSets;
+import net.tvburger.jdl.linalg.TypedVector;
 import net.tvburger.jdl.linalg.Vector;
-import net.tvburger.jdl.linalg.Vectors;
 import net.tvburger.jdl.linear.LinearBasisFunctionModel;
 import net.tvburger.jdl.linear.LinearRegression;
 import net.tvburger.jdl.linear.basis.BasisFunction;
@@ -25,7 +26,10 @@ import net.tvburger.jdl.model.training.regimes.Regimes;
 import net.tvburger.jdl.model.training.regularization.ExplicitRegularization;
 import net.tvburger.jdl.plots.Plot;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 public class NewOptimizers {
 
@@ -93,14 +97,14 @@ public class NewOptimizers {
                 Pair<Float, Map<String, Float>> currentRmes = regressionHolder.get().calculateRMEs(linearBasisFunctionModel);
                 mrePlot.addToSeries(title, new float[]{currentEpoch}, new float[]{currentRmes.left()});
                 mrePlot.redraw();
-                weightPlot.addToSeries(title, new float[]{currentEpoch}, new float[]{(float) (Arrays.stream(model.getParameters()).mapToDouble(p -> model.getCurrentNumberType().absolute(p).doubleValue()).sum())});
+                weightPlot.addToSeries(title, new float[]{currentEpoch}, new float[]{(float) (Array.stream(model.getParameters()).mapToDouble(p -> model.getNumberTypeSupport().absolute(p).doubleValue()).sum())});
                 weightPlot.redraw();
                 if (SHOW_FIT) {
                     fitPlot.plotTargetOutput(linearBasisFunctionModel, "Fit");
                 }
                 fitPlot.redraw();
                 Vector<N> oldParameters = previousParameters.get(optimizer);
-                Vector<N> newParameters = Vectors.of(linearBasisFunctionModel.getCurrentNumberType(), linearBasisFunctionModel.getParameters()).transpose();
+                Vector<N> newParameters = new TypedVector<>(linearBasisFunctionModel.getParameters(), true, linearBasisFunctionModel.getNumberTypeSupport());
                 if (oldParameters != null) {
                     N magnitude = newParameters.subtract(oldParameters).norm();
                     stepSizePlot.addToSeries(title, new float[]{currentEpoch}, new float[]{magnitude.floatValue()});
@@ -108,7 +112,7 @@ public class NewOptimizers {
                 }
                 previousParameters.put(optimizer, newParameters);
                 if (currentEpoch == epochs) {
-                    System.out.println(title + ": " + Arrays.toString(model.getParameters()));
+                    System.out.println(title + ": " + Array.toString(model.getParameters()));
                 }
             }
         })).batch();

@@ -81,7 +81,7 @@ public class ModelVariance {
         DataSet<N> testSet = dataSetGenerator.load(1000);
         Map<String, DataSet<N>> testSets = new LinkedHashMap<>();
         testSets.put("Test Set", testSet);
-        return new LinearRegression<>(basisFunctionGenerator, trainSet, testSets, new L2RegularizedClosedSolutionOptimizer<>(basisFunctionGenerator.getCurrentNumberType()), Regimes.oneShot());
+        return new LinearRegression<>(basisFunctionGenerator, trainSet, testSets, new L2RegularizedClosedSolutionOptimizer<>(basisFunctionGenerator.getNumberTypeSupport()), Regimes.oneShot());
     }
 
 }

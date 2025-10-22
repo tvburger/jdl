@@ -63,7 +63,7 @@ public class TrainingSetSize {
         DataSet<N> testSet = dataSetGenerator.load(1000);
         Map<String, DataSet<N>> testSets = new LinkedHashMap<>();
         testSets.put("Test Set", testSet);
-        return new LinearRegression<>(basisFunctionGenerator, trainSet, testSets, new ClosedSolutionOptimizer<>(basisFunctionGenerator.getCurrentNumberType()), Regimes.oneShot());
+        return new LinearRegression<>(basisFunctionGenerator, trainSet, testSets, new ClosedSolutionOptimizer<>(basisFunctionGenerator.getNumberTypeSupport()), Regimes.oneShot());
     }
 
 }

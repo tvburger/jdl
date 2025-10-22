@@ -13,125 +13,114 @@
 <div class="source-container">
 <pre><span class="source-line-no">001</span><span id="line-1">package net.tvburger.jdl.cnn;</span>
 <span class="source-line-no">002</span><span id="line-2"></span>
-<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.model.scalars.activations.ActivationFunction;</span>
-<span class="source-line-no">004</span><span id="line-4"></span>
-<span class="source-line-no">005</span><span id="line-5">import java.util.ArrayList;</span>
-<span class="source-line-no">006</span><span id="line-6">import java.util.List;</span>
-<span class="source-line-no">007</span><span id="line-7"></span>
-<span class="source-line-no">008</span><span id="line-8">public class PoolingLayer {</span>
-<span class="source-line-no">009</span><span id="line-9"></span>
-<span class="source-line-no">010</span><span id="line-10">    private final ConvolutionalShape inputShape;</span>
-<span class="source-line-no">011</span><span id="line-11">    private final ConvolutionalShape outputShape;</span>
-<span class="source-line-no">012</span><span id="line-12">    private final List&lt;ConvolutionalFilter&gt; filters;</span>
+<span class="source-line-no">003</span><span id="line-3">import java.util.ArrayList;</span>
+<span class="source-line-no">004</span><span id="line-4">import java.util.List;</span>
+<span class="source-line-no">005</span><span id="line-5"></span>
+<span class="source-line-no">006</span><span id="line-6">// For now only supports 2D pooling</span>
+<span class="source-line-no">007</span><span id="line-7">public class PoolingLayer implements ConvolutionalNetworkLayer {</span>
+<span class="source-line-no">008</span><span id="line-8"></span>
+<span class="source-line-no">009</span><span id="line-9">    private final ConvolutionalShape inputShape;</span>
+<span class="source-line-no">010</span><span id="line-10">    private final ConvolutionalShape outputShape;</span>
+<span class="source-line-no">011</span><span id="line-11">    private final PoolingFunction poolingFunction;</span>
+<span class="source-line-no">012</span><span id="line-12">    private final int size;</span>
 <span class="source-line-no">013</span><span id="line-13">    private final int stride;</span>
 <span class="source-line-no">014</span><span id="line-14">    private final int padding;</span>
 <span class="source-line-no">015</span><span id="line-15"></span>
-<span class="source-line-no">016</span><span id="line-16">    public static PoolingLayer create(int width, int height, ActivationFunction activationFunction) {</span>
-<span class="source-line-no">017</span><span id="line-17">        return create(width, height, 1, activationFunction);</span>
-<span class="source-line-no">018</span><span id="line-18">    }</span>
-<span class="source-line-no">019</span><span id="line-19"></span>
-<span class="source-line-no">020</span><span id="line-20">    public static PoolingLayer create(int width, int height, int depth, ActivationFunction activationFunction) {</span>
-<span class="source-line-no">021</span><span id="line-21">        return create(width, height, depth, 3, 1, 0, activationFunction);</span>
-<span class="source-line-no">022</span><span id="line-22">    }</span>
-<span class="source-line-no">023</span><span id="line-23"></span>
-<span class="source-line-no">024</span><span id="line-24">    public static PoolingLayer create(int width, int height, int depth, int size, int stride, int padding, ActivationFunction activationFunction) {</span>
-<span class="source-line-no">025</span><span id="line-25">        ConvolutionalShape inputShape = new ConvolutionalShape(width, height, depth, 1, null);</span>
-<span class="source-line-no">026</span><span id="line-26">        return create(inputShape, size, stride, padding, 1, activationFunction);</span>
-<span class="source-line-no">027</span><span id="line-27">    }</span>
-<span class="source-line-no">028</span><span id="line-28"></span>
-<span class="source-line-no">029</span><span id="line-29">    public static PoolingLayer create(ConvolutionalShape inputShape, int size, int dimensions, int stride, int padding, ActivationFunction activationFunction) {</span>
-<span class="source-line-no">030</span><span id="line-30">        int outputWidth = (inputShape.getWidth() - size + 2 * padding) / stride + 1;</span>
-<span class="source-line-no">031</span><span id="line-31">        int outputHeight = (inputShape.getHeight() - size + 2 * padding) / stride + 1;</span>
-<span class="source-line-no">032</span><span id="line-32">        ConvolutionalShape outputShape = new ConvolutionalShape(outputWidth, outputHeight, dimensions, 1, null);</span>
-<span class="source-line-no">033</span><span id="line-33">        return create(inputShape, outputShape, dimensions, stride, padding, activationFunction);</span>
-<span class="source-line-no">034</span><span id="line-34">    }</span>
-<span class="source-line-no">035</span><span id="line-35"></span>
-<span class="source-line-no">036</span><span id="line-36">    public static PoolingLayer create(ConvolutionalShape inputShape, ConvolutionalShape outputShape, int size, int stride, int padding, ActivationFunction activationFunction) {</span>
-<span class="source-line-no">037</span><span id="line-37">        List&lt;ConvolutionalFilter&gt; filters = new ArrayList&lt;&gt;();</span>
-<span class="source-line-no">038</span><span id="line-38">        for (int i = 0; i &lt; outputShape.getChannels(); i++) {</span>
-<span class="source-line-no">039</span><span id="line-39">            filters.add(ConvolutionalFilter.create(size, inputShape.getChannels()));</span>
-<span class="source-line-no">040</span><span id="line-40">        }</span>
-<span class="source-line-no">041</span><span id="line-41">        return new PoolingLayer(inputShape, outputShape, filters, stride, padding);</span>
-<span class="source-line-no">042</span><span id="line-42">    }</span>
-<span class="source-line-no">043</span><span id="line-43"></span>
-<span class="source-line-no">044</span><span id="line-44">    private PoolingLayer(ConvolutionalShape inputShape, ConvolutionalShape outputShape, List&lt;ConvolutionalFilter&gt; filters, int stride, int padding) {</span>
-<span class="source-line-no">045</span><span id="line-45">        this.inputShape = inputShape;</span>
-<span class="source-line-no">046</span><span id="line-46">        this.outputShape = outputShape;</span>
-<span class="source-line-no">047</span><span id="line-47">        this.filters = filters;</span>
-<span class="source-line-no">048</span><span id="line-48">        this.stride = stride;</span>
-<span class="source-line-no">049</span><span id="line-49">        this.padding = padding;</span>
-<span class="source-line-no">050</span><span id="line-50">    }</span>
-<span class="source-line-no">051</span><span id="line-51"></span>
-<span class="source-line-no">052</span><span id="line-52">    public ConvolutionalShape getInputShape() {</span>
-<span class="source-line-no">053</span><span id="line-53">        return inputShape;</span>
-<span class="source-line-no">054</span><span id="line-54">    }</span>
-<span class="source-line-no">055</span><span id="line-55"></span>
-<span class="source-line-no">056</span><span id="line-56">    public ConvolutionalShape getOutputShape() {</span>
-<span class="source-line-no">057</span><span id="line-57">        return outputShape;</span>
-<span class="source-line-no">058</span><span id="line-58">    }</span>
-<span class="source-line-no">059</span><span id="line-59"></span>
-<span class="source-line-no">060</span><span id="line-60">    public List&lt;ConvolutionalFilter&gt; getFilters() {</span>
-<span class="source-line-no">061</span><span id="line-61">        return filters;</span>
-<span class="source-line-no">062</span><span id="line-62">    }</span>
-<span class="source-line-no">063</span><span id="line-63"></span>
-<span class="source-line-no">064</span><span id="line-64">    public int getStride() {</span>
-<span class="source-line-no">065</span><span id="line-65">        return stride;</span>
-<span class="source-line-no">066</span><span id="line-66">    }</span>
-<span class="source-line-no">067</span><span id="line-67"></span>
-<span class="source-line-no">068</span><span id="line-68">    public int getPadding() {</span>
-<span class="source-line-no">069</span><span id="line-69">        return padding;</span>
-<span class="source-line-no">070</span><span id="line-70">    }</span>
-<span class="source-line-no">071</span><span id="line-71"></span>
-<span class="source-line-no">072</span><span id="line-72">    public int getDimensions() {</span>
-<span class="source-line-no">073</span><span id="line-73">        return filters.size();</span>
-<span class="source-line-no">074</span><span id="line-74">    }</span>
-<span class="source-line-no">075</span><span id="line-75"></span>
-<span class="source-line-no">076</span><span id="line-76">    public ConvolutionalShape transform(ConvolutionalShape input) {</span>
-<span class="source-line-no">077</span><span id="line-77">        ConvolutionalShape output = getOutputShape().clone();</span>
-<span class="source-line-no">078</span><span id="line-78">        for (int d = 0; d &lt; getDimensions(); d++) {</span>
-<span class="source-line-no">079</span><span id="line-79">            ConvolutionalFilter filter = filters.get(d);</span>
-<span class="source-line-no">080</span><span id="line-80">            for (int y = 0; y &lt; output.getHeight(); y++) {</span>
-<span class="source-line-no">081</span><span id="line-81">                for (int x = 0; x &lt; output.getWidth(); x++) {</span>
-<span class="source-line-no">082</span><span id="line-82">                    for (Float[] field : getFields(input, output)) {</span>
-<span class="source-line-no">083</span><span id="line-83">                        float value = filter.estimate(field)[0];</span>
-<span class="source-line-no">084</span><span id="line-84">                        output.setPixel(value, x, y, d + 1);</span>
-<span class="source-line-no">085</span><span id="line-85">                    }</span>
-<span class="source-line-no">086</span><span id="line-86">                }</span>
-<span class="source-line-no">087</span><span id="line-87">            }</span>
-<span class="source-line-no">088</span><span id="line-88">        }</span>
-<span class="source-line-no">089</span><span id="line-89">        return output;</span>
-<span class="source-line-no">090</span><span id="line-90">    }</span>
-<span class="source-line-no">091</span><span id="line-91"></span>
-<span class="source-line-no">092</span><span id="line-92">    private List&lt;Float[]&gt; getFields(ConvolutionalShape input, ConvolutionalShape output) {</span>
-<span class="source-line-no">093</span><span id="line-93">        if (filters.isEmpty()) {</span>
-<span class="source-line-no">094</span><span id="line-94">            return List.of();</span>
-<span class="source-line-no">095</span><span id="line-95">        }</span>
-<span class="source-line-no">096</span><span id="line-96">        ConvolutionalShape filterSize = filters.getFirst().getShape();</span>
-<span class="source-line-no">097</span><span id="line-97">        List&lt;Float[]&gt; fields = new ArrayList&lt;&gt;();</span>
-<span class="source-line-no">098</span><span id="line-98">        for (int x = -padding; x &lt; output.getWidth() - filterSize.getWidth() + padding; x = x + stride) {</span>
-<span class="source-line-no">099</span><span id="line-99">            for (int y = -padding; y &lt; input.getWidth() - filterSize.getHeight() + padding; y = y + stride) {</span>
-<span class="source-line-no">100</span><span id="line-100">                for (int c = 1; c &lt;= input.getChannels(); c++) {</span>
-<span class="source-line-no">101</span><span id="line-101">                    for (int i = 0; i &lt; input.getCount(); i++) {</span>
-<span class="source-line-no">102</span><span id="line-102">                        ConvolutionalShape fieldShape = filterSize.clone();</span>
-<span class="source-line-no">103</span><span id="line-103">                        for (int yi = 0; yi &lt; fieldShape.getHeight(); yi++) {</span>
-<span class="source-line-no">104</span><span id="line-104">                            for (int xi = 0; xi &lt; fieldShape.getWidth(); xi++) {</span>
-<span class="source-line-no">105</span><span id="line-105">                                float value;</span>
-<span class="source-line-no">106</span><span id="line-106">                                if (x + xi &lt; 0 || x + xi &gt;= input.getWidth() || y + yi &lt; 0 || y + yi &gt;= input.getHeight()) {</span>
-<span class="source-line-no">107</span><span id="line-107">                                    value = 0f;</span>
-<span class="source-line-no">108</span><span id="line-108">                                } else {</span>
-<span class="source-line-no">109</span><span id="line-109">                                    value = input.getPixel(x + xi, y + yi, c, i);</span>
-<span class="source-line-no">110</span><span id="line-110">                                }</span>
-<span class="source-line-no">111</span><span id="line-111">                                fieldShape.setPixel(value, xi, yi, c, i);</span>
-<span class="source-line-no">112</span><span id="line-112">                            }</span>
-<span class="source-line-no">113</span><span id="line-113">                        }</span>
-<span class="source-line-no">114</span><span id="line-114">                        fields.add(fieldShape.getPixels());</span>
-<span class="source-line-no">115</span><span id="line-115">                    }</span>
-<span class="source-line-no">116</span><span id="line-116">                }</span>
-<span class="source-line-no">117</span><span id="line-117">            }</span>
-<span class="source-line-no">118</span><span id="line-118">        }</span>
-<span class="source-line-no">119</span><span id="line-119">        return fields;</span>
-<span class="source-line-no">120</span><span id="line-120">    }</span>
-<span class="source-line-no">121</span><span id="line-121">}</span>
+<span class="source-line-no">016</span><span id="line-16">    public static PoolingLayer create(int width, int height, int size, PoolingFunction poolingFunction) {</span>
+<span class="source-line-no">017</span><span id="line-17">        ConvolutionalShape inputShape = new ConvolutionalShape(width, height, ConvolutionalShape.DEFAULT_CHANNELS, ConvolutionalShape.DEFAULT_COUNT, null);</span>
+<span class="source-line-no">018</span><span id="line-18">        return create(inputShape, size, poolingFunction);</span>
+<span class="source-line-no">019</span><span id="line-19">    }</span>
+<span class="source-line-no">020</span><span id="line-20"></span>
+<span class="source-line-no">021</span><span id="line-21">    public static PoolingLayer create(ConvolutionalShape inputShape, int size, PoolingFunction poolingFunction) {</span>
+<span class="source-line-no">022</span><span id="line-22">        return create(inputShape, size, size, 0, poolingFunction);</span>
+<span class="source-line-no">023</span><span id="line-23">    }</span>
+<span class="source-line-no">024</span><span id="line-24"></span>
+<span class="source-line-no">025</span><span id="line-25">    public static PoolingLayer create(ConvolutionalShape inputShape, int size, int stride, int padding, PoolingFunction poolingFunction) {</span>
+<span class="source-line-no">026</span><span id="line-26">        int outputWidth = (inputShape.getWidth() - size + 2 * padding) / stride + 1;</span>
+<span class="source-line-no">027</span><span id="line-27">        int outputHeight = (inputShape.getHeight() - size + 2 * padding) / stride + 1;</span>
+<span class="source-line-no">028</span><span id="line-28">        ConvolutionalShape outputShape = new ConvolutionalShape(outputWidth, outputHeight, ConvolutionalShape.DEFAULT_CHANNELS, ConvolutionalShape.DEFAULT_COUNT, null);</span>
+<span class="source-line-no">029</span><span id="line-29">        return new PoolingLayer(inputShape, outputShape, poolingFunction, size, stride, padding);</span>
+<span class="source-line-no">030</span><span id="line-30">    }</span>
+<span class="source-line-no">031</span><span id="line-31"></span>
+<span class="source-line-no">032</span><span id="line-32">    private PoolingLayer(ConvolutionalShape inputShape, ConvolutionalShape outputShape, PoolingFunction poolingFunction, int size, int stride, int padding) {</span>
+<span class="source-line-no">033</span><span id="line-33">        this.inputShape = inputShape;</span>
+<span class="source-line-no">034</span><span id="line-34">        this.outputShape = outputShape;</span>
+<span class="source-line-no">035</span><span id="line-35">        this.poolingFunction = poolingFunction;</span>
+<span class="source-line-no">036</span><span id="line-36">        this.size = size;</span>
+<span class="source-line-no">037</span><span id="line-37">        this.stride = stride;</span>
+<span class="source-line-no">038</span><span id="line-38">        this.padding = padding;</span>
+<span class="source-line-no">039</span><span id="line-39">    }</span>
+<span class="source-line-no">040</span><span id="line-40"></span>
+<span class="source-line-no">041</span><span id="line-41">    @Override</span>
+<span class="source-line-no">042</span><span id="line-42">    public ConvolutionalShape getInputShape() {</span>
+<span class="source-line-no">043</span><span id="line-43">        return inputShape;</span>
+<span class="source-line-no">044</span><span id="line-44">    }</span>
+<span class="source-line-no">045</span><span id="line-45"></span>
+<span class="source-line-no">046</span><span id="line-46">    @Override</span>
+<span class="source-line-no">047</span><span id="line-47">    public ConvolutionalShape getOutputShape() {</span>
+<span class="source-line-no">048</span><span id="line-48">        return outputShape;</span>
+<span class="source-line-no">049</span><span id="line-49">    }</span>
+<span class="source-line-no">050</span><span id="line-50"></span>
+<span class="source-line-no">051</span><span id="line-51">    public PoolingFunction getPoolingFunction() {</span>
+<span class="source-line-no">052</span><span id="line-52">        return poolingFunction;</span>
+<span class="source-line-no">053</span><span id="line-53">    }</span>
+<span class="source-line-no">054</span><span id="line-54"></span>
+<span class="source-line-no">055</span><span id="line-55">    public int getSize() {</span>
+<span class="source-line-no">056</span><span id="line-56">        return size;</span>
+<span class="source-line-no">057</span><span id="line-57">    }</span>
+<span class="source-line-no">058</span><span id="line-58"></span>
+<span class="source-line-no">059</span><span id="line-59">    public int getStride() {</span>
+<span class="source-line-no">060</span><span id="line-60">        return stride;</span>
+<span class="source-line-no">061</span><span id="line-61">    }</span>
+<span class="source-line-no">062</span><span id="line-62"></span>
+<span class="source-line-no">063</span><span id="line-63">    public int getPadding() {</span>
+<span class="source-line-no">064</span><span id="line-64">        return padding;</span>
+<span class="source-line-no">065</span><span id="line-65">    }</span>
+<span class="source-line-no">066</span><span id="line-66"></span>
+<span class="source-line-no">067</span><span id="line-67">    @Override</span>
+<span class="source-line-no">068</span><span id="line-68">    public ConvolutionalShape transform(ConvolutionalShape input) {</span>
+<span class="source-line-no">069</span><span id="line-69">        ConvolutionalShape output = getOutputShape().clone();</span>
+<span class="source-line-no">070</span><span id="line-70">        for (int i = 0; i &lt; output.getCount(); i++) {</span>
+<span class="source-line-no">071</span><span id="line-71">            for (int c = 1; c &lt;= output.getChannels(); c++) {</span>
+<span class="source-line-no">072</span><span id="line-72">                for (int y = 0; y &lt; output.getHeight(); y++) {</span>
+<span class="source-line-no">073</span><span id="line-73">                    for (int x = 0; x &lt; output.getWidth(); x++) {</span>
+<span class="source-line-no">074</span><span id="line-74">                        for (ConvolutionalShape window : getWindows(input)) {</span>
+<span class="source-line-no">075</span><span id="line-75">                            float value = poolingFunction.pool(window.getElements());</span>
+<span class="source-line-no">076</span><span id="line-76">                            output.setElement(value, x, y, c, i);</span>
+<span class="source-line-no">077</span><span id="line-77">                        }</span>
+<span class="source-line-no">078</span><span id="line-78">                    }</span>
+<span class="source-line-no">079</span><span id="line-79">                }</span>
+<span class="source-line-no">080</span><span id="line-80">            }</span>
+<span class="source-line-no">081</span><span id="line-81">        }</span>
+<span class="source-line-no">082</span><span id="line-82">        return output;</span>
+<span class="source-line-no">083</span><span id="line-83">    }</span>
+<span class="source-line-no">084</span><span id="line-84"></span>
+<span class="source-line-no">085</span><span id="line-85">    private List&lt;ConvolutionalShape&gt; getWindows(ConvolutionalShape input) {</span>
+<span class="source-line-no">086</span><span id="line-86">        List&lt;ConvolutionalShape&gt; windows = new ArrayList&lt;&gt;();</span>
+<span class="source-line-no">087</span><span id="line-87">        for (int x = -padding; x &lt;= input.getWidth() - size + padding; x = x + stride) {</span>
+<span class="source-line-no">088</span><span id="line-88">            for (int y = -padding; y &lt;= input.getHeight() - size + padding; y = y + stride) {</span>
+<span class="source-line-no">089</span><span id="line-89">                for (int c = 1; c &lt;= input.getChannels(); c++) {</span>
+<span class="source-line-no">090</span><span id="line-90">                    for (int i = 0; i &lt; input.getCount(); i++) {</span>
+<span class="source-line-no">091</span><span id="line-91">                        ConvolutionalShape window = new ConvolutionalShape(size, size);</span>
+<span class="source-line-no">092</span><span id="line-92">                        for (int yi = 0; yi &lt; window.getHeight(); yi++) {</span>
+<span class="source-line-no">093</span><span id="line-93">                            for (int xi = 0; xi &lt; window.getWidth(); xi++) {</span>
+<span class="source-line-no">094</span><span id="line-94">                                float value;</span>
+<span class="source-line-no">095</span><span id="line-95">                                if (x + xi &lt; 0 || x + xi &gt;= input.getWidth() || y + yi &lt; 0 || y + yi &gt;= input.getHeight()) {</span>
+<span class="source-line-no">096</span><span id="line-96">                                    value = 0f;</span>
+<span class="source-line-no">097</span><span id="line-97">                                } else {</span>
+<span class="source-line-no">098</span><span id="line-98">                                    value = input.getElement(x + xi, y + yi, c, i);</span>
+<span class="source-line-no">099</span><span id="line-99">                                }</span>
+<span class="source-line-no">100</span><span id="line-100">                                window.setElement(value, xi, yi, c, i);</span>
+<span class="source-line-no">101</span><span id="line-101">                            }</span>
+<span class="source-line-no">102</span><span id="line-102">                        }</span>
+<span class="source-line-no">103</span><span id="line-103">                        windows.add(window);</span>
+<span class="source-line-no">104</span><span id="line-104">                    }</span>
+<span class="source-line-no">105</span><span id="line-105">                }</span>
+<span class="source-line-no">106</span><span id="line-106">            }</span>
+<span class="source-line-no">107</span><span id="line-107">        }</span>
+<span class="source-line-no">108</span><span id="line-108">        return windows;</span>
+<span class="source-line-no">109</span><span id="line-109">    }</span>
+<span class="source-line-no">110</span><span id="line-110">}</span>
 
 
 

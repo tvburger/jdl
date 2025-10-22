@@ -16,10 +16,10 @@ public final class FloatSupport implements JavaNumberTypeSupport<Float> {
     }
 
     @Override
-    public Float[] createArray(int length) {
+    public Array<Float> createArray(int length) {
         Float[] floats = new Float[length];
         Arrays.fill(floats, 0.0f);
-        return floats;
+        return Array.of(floats);
     }
 
     @Override
@@ -135,5 +135,10 @@ public final class FloatSupport implements JavaNumberTypeSupport<Float> {
     @Override
     public boolean isInstance(Object value) {
         return value instanceof Float;
+    }
+
+    @Override
+    public int compare(Float o1, Float o2) {
+        return Float.compare(o1, o2);
     }
 }

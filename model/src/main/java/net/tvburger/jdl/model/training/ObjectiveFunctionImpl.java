@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model.training;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.patterns.Mediator;
 import net.tvburger.jdl.common.patterns.Strategy;
@@ -104,15 +105,15 @@ public class ObjectiveFunctionImpl<N extends Number> implements ObjectiveFunctio
      * {@inheritDoc}
      */
     @Override
-    public N calculateLossWithoutRegularizationPenalty(List<Pair<N[], N[]>> batch) {
+    public N calculateLossWithoutRegularizationPenalty(List<Pair<Array<N>, Array<N>>> batch) {
         List<N> sampleLosses = new ArrayList<>(batch.size());
         List<N> dimensionLosses = new ArrayList<>();
-        for (Pair<N[], N[]> sample : batch) {
-            N[] estimated = sample.left();
-            N[] target = sample.right();
-            int dimensions = estimated.length;
+        for (Pair<Array<N>, Array<N>> sample : batch) {
+            Array<N> estimated = sample.left();
+            Array<N> target = sample.right();
+            int dimensions = estimated.length();
             for (int d = 0; d < dimensions; d++) {
-                dimensionLosses.add(getDimensionLossFunction(d).calculateDimensionLoss(estimated[d], target[d]));
+                dimensionLosses.add(getDimensionLossFunction(d).calculateDimensionLoss(estimated.get(d), target.get(d)));
             }
             sampleLosses.add(sampleLossFunction.calculateSampleLoss(dimensionLosses));
             dimensionLosses.clear();
@@ -121,10 +122,10 @@ public class ObjectiveFunctionImpl<N extends Number> implements ObjectiveFunctio
     }
 
     @Override
-    public N calculateRegularizationPenalty(N[] parameters) {
-        N totalPenalty = getCurrentNumberType().zero();
+    public N calculateRegularizationPenalty(Array<N> parameters) {
+        N totalPenalty = getNumberTypeSupport().zero();
         for (ExplicitRegularization<N> regularization : regularizations) {
-            totalPenalty = getCurrentNumberType().add(totalPenalty, regularization.lossPenalty(parameters));
+            totalPenalty = getNumberTypeSupport().add(totalPenalty, regularization.lossPenalty(parameters));
         }
         return totalPenalty;
     }
@@ -133,24 +134,24 @@ public class ObjectiveFunctionImpl<N extends Number> implements ObjectiveFunctio
      * {@inheritDoc}
      */
     @Override
-    public N[] calculateGradient_dJ_da(int batchSize, N[] estimated, N[] target) {
-        int dimensions = target.length;
-        JavaNumberTypeSupport<N> typeSupport = getCurrentNumberType();
-        N[] gradients = typeSupport.createArray(dimensions);
+    public Array<N> calculateGradient_dJ_da(int batchSize, Array<N> estimated, Array<N> target) {
+        int dimensions = target.length();
+        JavaNumberTypeSupport<N> typeSupport = getNumberTypeSupport();
+        Array<N> gradients = typeSupport.createArray(dimensions);
         for (int d = 0; d < dimensions; d++) {
-            gradients[d] = typeSupport.multiply(typeSupport.multiply(
+            gradients.set(d, typeSupport.multiply(typeSupport.multiply(
                             batchLossFunction.calculateGradient_dJ_dL(batchSize),
                             sampleLossFunction.calculateGradient_dL_dl(dimensions)),
-                    getDimensionLossFunction(d).calculateGradient_dl_da(estimated[d], target[d]));
+                    getDimensionLossFunction(d).calculateGradient_dl_da(estimated.get(d), target.get(d))));
         }
         return gradients;
     }
 
     @Override
     public N regularizedGradient(N parameter) {
-        N totalAdjustment = getCurrentNumberType().zero();
+        N totalAdjustment = getNumberTypeSupport().zero();
         for (ExplicitRegularization<N> regularization : regularizations) {
-            totalAdjustment = getCurrentNumberType().add(totalAdjustment, regularization.gradientAdjustment(parameter));
+            totalAdjustment = getNumberTypeSupport().add(totalAdjustment, regularization.gradientAdjustment(parameter));
         }
         return totalAdjustment;
     }
@@ -163,7 +164,7 @@ public class ObjectiveFunctionImpl<N extends Number> implements ObjectiveFunctio
      * {@inheritDoc}
      */
     @Override
-    public JavaNumberTypeSupport<N> getCurrentNumberType() {
-        return batchLossFunction.getCurrentNumberType();
+    public JavaNumberTypeSupport<N> getNumberTypeSupport() {
+        return batchLossFunction.getNumberTypeSupport();
     }
 }

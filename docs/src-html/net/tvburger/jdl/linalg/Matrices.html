@@ -69,7 +69,7 @@
 <span class="source-line-no">056</span><span id="line-56">    }</span>
 <span class="source-line-no">057</span><span id="line-57"></span>
 <span class="source-line-no">058</span><span id="line-58">    public static &lt;N extends Number&gt; boolean isIdentity(TypedMatrix&lt;N&gt; matrix) {</span>
-<span class="source-line-no">059</span><span id="line-59">        return isIdentity(matrix, matrix.getCurrentNumberType());</span>
+<span class="source-line-no">059</span><span id="line-59">        return isIdentity(matrix, matrix.getNumberTypeSupport());</span>
 <span class="source-line-no">060</span><span id="line-60">    }</span>
 <span class="source-line-no">061</span><span id="line-61"></span>
 <span class="source-line-no">062</span><span id="line-62">    public static &lt;N extends Number&gt; boolean isIdentity(Matrix&lt;N&gt; matrix, JavaNumberTypeSupport&lt;N&gt; support) {</span>

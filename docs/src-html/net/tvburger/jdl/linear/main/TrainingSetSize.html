@@ -76,7 +76,7 @@
 <span class="source-line-no">063</span><span id="line-63">        DataSet&lt;N&gt; testSet = dataSetGenerator.load(1000);</span>
 <span class="source-line-no">064</span><span id="line-64">        Map&lt;String, DataSet&lt;N&gt;&gt; testSets = new LinkedHashMap&lt;&gt;();</span>
 <span class="source-line-no">065</span><span id="line-65">        testSets.put("Test Set", testSet);</span>
-<span class="source-line-no">066</span><span id="line-66">        return new LinearRegression&lt;&gt;(basisFunctionGenerator, trainSet, testSets, new ClosedSolutionOptimizer&lt;&gt;(basisFunctionGenerator.getCurrentNumberType()), Regimes.oneShot());</span>
+<span class="source-line-no">066</span><span id="line-66">        return new LinearRegression&lt;&gt;(basisFunctionGenerator, trainSet, testSets, new ClosedSolutionOptimizer&lt;&gt;(basisFunctionGenerator.getNumberTypeSupport()), Regimes.oneShot());</span>
 <span class="source-line-no">067</span><span id="line-67">    }</span>
 <span class="source-line-no">068</span><span id="line-68"></span>
 <span class="source-line-no">069</span><span id="line-69">}</span>

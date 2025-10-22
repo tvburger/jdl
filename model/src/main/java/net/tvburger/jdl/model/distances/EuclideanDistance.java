@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model.distances;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.patterns.Strategy;
 
 /**
@@ -26,17 +27,17 @@ public class EuclideanDistance implements DistanceMetric {
      * @throws IllegalArgumentException if the points are null or have different dimensions
      */
     @Override
-    public float distance(Float[] point1, Float[] point2) {
+    public float distance(Array<Float> point1, Array<Float> point2) {
         if (point1 == null || point2 == null) {
             throw new IllegalArgumentException("Points must not be null.");
         }
-        if (point1.length != point2.length) {
+        if (point1.length() != point2.length()) {
             throw new IllegalArgumentException("Points must have the same dimension.");
         }
 
         float sum = 0.0f;
-        for (int i = 0; i < point1.length; i++) {
-            float diff = point1[i] - point2[i];
+        for (int i = 0; i < point1.length(); i++) {
+            float diff = point1.get(i) - point2.get(i);
             sum += diff * diff;
         }
 

@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model.training.optimizer.steps;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.utils.Pair;
 import net.tvburger.jdl.linalg.TypedVector;
@@ -38,14 +39,14 @@ public class AdamW<N extends Number> implements UpdateStep<LinearCombination<N>,
 
     @Override
     public Vector<N> calculateUpdate(Vector<N> gradients, LinearCombination<N> model, int step, Set<ExplicitRegularization<N>> regularizations) {
-        JavaNumberTypeSupport<N> typeSupport = model.getCurrentNumberType();
+        JavaNumberTypeSupport<N> typeSupport = model.getNumberTypeSupport();
 
         Pair<TypedVector<N>, TypedVector<N>> adaptions = this.adaptions.computeIfAbsent(model, k -> Pair.mutable(null, null));
         TypedVector<N> m = adaptions.left();
         TypedVector<N> v = adaptions.right();
 
-        N[] parameters = model.getParameters();
-        Vector<N> thetas = Vectors.of(model.getCurrentNumberType(), parameters).transpose();
+        Array<N> parameters = model.getParameters();
+        Vector<N> thetas = new TypedVector<>(parameters, true, model.getNumberTypeSupport());
         TypedVector<N> regularizationGradients = (TypedVector<N>) Regularizations.applyExplicitRegularization(regularizations, thetas, gradients);
 
         // m = β1 * m + (1 - β1) * g
@@ -75,8 +76,8 @@ public class AdamW<N extends Number> implements UpdateStep<LinearCombination<N>,
         TypedVector<N> denom = vHatSqrt.add(typeSupport.epsilon()); // epsilon is scalar, broadcasts
 
         // Weight decay
-        TypedVector<N> weightDecayTerm = Vectors.of(model.getCurrentNumberType(), parameters).transpose().multiply(lambda);
-        return Vectors.divide(mHat, denom).add(weightDecayTerm).multiply(model.getCurrentNumberType().negate(learningRate));
+        TypedVector<N> weightDecayTerm = new TypedVector<>(parameters, true, model.getNumberTypeSupport()).multiply(lambda);
+        return Vectors.divide(mHat, denom).add(weightDecayTerm).multiply(model.getNumberTypeSupport().negate(learningRate));
     }
 
     @Override

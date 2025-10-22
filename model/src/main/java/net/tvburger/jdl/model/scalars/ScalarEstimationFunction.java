@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model.scalars;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.patterns.Strategy;
 import net.tvburger.jdl.model.EstimationFunction;
 
@@ -18,11 +19,11 @@ public interface ScalarEstimationFunction<N extends Number> extends EstimationFu
      * returning the result as a single-element array.
      *
      * @param inputs the input feature vector
-     * @return a single-element array containing {@link #estimateScalar(N[])}
+     * @return a single-element array containing {@link #estimateScalar(Array)}
      */
-    default N[] estimate(N[] inputs) {
-        N[] array = getCurrentNumberType().createArray(1);
-        array[0] = estimateScalar(inputs);
+    default Array<N> estimate(Array<N> inputs) {
+        Array<N> array = getNumberTypeSupport().createArray(1);
+        array.set(0, estimateScalar(inputs));
         return array;
     }
 
@@ -32,7 +33,7 @@ public interface ScalarEstimationFunction<N extends Number> extends EstimationFu
      * @param inputs the input feature vector
      * @return the scalar output value
      */
-    N estimateScalar(N[] inputs);
+    N estimateScalar(Array<N> inputs);
 
     /**
      * Returns the number of output values (co-arity) of this function.

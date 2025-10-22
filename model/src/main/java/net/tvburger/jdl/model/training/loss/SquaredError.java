@@ -55,7 +55,7 @@ public class SquaredError<N extends Number> implements DimensionLossFunction<N> 
     }
 
     @Override
-    public JavaNumberTypeSupport<N> getCurrentNumberType() {
+    public JavaNumberTypeSupport<N> getNumberTypeSupport() {
         return typeSupport;
     }
 }

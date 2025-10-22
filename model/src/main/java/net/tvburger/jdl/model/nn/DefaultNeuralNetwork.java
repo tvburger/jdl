@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model.nn;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.patterns.Mediator;
 import net.tvburger.jdl.common.utils.Pair;
@@ -110,16 +111,16 @@ public class DefaultNeuralNetwork implements NeuralNetwork {
      * {@inheritDoc}
      */
     @Override
-    public Float[] getParameters() {
-        Float[] parameters = new Float[getParameterCount()];
+    public Array<Float> getParameters() {
+        Array<Float> parameters = Array.of(new Float[getParameterCount()]);
         int i = 0;
         for (List<? extends Neuron> layer : layers) {
             for (Neuron neuron : layer) {
                 if (neuron instanceof InputNeuron) {
                     continue;
                 }
-                Float[] neuronParameters = neuron.getParameters();
-                System.arraycopy(neuronParameters, 0, parameters, i, neuronParameters.length);
+                Array<Float> neuronParameters = neuron.getParameters();
+                parameters.set(neuronParameters, i, neuronParameters.length());
             }
         }
         return parameters;
@@ -127,11 +128,11 @@ public class DefaultNeuralNetwork implements NeuralNetwork {
 
     @Override
     public Float getParameter(int p) {
-        return getParameters()[p];
+        return getParameters().get(p);
     }
 
     @Override
-    public void setParameters(Float[] values) {
+    public void setParameters(Array<Float> values) {
         throw new UnsupportedOperationException();
     }
 
@@ -141,7 +142,7 @@ public class DefaultNeuralNetwork implements NeuralNetwork {
     }
 
     @Override
-    public JavaNumberTypeSupport<Float> getCurrentNumberType() {
+    public JavaNumberTypeSupport<Float> getNumberTypeSupport() {
         return JavaNumberTypeSupport.FLOAT;
     }
 
@@ -149,20 +150,20 @@ public class DefaultNeuralNetwork implements NeuralNetwork {
      * {@inheritDoc}
      */
     @Override
-    public Float[] estimate(Float... inputs) {
+    public Array<Float> estimate(Array<Float> inputs) {
         for (List<? extends Neuron> layer : layers) {
             layer.forEach(Neuron::deactivate);
         }
-        for (int j = 0; j < inputs.length; j++) {
-            ((InputNeuron) layers.get(0).get(j)).setInputValue(inputs[j]);
+        for (int j = 0; j < inputs.length(); j++) {
+            ((InputNeuron) layers.getFirst().get(j)).setInputValue(inputs.get(j));
         }
         for (List<? extends Neuron> layer : layers) {
             layer.forEach(Neuron::activate);
         }
-        List<? extends Neuron> outputLayer = layers.get(layers.size() - 1);
-        Float[] outputs = new Float[outputLayer.size()];
-        for (int j = 0; j < outputs.length; j++) {
-            outputs[j] = outputLayer.get(j).getOutput();
+        List<? extends Neuron> outputLayer = layers.getLast();
+        Array<Float> outputs = Array.of(new Float[outputLayer.size()]);
+        for (int j = 0; j < outputs.length(); j++) {
+            outputs.set(j, outputLayer.get(j).getOutput());
         }
         return outputs;
     }
@@ -172,7 +173,7 @@ public class DefaultNeuralNetwork implements NeuralNetwork {
      */
     @Override
     public int arity() {
-        return layers.get(0).size();
+        return layers.getFirst().size();
     }
 
     /**
@@ -180,7 +181,7 @@ public class DefaultNeuralNetwork implements NeuralNetwork {
      */
     @Override
     public int coArity() {
-        return layers.get(layers.size() - 1).size();
+        return layers.getLast().size();
     }
 
     /**

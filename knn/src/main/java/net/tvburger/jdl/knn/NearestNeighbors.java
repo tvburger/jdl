@@ -1,11 +1,11 @@
 package net.tvburger.jdl.knn;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.utils.Floats;
 import net.tvburger.jdl.common.utils.Pair;
 import net.tvburger.jdl.common.utils.SimpleHolder;
 import net.tvburger.jdl.model.DataSet;
-import net.tvburger.jdl.model.EstimationFunction;
 import net.tvburger.jdl.model.distances.DistanceMetric;
 import net.tvburger.jdl.model.training.TrainableFunction;
 
@@ -46,7 +46,7 @@ public class NearestNeighbors implements TrainableFunction<Float> {
     }
 
     @Override
-    public Float[] estimate(Float[] inputs) {
+    public Array<Float> estimate(Array<Float> inputs) {
         if (k < 0) {
             throw new IllegalStateException("Invalid k set (" + k + ")! Must be positive!");
         }
@@ -72,18 +72,18 @@ public class NearestNeighbors implements TrainableFunction<Float> {
             }
         }
         SimpleHolder<Float> totalWeights = new SimpleHolder<>(0.0f);
-        Float[] estimation = getCurrentNumberType().createArray(neighbors.iterator().next().left().targetOutputs().length);
+        Array<Float> estimation = getNumberTypeSupport().createArray(neighbors.iterator().next().left().targetOutputs().length());
         neighbors.forEach(p -> {
             float distance = p.right();
             float weight = neighborWeighting.weight(distance);
-            Float[] neighborOutputs = p.left().targetOutputs();
+            Array<Float> neighborOutputs = p.left().targetOutputs();
             totalWeights.adjust(f -> f + weight);
-            for (int i = 0; i < estimation.length; i++) {
-                estimation[i] += weight * neighborOutputs[i];
+            for (int i = 0; i < estimation.length(); i++) {
+                estimation.set(i, estimation.get(i) + weight * neighborOutputs.get(i));
             }
         });
-        for (int i = 0; i < estimation.length; i++) {
-            estimation[i] = estimation[i] / totalWeights.get();
+        for (int i = 0; i < estimation.length(); i++) {
+            estimation.set(i, estimation.get(i) / totalWeights.get());
         }
         return estimation;
     }
@@ -114,7 +114,7 @@ public class NearestNeighbors implements TrainableFunction<Float> {
     }
 
     @Override
-    public JavaNumberTypeSupport<Float> getCurrentNumberType() {
+    public JavaNumberTypeSupport<Float> getNumberTypeSupport() {
         return JavaNumberTypeSupport.FLOAT;
     }
 
@@ -124,8 +124,8 @@ public class NearestNeighbors implements TrainableFunction<Float> {
     }
 
     @Override
-    public Float[] getParameters() {
-        return new Float[0];
+    public Array<Float> getParameters() {
+        return Array.empty();
     }
 
     @Override
@@ -134,7 +134,7 @@ public class NearestNeighbors implements TrainableFunction<Float> {
     }
 
     @Override
-    public void setParameters(Float[] values) {
+    public void setParameters(Array<Float> values) {
     }
 
     @Override

@@ -29,10 +29,10 @@
 <span class="source-line-no">016</span><span id="line-16">    }</span>
 <span class="source-line-no">017</span><span id="line-17"></span>
 <span class="source-line-no">018</span><span id="line-18">    @Override</span>
-<span class="source-line-no">019</span><span id="line-19">    public Float[] createArray(int length) {</span>
+<span class="source-line-no">019</span><span id="line-19">    public Array&lt;Float&gt; createArray(int length) {</span>
 <span class="source-line-no">020</span><span id="line-20">        Float[] floats = new Float[length];</span>
 <span class="source-line-no">021</span><span id="line-21">        Arrays.fill(floats, 0.0f);</span>
-<span class="source-line-no">022</span><span id="line-22">        return floats;</span>
+<span class="source-line-no">022</span><span id="line-22">        return Array.of(floats);</span>
 <span class="source-line-no">023</span><span id="line-23">    }</span>
 <span class="source-line-no">024</span><span id="line-24"></span>
 <span class="source-line-no">025</span><span id="line-25">    @Override</span>
@@ -149,7 +149,12 @@
 <span class="source-line-no">136</span><span id="line-136">    public boolean isInstance(Object value) {</span>
 <span class="source-line-no">137</span><span id="line-137">        return value instanceof Float;</span>
 <span class="source-line-no">138</span><span id="line-138">    }</span>
-<span class="source-line-no">139</span><span id="line-139">}</span>
+<span class="source-line-no">139</span><span id="line-139"></span>
+<span class="source-line-no">140</span><span id="line-140">    @Override</span>
+<span class="source-line-no">141</span><span id="line-141">    public int compare(Float o1, Float o2) {</span>
+<span class="source-line-no">142</span><span id="line-142">        return Float.compare(o1, o2);</span>
+<span class="source-line-no">143</span><span id="line-143">    }</span>
+<span class="source-line-no">144</span><span id="line-144">}</span>
 
 
 

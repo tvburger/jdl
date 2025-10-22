@@ -49,7 +49,7 @@ public class LinearRegression<N extends Number> {
 
     public LinearBasisFunctionModel<N> fitComplexity(int m, Set<ExplicitRegularization<N>> regularizations) {
         LinearBasisFunctionModel<N> regression = LinearBasisFunctionModel.create(m, basisFunctionGenerator);
-        ObjectiveFunction<N> objective = Objectives.mSE(basisFunctionGenerator.getCurrentNumberType());
+        ObjectiveFunction<N> objective = Objectives.mSE(basisFunctionGenerator.getNumberTypeSupport());
         if (null != regularizations) {
             regularizations.forEach(objective::addRegularization);
         }
@@ -70,7 +70,7 @@ public class LinearRegression<N extends Number> {
         float mse = 0.0f;
         for (DataSet.Sample<N> sample : dataSet) {
             float estimated = regression.estimateScalar(sample.features()).floatValue();
-            float target = sample.targetOutputs()[0].floatValue();
+            float target = sample.targetOutputs().get(0).floatValue();
             mse += (float) Math.pow(estimated - target, 2) / dataSet.size();
         }
         return (float) Math.sqrt(mse);

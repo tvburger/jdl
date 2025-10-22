@@ -13,46 +13,48 @@
 <div class="source-container">
 <pre><span class="source-line-no">001</span><span id="line-1">package net.tvburger.jdl.model.training.optimizer.steps;</span>
 <span class="source-line-no">002</span><span id="line-2"></span>
-<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.linalg.Vector;</span>
-<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.linalg.Vectors;</span>
-<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.model.scalars.LinearCombination;</span>
-<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.model.training.optimizer.LearningRateConfigurable;</span>
-<span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.model.training.optimizer.UpdateStep;</span>
-<span class="source-line-no">008</span><span id="line-8">import net.tvburger.jdl.model.training.regularization.ExplicitRegularization;</span>
-<span class="source-line-no">009</span><span id="line-9">import net.tvburger.jdl.model.training.regularization.Regularizations;</span>
-<span class="source-line-no">010</span><span id="line-10"></span>
-<span class="source-line-no">011</span><span id="line-11">import java.util.Map;</span>
-<span class="source-line-no">012</span><span id="line-12">import java.util.Set;</span>
-<span class="source-line-no">013</span><span id="line-13"></span>
-<span class="source-line-no">014</span><span id="line-14">public class VanillaGradientDescent&lt;N extends Number&gt; implements UpdateStep&lt;LinearCombination&lt;N&gt;, N&gt;, LearningRateConfigurable&lt;N&gt; {</span>
+<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.numbers.Array;</span>
+<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.linalg.TypedVector;</span>
+<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.linalg.Vector;</span>
+<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.linalg.Vectors;</span>
+<span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.model.scalars.LinearCombination;</span>
+<span class="source-line-no">008</span><span id="line-8">import net.tvburger.jdl.model.training.optimizer.LearningRateConfigurable;</span>
+<span class="source-line-no">009</span><span id="line-9">import net.tvburger.jdl.model.training.optimizer.UpdateStep;</span>
+<span class="source-line-no">010</span><span id="line-10">import net.tvburger.jdl.model.training.regularization.ExplicitRegularization;</span>
+<span class="source-line-no">011</span><span id="line-11">import net.tvburger.jdl.model.training.regularization.Regularizations;</span>
+<span class="source-line-no">012</span><span id="line-12"></span>
+<span class="source-line-no">013</span><span id="line-13">import java.util.Map;</span>
+<span class="source-line-no">014</span><span id="line-14">import java.util.Set;</span>
 <span class="source-line-no">015</span><span id="line-15"></span>
-<span class="source-line-no">016</span><span id="line-16">    private N learningRate;</span>
+<span class="source-line-no">016</span><span id="line-16">public class VanillaGradientDescent&lt;N extends Number&gt; implements UpdateStep&lt;LinearCombination&lt;N&gt;, N&gt;, LearningRateConfigurable&lt;N&gt; {</span>
 <span class="source-line-no">017</span><span id="line-17"></span>
-<span class="source-line-no">018</span><span id="line-18">    public VanillaGradientDescent(N learningRate) {</span>
-<span class="source-line-no">019</span><span id="line-19">        this.learningRate = learningRate;</span>
-<span class="source-line-no">020</span><span id="line-20">    }</span>
-<span class="source-line-no">021</span><span id="line-21"></span>
-<span class="source-line-no">022</span><span id="line-22">    @Override</span>
-<span class="source-line-no">023</span><span id="line-23">    public Vector&lt;N&gt; calculateUpdate(Vector&lt;N&gt; gradients, LinearCombination&lt;N&gt; model, int step, Set&lt;ExplicitRegularization&lt;N&gt;&gt; regularizations) {</span>
-<span class="source-line-no">024</span><span id="line-24">        N[] parameters = model.getParameters();</span>
-<span class="source-line-no">025</span><span id="line-25">        Vector&lt;N&gt; thetas = Vectors.of(model.getCurrentNumberType(), parameters).transpose();</span>
-<span class="source-line-no">026</span><span id="line-26">        Vector&lt;N&gt; regularizationGradients = Regularizations.applyExplicitRegularization(regularizations, thetas, gradients);</span>
-<span class="source-line-no">027</span><span id="line-27">        return regularizationGradients.multiply(model.getCurrentNumberType().negate(learningRate));</span>
-<span class="source-line-no">028</span><span id="line-28">    }</span>
-<span class="source-line-no">029</span><span id="line-29"></span>
-<span class="source-line-no">030</span><span id="line-30">    @Override</span>
-<span class="source-line-no">031</span><span id="line-31">    public Map&lt;String, Object&gt; getHyperparameters() {</span>
-<span class="source-line-no">032</span><span id="line-32">        return Map.of(HP_LEARNING_RATE, learningRate);</span>
-<span class="source-line-no">033</span><span id="line-33">    }</span>
-<span class="source-line-no">034</span><span id="line-34"></span>
-<span class="source-line-no">035</span><span id="line-35">    @SuppressWarnings("unchecked")</span>
-<span class="source-line-no">036</span><span id="line-36">    @Override</span>
-<span class="source-line-no">037</span><span id="line-37">    public void setHyperparameter(String name, Object value) {</span>
-<span class="source-line-no">038</span><span id="line-38">        if (HP_LEARNING_RATE.equals(name)) {</span>
-<span class="source-line-no">039</span><span id="line-39">            this.learningRate = (N) value;</span>
-<span class="source-line-no">040</span><span id="line-40">        }</span>
-<span class="source-line-no">041</span><span id="line-41">    }</span>
-<span class="source-line-no">042</span><span id="line-42">}</span>
+<span class="source-line-no">018</span><span id="line-18">    private N learningRate;</span>
+<span class="source-line-no">019</span><span id="line-19"></span>
+<span class="source-line-no">020</span><span id="line-20">    public VanillaGradientDescent(N learningRate) {</span>
+<span class="source-line-no">021</span><span id="line-21">        this.learningRate = learningRate;</span>
+<span class="source-line-no">022</span><span id="line-22">    }</span>
+<span class="source-line-no">023</span><span id="line-23"></span>
+<span class="source-line-no">024</span><span id="line-24">    @Override</span>
+<span class="source-line-no">025</span><span id="line-25">    public Vector&lt;N&gt; calculateUpdate(Vector&lt;N&gt; gradients, LinearCombination&lt;N&gt; model, int step, Set&lt;ExplicitRegularization&lt;N&gt;&gt; regularizations) {</span>
+<span class="source-line-no">026</span><span id="line-26">        Array&lt;N&gt; parameters = model.getParameters();</span>
+<span class="source-line-no">027</span><span id="line-27">        Vector&lt;N&gt; thetas = new TypedVector&lt;&gt;(parameters, true, model.getNumberTypeSupport());</span>
+<span class="source-line-no">028</span><span id="line-28">        Vector&lt;N&gt; regularizationGradients = Regularizations.applyExplicitRegularization(regularizations, thetas, gradients);</span>
+<span class="source-line-no">029</span><span id="line-29">        return regularizationGradients.multiply(model.getNumberTypeSupport().negate(learningRate));</span>
+<span class="source-line-no">030</span><span id="line-30">    }</span>
+<span class="source-line-no">031</span><span id="line-31"></span>
+<span class="source-line-no">032</span><span id="line-32">    @Override</span>
+<span class="source-line-no">033</span><span id="line-33">    public Map&lt;String, Object&gt; getHyperparameters() {</span>
+<span class="source-line-no">034</span><span id="line-34">        return Map.of(HP_LEARNING_RATE, learningRate);</span>
+<span class="source-line-no">035</span><span id="line-35">    }</span>
+<span class="source-line-no">036</span><span id="line-36"></span>
+<span class="source-line-no">037</span><span id="line-37">    @SuppressWarnings("unchecked")</span>
+<span class="source-line-no">038</span><span id="line-38">    @Override</span>
+<span class="source-line-no">039</span><span id="line-39">    public void setHyperparameter(String name, Object value) {</span>
+<span class="source-line-no">040</span><span id="line-40">        if (HP_LEARNING_RATE.equals(name)) {</span>
+<span class="source-line-no">041</span><span id="line-41">            this.learningRate = (N) value;</span>
+<span class="source-line-no">042</span><span id="line-42">        }</span>
+<span class="source-line-no">043</span><span id="line-43">    }</span>
+<span class="source-line-no">044</span><span id="line-44">}</span>
 
 
 

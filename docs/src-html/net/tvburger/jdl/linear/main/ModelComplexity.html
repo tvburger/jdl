@@ -57,7 +57,7 @@
 <span class="source-line-no">044</span><span id="line-44">            float weights = 0.0f;</span>
 <span class="source-line-no">045</span><span id="line-45">            List&lt;Float&gt; floats = new ArrayList&lt;&gt;();</span>
 <span class="source-line-no">046</span><span id="line-46">            for (N weight : model.getParameters()) {</span>
-<span class="source-line-no">047</span><span id="line-47">                weights += model.getCurrentNumberType().absolute(weight).floatValue();</span>
+<span class="source-line-no">047</span><span id="line-47">                weights += model.getNumberTypeSupport().absolute(weight).floatValue();</span>
 <span class="source-line-no">048</span><span id="line-48">                floats.add(weight.floatValue());</span>
 <span class="source-line-no">049</span><span id="line-49">            }</span>
 <span class="source-line-no">050</span><span id="line-50">            System.out.println("m = " + m + "; weights: " + floats);</span>
@@ -88,7 +88,7 @@
 <span class="source-line-no">075</span><span id="line-75">        DataSet&lt;N&gt; testSet = dataSetGenerator.load(1000);</span>
 <span class="source-line-no">076</span><span id="line-76">        Map&lt;String, DataSet&lt;N&gt;&gt; testSets = new LinkedHashMap&lt;&gt;();</span>
 <span class="source-line-no">077</span><span id="line-77">        testSets.put("Test Set", testSet);</span>
-<span class="source-line-no">078</span><span id="line-78">        return new LinearRegression&lt;&gt;(basisFunctionGenerator, trainSet, testSets, new ClosedSolutionOptimizer&lt;&gt;(basisFunctionGenerator.getCurrentNumberType()), Regimes.oneShot());</span>
+<span class="source-line-no">078</span><span id="line-78">        return new LinearRegression&lt;&gt;(basisFunctionGenerator, trainSet, testSets, new ClosedSolutionOptimizer&lt;&gt;(basisFunctionGenerator.getNumberTypeSupport()), Regimes.oneShot());</span>
 <span class="source-line-no">079</span><span id="line-79">    }</span>
 <span class="source-line-no">080</span><span id="line-80"></span>
 <span class="source-line-no">081</span><span id="line-81">}</span>

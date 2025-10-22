@@ -1,5 +1,6 @@
 package net.tvburger.jdl.mlp;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.utils.Floats;
 import net.tvburger.jdl.datasets.LinesAndCircles;
 import net.tvburger.jdl.model.DataSet;
@@ -13,8 +14,6 @@ import net.tvburger.jdl.model.training.loss.Objectives;
 import net.tvburger.jdl.model.training.regimes.Regimes;
 import net.tvburger.jdl.plots.ImageViewer;
 import net.tvburger.jdl.plots.listeners.EpochRmePlotter;
-
-import java.util.Arrays;
 
 public class MLPCirclesAndSquaresMain {
 
@@ -30,7 +29,7 @@ public class MLPCirclesAndSquaresMain {
                 epochRmePlotter.attach("Training Set (" + trainingSet.size() + ")"),
                 epochRmePlotter.attach("Test Set (" + testSet.size() + ")", testSet)).batch();
         Optimizer<? super MultiLayerPerceptron, Float> optimizer = NeuralNetworkOptimizers.adaGrad(0.1f);
-        Trainer<MultiLayerPerceptron, Float> trainer = Trainer.of(new XavierInitializer(), Objectives.bCE(mlp.getCurrentNumberType()), optimizer, regime);
+        Trainer<MultiLayerPerceptron, Float> trainer = Trainer.of(new XavierInitializer(), Objectives.bCE(mlp.getNumberTypeSupport()), optimizer, regime);
         trainer.train(mlp, trainingSet);
 
         int i = 0;
@@ -38,9 +37,9 @@ public class MLPCirclesAndSquaresMain {
         int wrong = 0;
         for (DataSet.Sample<Float> sample : testSet) {
             i++;
-            boolean[] estimate = Floats.toBooleans(mlp.estimate(sample.features()), 0.5f);
-            boolean[] target = Floats.toBooleans(sample.targetOutputs(), 0.5f);
-            if (Arrays.equals(estimate, target)) {
+            Array<Boolean> estimate = Floats.toBooleans(mlp.estimate(sample.features()), 0.5f);
+            Array<Boolean> target = Floats.toBooleans(sample.targetOutputs(), 0.5f);
+            if (Array.equals(estimate, target)) {
                 correct++;
             } else {
                 String label = createLabel(i, target, estimate);
@@ -51,8 +50,8 @@ public class MLPCirclesAndSquaresMain {
         }
         if (wrong == 0) {
             DataSet.Sample<Float> sample = testSet.samples().getFirst();
-            boolean[] estimate = Floats.toBooleans(mlp.estimate(sample.features()), 0.5f);
-            boolean[] target = Floats.toBooleans(sample.targetOutputs(), 0.5f);
+            Array<Boolean> estimate = Floats.toBooleans(mlp.estimate(sample.features()), 0.5f);
+            Array<Boolean> target = Floats.toBooleans(sample.targetOutputs(), 0.5f);
             String label = createLabel(1, target, estimate);
             ImageViewer image = ImageViewer.fromPerceptronImage(label, sample);
             image.display();
@@ -60,15 +59,15 @@ public class MLPCirclesAndSquaresMain {
         System.out.println("Correct: " + correct + ", Wrong: " + wrong + ", Total: " + (correct + wrong));
     }
 
-    private static String createLabel(int i, boolean[] target, boolean[] estimate) {
+    private static String createLabel(int i, Array<Boolean> target, Array<Boolean> estimate) {
         String label = "";
         boolean wrong = false;
-        label += estimate[0] ? "Circle " : "Line ";
-        if (target[0] != estimate[0]) {
+        label += estimate.get(0) ? "Circle " : "Line ";
+        if (target.get(0) != estimate.get(0)) {
             wrong = true;
         }
-        label += estimate[1] ? "Left" : "Right";
-        if (target[1] != estimate[1]) {
+        label += estimate.get(1) ? "Left" : "Right";
+        if (target.get(1) != estimate.get(1)) {
             wrong = true;
         }
         return i + ". " + (wrong ? "X: " : "V: ") + label;

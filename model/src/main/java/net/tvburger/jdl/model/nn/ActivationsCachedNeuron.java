@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model.nn;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.patterns.Decorator;
 import net.tvburger.jdl.model.scalars.AffineTransformation;
@@ -45,7 +46,7 @@ public class ActivationsCachedNeuron extends Neuron {
      *     <li>{@code parameterGradients_df_dp} – the gradient calculated for this output (useful for learning)</li>
      * </ul>
      */
-    public record Activation(Float[] inputs, float output, Float[] parameterGradients_df_dp) {
+    public record Activation(Array<Float> inputs, float output, Array<Float> parameterGradients_df_dp) {
 
     }
 
@@ -78,7 +79,7 @@ public class ActivationsCachedNeuron extends Neuron {
             return;
         }
         super.activate();
-        Float[] inputValues = getInputValues();
+        Array<Float> inputValues = getInputValues();
         float output = getOutput();
         cachedActivations.add(new Activation(inputValues, output, getNeuronFunction().calculateParameterGradients_df_dp(inputValues)));
     }

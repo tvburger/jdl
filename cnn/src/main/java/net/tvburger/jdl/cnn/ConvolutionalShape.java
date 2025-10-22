@@ -1,8 +1,8 @@
 package net.tvburger.jdl.cnn;
 
+import net.tvburger.jdl.common.numbers.Array;
+import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.shapes.Shape4D;
-
-import java.util.Arrays;
 
 public class ConvolutionalShape implements Shape4D, Cloneable {
 
@@ -15,7 +15,7 @@ public class ConvolutionalShape implements Shape4D, Cloneable {
     private final int height;
     private final int channels;
     private final int count;
-    private final Float[] pixels;
+    private final Array<Float> elements;
 
     public ConvolutionalShape(int width, int height) {
         this(width, height, DEFAULT_CHANNELS);
@@ -26,19 +26,19 @@ public class ConvolutionalShape implements Shape4D, Cloneable {
     }
 
     public ConvolutionalShape(int width, int height, int channels, int count) {
-        this(width, height, channels, count, new Float[width * height * channels * count]);
+        this(width, height, channels, count, JavaNumberTypeSupport.FLOAT.createArray(width * height * channels * count));
     }
 
-    public ConvolutionalShape(int width, int height, int channels, int count, Float[] pixels) {
+    public ConvolutionalShape(int width, int height, int channels, int count, Array<Float> elements) {
         this.width = width;
         this.height = height;
         this.channels = channels;
         this.count = count;
-        this.pixels = pixels;
+        this.elements = elements;
     }
 
-    public Float[] getPixels() {
-        return pixels;
+    public Array<Float> getElements() {
+        return elements;
     }
 
     @Override
@@ -61,28 +61,28 @@ public class ConvolutionalShape implements Shape4D, Cloneable {
         return count;
     }
 
-    public void setPixel(float value, int x, int y) {
-        setPixel(value, x, y, DEFAULT_CHANNEL);
+    public void setElement(float value, int x, int y) {
+        setElement(value, x, y, DEFAULT_CHANNEL);
     }
 
-    public void setPixel(float value, int x, int y, int channel) {
-        setPixel(value, x, y, channel, DEFAULT_INDEX);
+    public void setElement(float value, int x, int y, int channel) {
+        setElement(value, x, y, channel, DEFAULT_INDEX);
     }
 
-    public void setPixel(float value, int x, int y, int channel, int index) {
-        pixels[index * (width * height * channels) + (channel - 1) * (width * height) + y * width + x] = value;
+    public void setElement(float value, int x, int y, int channel, int index) {
+        elements.set(index * (width * height * channels) + (channel - 1) * (width * height) + y * width + x, value);
     }
 
-    public float getPixel(int x, int y) {
-        return getPixel(x, y, DEFAULT_CHANNEL);
+    public float getElement(int x, int y) {
+        return getElement(x, y, DEFAULT_CHANNEL);
     }
 
-    public float getPixel(int x, int y, int channel) {
-        return getPixel(x, y, channel, DEFAULT_INDEX);
+    public float getElement(int x, int y, int channel) {
+        return getElement(x, y, channel, DEFAULT_INDEX);
     }
 
-    public float getPixel(int x, int y, int channel, int index) {
-        return pixels[index * (width * height * channels) + (channel - 1) * (width * height) + y * width + x];
+    public float getElement(int x, int y, int channel, int index) {
+        return elements.get(index * (width * height * channels) + (channel - 1) * (width * height) + y * width + x);
     }
 
     public int getChannels() {
@@ -91,10 +91,10 @@ public class ConvolutionalShape implements Shape4D, Cloneable {
 
     @Override
     public ConvolutionalShape clone() {
-        return new ConvolutionalShape(width, height, channels, count, pixels == null ? new Float[width * height * channels * count] : Arrays.copyOf(pixels, pixels.length));
+        return new ConvolutionalShape(width, height, channels, count, elements == null ? JavaNumberTypeSupport.FLOAT.createArray(width * height * channels * count) : elements.clone());
     }
 
-    public ConvolutionalShape withPixels(Float[] pixels) {
-        return new ConvolutionalShape(width, height, channels, count, pixels);
+    public ConvolutionalShape withElements(Array<Float> elements) {
+        return new ConvolutionalShape(width, height, channels, count, elements);
     }
 }

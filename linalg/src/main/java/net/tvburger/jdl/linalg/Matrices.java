@@ -56,7 +56,7 @@ public final class Matrices {
     }
 
     public static <N extends Number> boolean isIdentity(TypedMatrix<N> matrix) {
-        return isIdentity(matrix, matrix.getCurrentNumberType());
+        return isIdentity(matrix, matrix.getNumberTypeSupport());
     }
 
     public static <N extends Number> boolean isIdentity(Matrix<N> matrix, JavaNumberTypeSupport<N> support) {

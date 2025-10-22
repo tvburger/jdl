@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model.nn;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.patterns.DomainObject;
 
 /**
@@ -56,7 +57,7 @@ public class InputNeuron extends Neuron {
     }
 
     @Override
-    public Float estimateScalar(Float[] inputs) {
+    public Float estimateScalar(Array<Float> inputs) {
         return input;
     }
 

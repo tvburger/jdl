@@ -21,10 +21,10 @@ public final class RationalBigIntegerSupport implements JavaNumberTypeSupport<Ra
 
     @SuppressWarnings("unchecked")
     @Override
-    public Rational<BigInteger>[] createArray(int length) {
+    public Array<Rational<BigInteger>> createArray(int length) {
         Rational<BigInteger>[] array = (Rational<BigInteger>[]) new Rational<?>[length];
         Arrays.fill(array, ZERO);
-        return array;
+        return Array.of(array);
     }
 
     @SuppressWarnings("unchecked")

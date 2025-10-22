@@ -9,6 +9,7 @@ import net.tvburger.jdl.model.training.Initializer;
 /**
  * The initializer is used to set the initial parameter value of a neuron
  */
+@Deprecated
 @Strategy(Strategy.Role.INTERFACE)
 public interface NeuralNetworkInitializer extends NeuronVisitor, Initializer<NeuralNetwork, Float> {
 

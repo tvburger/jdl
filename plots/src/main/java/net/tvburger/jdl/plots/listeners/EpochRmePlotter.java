@@ -1,5 +1,6 @@
 package net.tvburger.jdl.plots.listeners;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.model.DataSet;
 import net.tvburger.jdl.model.training.Optimizer;
 import net.tvburger.jdl.model.training.TrainableFunction;
@@ -53,13 +54,13 @@ public class EpochRmePlotter implements DataRenderer {
     private <N extends Number> float calculateRme(TrainableFunction<N> model, DataSet<N> samples) {
         float mse = 0.0f;
         for (DataSet.Sample<N> sample : samples) {
-            N[] estimate = model.estimate(sample.features());
+            Array<N> estimate = model.estimate(sample.features());
             float sumSquaredErrors = 0.0f;
-            for (int i = 0; i < estimate.length; i++) {
-                float error = estimate[i].floatValue() - sample.targetOutputs()[i].floatValue();
+            for (int i = 0; i < estimate.length(); i++) {
+                float error = estimate.get(i).floatValue() - sample.targetOutputs().get(i).floatValue();
                 sumSquaredErrors += error * error;
             }
-            float meanSquaredError = sumSquaredErrors / estimate.length;
+            float meanSquaredError = sumSquaredErrors / estimate.length();
             mse += (float) Math.sqrt(meanSquaredError) / samples.size();
         }
         return mse;

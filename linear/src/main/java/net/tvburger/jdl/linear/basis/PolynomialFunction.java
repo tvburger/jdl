@@ -18,7 +18,7 @@ public class PolynomialFunction<N extends Number> implements BasisFunction<N> {
     }
 
     @Override
-    public JavaNumberTypeSupport<N> getCurrentNumberType() {
+    public JavaNumberTypeSupport<N> getNumberTypeSupport() {
         return typeSupport;
     }
 
@@ -49,7 +49,7 @@ public class PolynomialFunction<N extends Number> implements BasisFunction<N> {
         }
 
         @Override
-        public JavaNumberTypeSupport<N> getCurrentNumberType() {
+        public JavaNumberTypeSupport<N> getNumberTypeSupport() {
             return typeSupport;
         }
 

@@ -98,7 +98,7 @@ public class ScaledError<N extends Number> implements DimensionLossFunction<N>, 
      * {@inheritDoc}
      */
     @Override
-    public JavaNumberTypeSupport<N> getCurrentNumberType() {
+    public JavaNumberTypeSupport<N> getNumberTypeSupport() {
         return typeSupport;
     }
 }

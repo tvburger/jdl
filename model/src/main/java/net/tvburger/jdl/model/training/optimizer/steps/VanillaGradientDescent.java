@@ -1,5 +1,7 @@
 package net.tvburger.jdl.model.training.optimizer.steps;
 
+import net.tvburger.jdl.common.numbers.Array;
+import net.tvburger.jdl.linalg.TypedVector;
 import net.tvburger.jdl.linalg.Vector;
 import net.tvburger.jdl.linalg.Vectors;
 import net.tvburger.jdl.model.scalars.LinearCombination;
@@ -21,10 +23,10 @@ public class VanillaGradientDescent<N extends Number> implements UpdateStep<Line
 
     @Override
     public Vector<N> calculateUpdate(Vector<N> gradients, LinearCombination<N> model, int step, Set<ExplicitRegularization<N>> regularizations) {
-        N[] parameters = model.getParameters();
-        Vector<N> thetas = Vectors.of(model.getCurrentNumberType(), parameters).transpose();
+        Array<N> parameters = model.getParameters();
+        Vector<N> thetas = new TypedVector<>(parameters, true, model.getNumberTypeSupport());
         Vector<N> regularizationGradients = Regularizations.applyExplicitRegularization(regularizations, thetas, gradients);
-        return regularizationGradients.multiply(model.getCurrentNumberType().negate(learningRate));
+        return regularizationGradients.multiply(model.getNumberTypeSupport().negate(learningRate));
     }
 
     @Override

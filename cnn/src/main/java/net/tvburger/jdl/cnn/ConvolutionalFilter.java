@@ -1,69 +1,80 @@
 package net.tvburger.jdl.cnn;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.shapes.Shape2D;
 import net.tvburger.jdl.model.scalars.TrainableScalarFunction;
 
 public class ConvolutionalFilter implements TrainableScalarFunction<Float> {
 
-    private final ConvolutionalShape shape;
     private final ConvolutionalKernel kernel;
+    private Array<Float> parameters;
 
     public static ConvolutionalFilter create(int size, int channels) {
-        return new ConvolutionalFilter(new ConvolutionalShape(size, size, channels), new ConvolutionalKernel(Shape2D.of(size, size)));
+        Array<Float> parameters = JavaNumberTypeSupport.FLOAT.createArray(size * size * channels + 1);
+        return new ConvolutionalFilter(new ConvolutionalKernel(Shape2D.of(size, size), channels, 1, parameters.slice(1)), parameters);
     }
 
-    public ConvolutionalFilter(ConvolutionalShape shape, ConvolutionalKernel kernel) {
-        this.shape = shape;
+    public ConvolutionalFilter(ConvolutionalKernel kernel, Array<Float> parameters) {
         this.kernel = kernel;
+        this.parameters = parameters;
     }
 
     public ConvolutionalShape getShape() {
-        return shape;
+        return kernel;
+    }
+
+    public Float applyToWindow(ConvolutionalShape window) {
+        return estimateScalar(window.getElements());
     }
 
     @Override
-    public Float[] calculateParameterGradients(Float[] inputs) {
-        return new Float[0];
+    public Array<Float> calculateParameterGradients(Array<Float> inputs) {
+        return inputs;
     }
 
     @Override
-    public Float estimateScalar(Float[] inputs) {
-        return 0f;
+    public Float estimateScalar(Array<Float> inputs) {
+        Array<Float> weights = kernel.getWeights();
+        float result = parameters.get(0);
+        for (int i = 0; i < weights.length(); i++) {
+            result += weights.get(i) * inputs.get(i);
+        }
+        return result;
     }
 
     @Override
     public int getParameterCount() {
-        return 0;
+        return parameters.length();
     }
 
     @Override
-    public Float[] getParameters() {
-        return new Float[0];
+    public Array<Float> getParameters() {
+        return parameters;
     }
 
     @Override
     public Float getParameter(int p) {
-        return 0f;
+        return parameters.get(p);
     }
 
     @Override
-    public void setParameters(Float[] values) {
-
+    public void setParameters(Array<Float> values) {
+        this.parameters = values;
     }
 
     @Override
     public void setParameter(int p, Float value) {
-
+        parameters.set(p, value);
     }
 
     @Override
     public int arity() {
-        return 0;
+        return kernel.getElements().length();
     }
 
     @Override
-    public JavaNumberTypeSupport<Float> getCurrentNumberType() {
-        return null;
+    public JavaNumberTypeSupport<Float> getNumberTypeSupport() {
+        return JavaNumberTypeSupport.FLOAT;
     }
 }

@@ -1,5 +1,6 @@
 package net.tvburger.jdl.mlp;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.datasets.SyntheticDataSets;
 import net.tvburger.jdl.model.DataSet;
@@ -20,7 +21,6 @@ import net.tvburger.jdl.model.training.regularization.RegularizationFactory;
 import net.tvburger.jdl.model.training.regularization.Regularizations;
 import net.tvburger.jdl.plots.listeners.EpochRmePlotter;
 
-import java.util.Arrays;
 import java.util.Random;
 
 public class MLPLineMain {
@@ -51,8 +51,8 @@ public class MLPLineMain {
         NeuralNetworks.dump(mlp);
 
         for (DataSet.Sample<Float> sample : testSet) {
-            Float[] estimate = mlp.estimate(sample.features());
-            System.out.println("with noise = " + Arrays.toString(sample.targetOutputs()) + " estimated = " + Arrays.toString(estimate) + " real = " + Arrays.toString(line.getEstimationFunction().estimate(sample.features())));
+            Array<Float> estimate = mlp.estimate(sample.features());
+            System.out.println("with noise = " + Array.toString(sample.targetOutputs()) + " estimated = " + Array.toString(estimate) + " real = " + Array.toString(line.getEstimationFunction().estimate(sample.features())));
         }
     }
 }

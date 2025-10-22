@@ -1,5 +1,6 @@
 package net.tvburger.jdl.plots;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.model.DataSet;
 
 import javax.swing.*;
@@ -8,7 +9,7 @@ import java.awt.*;
 public class ImageViewer extends JPanel implements DataRenderer {
 
     private final String label;
-    private final Float[] pixels; // grayscale values (0.0 - 1.0)
+    private final Array<Float> pixels; // grayscale values (0.0 - 1.0)
     private final int width;
     private final int height;
     private final int scale; // zoom factor to make it visible
@@ -17,7 +18,7 @@ public class ImageViewer extends JPanel implements DataRenderer {
     public static ImageViewer fromMnistImage(DataSet.Sample<Float> sample) {
         String label = "unknown";
         for (int i = 0; i < sample.targetCount(); i++) {
-            if (sample.targetOutputs()[i] >= 0.9f) {
+            if (sample.targetOutputs().get(i) >= 0.9f) {
                 label = Integer.toString(i);
                 break;
             }
@@ -29,8 +30,8 @@ public class ImageViewer extends JPanel implements DataRenderer {
         return new ImageViewer(label, sample.features(), 20, 20, 10);
     }
 
-    public ImageViewer(String label, Float[] pixels, int width, int height, int scale) {
-        if (pixels.length != width * height) {
+    public ImageViewer(String label, Array<Float> pixels, int width, int height, int scale) {
+        if (pixels.length() != width * height) {
             throw new IllegalArgumentException("Pixel array must have " + width + "x" + height + " = " + (width * height) + " elements.");
         }
         this.width = width;
@@ -46,7 +47,7 @@ public class ImageViewer extends JPanel implements DataRenderer {
         super.paintComponent(g);
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                float value = pixels[y * width + x];
+                float value = pixels.get(y * width + x);
                 g.setColor(new Color(value, value, value)); // grayscale
                 g.fillRect(x * scale, y * scale, scale, scale);
             }

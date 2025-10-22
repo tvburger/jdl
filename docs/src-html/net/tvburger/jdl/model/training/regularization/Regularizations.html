@@ -13,12 +13,12 @@
 <div class="source-container">
 <pre><span class="source-line-no">001</span><span id="line-1">package net.tvburger.jdl.model.training.regularization;</span>
 <span class="source-line-no">002</span><span id="line-2"></span>
-<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;</span>
-<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.patterns.StaticUtility;</span>
-<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.linalg.TypedVector;</span>
-<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.linalg.Vector;</span>
-<span class="source-line-no">007</span><span id="line-7"></span>
-<span class="source-line-no">008</span><span id="line-8">import java.util.Arrays;</span>
+<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.numbers.Array;</span>
+<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;</span>
+<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.common.patterns.StaticUtility;</span>
+<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.linalg.TypedVector;</span>
+<span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.linalg.Vector;</span>
+<span class="source-line-no">008</span><span id="line-8"></span>
 <span class="source-line-no">009</span><span id="line-9">import java.util.HashMap;</span>
 <span class="source-line-no">010</span><span id="line-10">import java.util.Map;</span>
 <span class="source-line-no">011</span><span id="line-11">import java.util.Set;</span>
@@ -33,14 +33,14 @@
 <span class="source-line-no">020</span><span id="line-20">        if (regularizations.isEmpty()) {</span>
 <span class="source-line-no">021</span><span id="line-21">            return gradients;</span>
 <span class="source-line-no">022</span><span id="line-22">        }</span>
-<span class="source-line-no">023</span><span id="line-23">        N[] values = Arrays.copyOf(gradients.asArray(), gradients.getDimensions());</span>
+<span class="source-line-no">023</span><span id="line-23">        Array&lt;N&gt; values = gradients.asArray().clone();</span>
 <span class="source-line-no">024</span><span id="line-24">        for (ExplicitRegularization&lt;N&gt; regularization : regularizations) {</span>
 <span class="source-line-no">025</span><span id="line-25">            for (int i = 0; i &lt; thetas.getDimensions(); i++) {</span>
 <span class="source-line-no">026</span><span id="line-26">                N adjustment = regularization.gradientAdjustment(thetas.get(i + 1));</span>
-<span class="source-line-no">027</span><span id="line-27">                values[i] = regularization.getCurrentNumberType().add(values[i], adjustment);</span>
+<span class="source-line-no">027</span><span id="line-27">                values.set(i, regularization.getNumberTypeSupport().add(values.get(i), adjustment));</span>
 <span class="source-line-no">028</span><span id="line-28">            }</span>
 <span class="source-line-no">029</span><span id="line-29">        }</span>
-<span class="source-line-no">030</span><span id="line-30">        return new TypedVector&lt;&gt;(values, gradients.isColumnVector(), gradients.getCurrentNumberType());</span>
+<span class="source-line-no">030</span><span id="line-30">        return new TypedVector&lt;&gt;(values, gradients.isColumnVector(), gradients.getNumberTypeSupport());</span>
 <span class="source-line-no">031</span><span id="line-31">    }</span>
 <span class="source-line-no">032</span><span id="line-32"></span>
 <span class="source-line-no">033</span><span id="line-33">    private static final Map&lt;JavaNumberTypeSupport&lt;?&gt;, RegularizationFactory&lt;?&gt;&gt; factories = new HashMap&lt;&gt;();</span>

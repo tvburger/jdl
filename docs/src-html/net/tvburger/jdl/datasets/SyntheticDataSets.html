@@ -13,137 +13,138 @@
 <div class="source-container">
 <pre><span class="source-line-no">001</span><span id="line-1">package net.tvburger.jdl.datasets;</span>
 <span class="source-line-no">002</span><span id="line-2"></span>
-<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;</span>
-<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.numbers.NumberTypeAgnostic;</span>
-<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.model.DataSet;</span>
-<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.model.scalars.UnaryEstimationFunction;</span>
-<span class="source-line-no">007</span><span id="line-7"></span>
-<span class="source-line-no">008</span><span id="line-8">import java.util.ArrayList;</span>
-<span class="source-line-no">009</span><span id="line-9">import java.util.List;</span>
-<span class="source-line-no">010</span><span id="line-10">import java.util.Random;</span>
-<span class="source-line-no">011</span><span id="line-11"></span>
-<span class="source-line-no">012</span><span id="line-12">public final class SyntheticDataSets {</span>
-<span class="source-line-no">013</span><span id="line-13"></span>
-<span class="source-line-no">014</span><span id="line-14">    public static abstract class SyntheticDataSet&lt;N extends Number&gt; implements NumberTypeAgnostic&lt;N&gt; {</span>
-<span class="source-line-no">015</span><span id="line-15"></span>
-<span class="source-line-no">016</span><span id="line-16">        private final JavaNumberTypeSupport&lt;N&gt; typeSupport;</span>
-<span class="source-line-no">017</span><span id="line-17">        private final Random random = new Random();</span>
-<span class="source-line-no">018</span><span id="line-18">        private float noiseScale = 0.1f;</span>
-<span class="source-line-no">019</span><span id="line-19">        private float bias = 0.0f;</span>
-<span class="source-line-no">020</span><span id="line-20"></span>
-<span class="source-line-no">021</span><span id="line-21">        protected SyntheticDataSet(JavaNumberTypeSupport&lt;N&gt; typeSupport) {</span>
-<span class="source-line-no">022</span><span id="line-22">            this.typeSupport = typeSupport;</span>
-<span class="source-line-no">023</span><span id="line-23">        }</span>
-<span class="source-line-no">024</span><span id="line-24"></span>
-<span class="source-line-no">025</span><span id="line-25">        @Override</span>
-<span class="source-line-no">026</span><span id="line-26">        public JavaNumberTypeSupport&lt;N&gt; getCurrentNumberType() {</span>
-<span class="source-line-no">027</span><span id="line-27">            return typeSupport;</span>
-<span class="source-line-no">028</span><span id="line-28">        }</span>
-<span class="source-line-no">029</span><span id="line-29"></span>
-<span class="source-line-no">030</span><span id="line-30">        public void setNoiseScale(float noiseScale) {</span>
-<span class="source-line-no">031</span><span id="line-31">            this.noiseScale = noiseScale;</span>
-<span class="source-line-no">032</span><span id="line-32">        }</span>
-<span class="source-line-no">033</span><span id="line-33"></span>
-<span class="source-line-no">034</span><span id="line-34">        public float getNoiseScale() {</span>
-<span class="source-line-no">035</span><span id="line-35">            return noiseScale;</span>
-<span class="source-line-no">036</span><span id="line-36">        }</span>
-<span class="source-line-no">037</span><span id="line-37"></span>
-<span class="source-line-no">038</span><span id="line-38">        public float getBias() {</span>
-<span class="source-line-no">039</span><span id="line-39">            return bias;</span>
-<span class="source-line-no">040</span><span id="line-40">        }</span>
-<span class="source-line-no">041</span><span id="line-41"></span>
-<span class="source-line-no">042</span><span id="line-42">        public void setBias(float bias) {</span>
-<span class="source-line-no">043</span><span id="line-43">            this.bias = bias;</span>
-<span class="source-line-no">044</span><span id="line-44">        }</span>
-<span class="source-line-no">045</span><span id="line-45"></span>
-<span class="source-line-no">046</span><span id="line-46">        public void setRandomSeed(int seed) {</span>
-<span class="source-line-no">047</span><span id="line-47">            random.setSeed(seed);</span>
-<span class="source-line-no">048</span><span id="line-48">        }</span>
-<span class="source-line-no">049</span><span id="line-49"></span>
-<span class="source-line-no">050</span><span id="line-50">        public DataSet&lt;N&gt; loadRandomX(float min, float max, int n) {</span>
-<span class="source-line-no">051</span><span id="line-51">            List&lt;DataSet.Sample&lt;N&gt;&gt; samples = new ArrayList&lt;&gt;();</span>
-<span class="source-line-no">052</span><span id="line-52">            for (int i = 0; i &lt; n; i++) {</span>
-<span class="source-line-no">053</span><span id="line-53">                float x = (max - min) * random.nextFloat() + min;</span>
-<span class="source-line-no">054</span><span id="line-54">                float y = targetOutputs(x) + noiseScale * (float) random.nextGaussian(0.0, noiseScale) + bias;</span>
-<span class="source-line-no">055</span><span id="line-55">                N[] xa = typeSupport.createArray(1);</span>
-<span class="source-line-no">056</span><span id="line-56">                xa[0] = typeSupport.valueOf(x);</span>
-<span class="source-line-no">057</span><span id="line-57">                N[] ya = typeSupport.createArray(1);</span>
-<span class="source-line-no">058</span><span id="line-58">                ya[0] = typeSupport.valueOf(y);</span>
-<span class="source-line-no">059</span><span id="line-59">                samples.add(new DataSet.Sample&lt;&gt;(xa, ya));</span>
-<span class="source-line-no">060</span><span id="line-60">            }</span>
-<span class="source-line-no">061</span><span id="line-61">            return new DataSet&lt;&gt;(samples);</span>
-<span class="source-line-no">062</span><span id="line-62">        }</span>
-<span class="source-line-no">063</span><span id="line-63"></span>
-<span class="source-line-no">064</span><span id="line-64">        public DataSet&lt;N&gt; loadEvenX(float min, float max, int n) {</span>
-<span class="source-line-no">065</span><span id="line-65">            List&lt;DataSet.Sample&lt;N&gt;&gt; samples = new ArrayList&lt;&gt;();</span>
-<span class="source-line-no">066</span><span id="line-66">            N range = typeSupport.subtract(typeSupport.valueOf(max), typeSupport.valueOf(min));</span>
-<span class="source-line-no">067</span><span id="line-67">            N counter = typeSupport.zero();</span>
-<span class="source-line-no">068</span><span id="line-68">            N n_min_1 = typeSupport.valueOf(n - 1);</span>
-<span class="source-line-no">069</span><span id="line-69">            for (int i = 0; i &lt; n; i++) {</span>
-<span class="source-line-no">070</span><span id="line-70">                N x = typeSupport.add(typeSupport.multiply(typeSupport.divide(range, n_min_1), counter), typeSupport.valueOf(min));</span>
-<span class="source-line-no">071</span><span id="line-71">                N y = typeSupport.valueOf(targetOutputs(x.floatValue()) + noiseScale * (float) random.nextGaussian(0.0, noiseScale));</span>
-<span class="source-line-no">072</span><span id="line-72">                N[] xa = typeSupport.createArray(1);</span>
-<span class="source-line-no">073</span><span id="line-73">                xa[0] = x;</span>
-<span class="source-line-no">074</span><span id="line-74">                N[] ya = typeSupport.createArray(1);</span>
-<span class="source-line-no">075</span><span id="line-75">                ya[0] = y;</span>
-<span class="source-line-no">076</span><span id="line-76">                samples.add(new DataSet.Sample&lt;&gt;(xa, ya));</span>
-<span class="source-line-no">077</span><span id="line-77">                counter = typeSupport.add(counter, typeSupport.one());</span>
-<span class="source-line-no">078</span><span id="line-78">            }</span>
-<span class="source-line-no">079</span><span id="line-79">            return new DataSet&lt;&gt;(samples);</span>
-<span class="source-line-no">080</span><span id="line-80">        }</span>
-<span class="source-line-no">081</span><span id="line-81"></span>
-<span class="source-line-no">082</span><span id="line-82">        public DataSet&lt;N&gt; load(int n, float min, float max) {</span>
-<span class="source-line-no">083</span><span id="line-83">            return loadEvenX(min, max, n);</span>
-<span class="source-line-no">084</span><span id="line-84">        }</span>
-<span class="source-line-no">085</span><span id="line-85"></span>
-<span class="source-line-no">086</span><span id="line-86">        public DataSet&lt;N&gt; load(int n) {</span>
-<span class="source-line-no">087</span><span id="line-87">            return loadEvenX(0.0f, 1.0f, n);</span>
-<span class="source-line-no">088</span><span id="line-88">        }</span>
-<span class="source-line-no">089</span><span id="line-89"></span>
-<span class="source-line-no">090</span><span id="line-90">        public DataSet&lt;N&gt; load() {</span>
-<span class="source-line-no">091</span><span id="line-91">            return loadEvenX(0.0f, 1.0f, 1000);</span>
-<span class="source-line-no">092</span><span id="line-92">        }</span>
-<span class="source-line-no">093</span><span id="line-93"></span>
-<span class="source-line-no">094</span><span id="line-94">        protected abstract float targetOutputs(float x);</span>
-<span class="source-line-no">095</span><span id="line-95"></span>
-<span class="source-line-no">096</span><span id="line-96">        public UnaryEstimationFunction&lt;N&gt; getEstimationFunction() {</span>
-<span class="source-line-no">097</span><span id="line-97">            return new UnaryEstimationFunction&lt;&gt;() {</span>
-<span class="source-line-no">098</span><span id="line-98">                @Override</span>
-<span class="source-line-no">099</span><span id="line-99">                public N estimateUnary(N input) {</span>
-<span class="source-line-no">100</span><span id="line-100">                    return typeSupport.valueOf(targetOutputs(input.floatValue()));</span>
-<span class="source-line-no">101</span><span id="line-101">                }</span>
-<span class="source-line-no">102</span><span id="line-102"></span>
-<span class="source-line-no">103</span><span id="line-103">                @Override</span>
-<span class="source-line-no">104</span><span id="line-104">                public JavaNumberTypeSupport&lt;N&gt; getCurrentNumberType() {</span>
-<span class="source-line-no">105</span><span id="line-105">                    return typeSupport;</span>
-<span class="source-line-no">106</span><span id="line-106">                }</span>
-<span class="source-line-no">107</span><span id="line-107">            };</span>
-<span class="source-line-no">108</span><span id="line-108">        }</span>
-<span class="source-line-no">109</span><span id="line-109">    }</span>
-<span class="source-line-no">110</span><span id="line-110"></span>
-<span class="source-line-no">111</span><span id="line-111">    public static &lt;N extends Number&gt; SyntheticDataSet&lt;N&gt; line(float bias, float weight, JavaNumberTypeSupport&lt;N&gt; typeSupport) {</span>
-<span class="source-line-no">112</span><span id="line-112">        return new SyntheticDataSet&lt;&gt;(typeSupport) {</span>
-<span class="source-line-no">113</span><span id="line-113">            @Override</span>
-<span class="source-line-no">114</span><span id="line-114">            public float targetOutputs(float x) {</span>
-<span class="source-line-no">115</span><span id="line-115">                return weight * x + bias;</span>
-<span class="source-line-no">116</span><span id="line-116">            }</span>
-<span class="source-line-no">117</span><span id="line-117">        };</span>
-<span class="source-line-no">118</span><span id="line-118">    }</span>
-<span class="source-line-no">119</span><span id="line-119"></span>
-<span class="source-line-no">120</span><span id="line-120">    public static &lt;N extends Number&gt; SyntheticDataSet&lt;N&gt; sinus(JavaNumberTypeSupport&lt;N&gt; typeSupport) {</span>
-<span class="source-line-no">121</span><span id="line-121">        return sinus(1.0f, (float) Math.PI * 2, typeSupport);</span>
-<span class="source-line-no">122</span><span id="line-122">    }</span>
-<span class="source-line-no">123</span><span id="line-123"></span>
-<span class="source-line-no">124</span><span id="line-124">    public static &lt;N extends Number&gt; SyntheticDataSet&lt;N&gt; sinus(float scale, float period, JavaNumberTypeSupport&lt;N&gt; typeSupport) {</span>
-<span class="source-line-no">125</span><span id="line-125">        return new SyntheticDataSet&lt;&gt;(typeSupport) {</span>
-<span class="source-line-no">126</span><span id="line-126">            @Override</span>
-<span class="source-line-no">127</span><span id="line-127">            public float targetOutputs(float x) {</span>
-<span class="source-line-no">128</span><span id="line-128">                return scale * (float) Math.sin(x * period);</span>
-<span class="source-line-no">129</span><span id="line-129">            }</span>
-<span class="source-line-no">130</span><span id="line-130">        };</span>
-<span class="source-line-no">131</span><span id="line-131">    }</span>
-<span class="source-line-no">132</span><span id="line-132"></span>
-<span class="source-line-no">133</span><span id="line-133">}</span>
+<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.numbers.Array;</span>
+<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;</span>
+<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.common.numbers.NumberTypeAgnostic;</span>
+<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.model.DataSet;</span>
+<span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.model.scalars.UnaryEstimationFunction;</span>
+<span class="source-line-no">008</span><span id="line-8"></span>
+<span class="source-line-no">009</span><span id="line-9">import java.util.ArrayList;</span>
+<span class="source-line-no">010</span><span id="line-10">import java.util.List;</span>
+<span class="source-line-no">011</span><span id="line-11">import java.util.Random;</span>
+<span class="source-line-no">012</span><span id="line-12"></span>
+<span class="source-line-no">013</span><span id="line-13">public final class SyntheticDataSets {</span>
+<span class="source-line-no">014</span><span id="line-14"></span>
+<span class="source-line-no">015</span><span id="line-15">    public static abstract class SyntheticDataSet&lt;N extends Number&gt; implements NumberTypeAgnostic&lt;N&gt; {</span>
+<span class="source-line-no">016</span><span id="line-16"></span>
+<span class="source-line-no">017</span><span id="line-17">        private final JavaNumberTypeSupport&lt;N&gt; typeSupport;</span>
+<span class="source-line-no">018</span><span id="line-18">        private final Random random = new Random();</span>
+<span class="source-line-no">019</span><span id="line-19">        private float noiseScale = 0.1f;</span>
+<span class="source-line-no">020</span><span id="line-20">        private float bias = 0.0f;</span>
+<span class="source-line-no">021</span><span id="line-21"></span>
+<span class="source-line-no">022</span><span id="line-22">        protected SyntheticDataSet(JavaNumberTypeSupport&lt;N&gt; typeSupport) {</span>
+<span class="source-line-no">023</span><span id="line-23">            this.typeSupport = typeSupport;</span>
+<span class="source-line-no">024</span><span id="line-24">        }</span>
+<span class="source-line-no">025</span><span id="line-25"></span>
+<span class="source-line-no">026</span><span id="line-26">        @Override</span>
+<span class="source-line-no">027</span><span id="line-27">        public JavaNumberTypeSupport&lt;N&gt; getNumberTypeSupport() {</span>
+<span class="source-line-no">028</span><span id="line-28">            return typeSupport;</span>
+<span class="source-line-no">029</span><span id="line-29">        }</span>
+<span class="source-line-no">030</span><span id="line-30"></span>
+<span class="source-line-no">031</span><span id="line-31">        public void setNoiseScale(float noiseScale) {</span>
+<span class="source-line-no">032</span><span id="line-32">            this.noiseScale = noiseScale;</span>
+<span class="source-line-no">033</span><span id="line-33">        }</span>
+<span class="source-line-no">034</span><span id="line-34"></span>
+<span class="source-line-no">035</span><span id="line-35">        public float getNoiseScale() {</span>
+<span class="source-line-no">036</span><span id="line-36">            return noiseScale;</span>
+<span class="source-line-no">037</span><span id="line-37">        }</span>
+<span class="source-line-no">038</span><span id="line-38"></span>
+<span class="source-line-no">039</span><span id="line-39">        public float getBias() {</span>
+<span class="source-line-no">040</span><span id="line-40">            return bias;</span>
+<span class="source-line-no">041</span><span id="line-41">        }</span>
+<span class="source-line-no">042</span><span id="line-42"></span>
+<span class="source-line-no">043</span><span id="line-43">        public void setBias(float bias) {</span>
+<span class="source-line-no">044</span><span id="line-44">            this.bias = bias;</span>
+<span class="source-line-no">045</span><span id="line-45">        }</span>
+<span class="source-line-no">046</span><span id="line-46"></span>
+<span class="source-line-no">047</span><span id="line-47">        public void setRandomSeed(int seed) {</span>
+<span class="source-line-no">048</span><span id="line-48">            random.setSeed(seed);</span>
+<span class="source-line-no">049</span><span id="line-49">        }</span>
+<span class="source-line-no">050</span><span id="line-50"></span>
+<span class="source-line-no">051</span><span id="line-51">        public DataSet&lt;N&gt; loadRandomX(float min, float max, int n) {</span>
+<span class="source-line-no">052</span><span id="line-52">            List&lt;DataSet.Sample&lt;N&gt;&gt; samples = new ArrayList&lt;&gt;();</span>
+<span class="source-line-no">053</span><span id="line-53">            for (int i = 0; i &lt; n; i++) {</span>
+<span class="source-line-no">054</span><span id="line-54">                float x = (max - min) * random.nextFloat() + min;</span>
+<span class="source-line-no">055</span><span id="line-55">                float y = targetOutputs(x) + noiseScale * (float) random.nextGaussian(0.0, noiseScale) + bias;</span>
+<span class="source-line-no">056</span><span id="line-56">                Array&lt;N&gt; xa = typeSupport.createArray(1);</span>
+<span class="source-line-no">057</span><span id="line-57">                xa.set(0, typeSupport.valueOf(x));</span>
+<span class="source-line-no">058</span><span id="line-58">                Array&lt;N&gt; ya = typeSupport.createArray(1);</span>
+<span class="source-line-no">059</span><span id="line-59">                ya.set(0, typeSupport.valueOf(y));</span>
+<span class="source-line-no">060</span><span id="line-60">                samples.add(new DataSet.Sample&lt;&gt;(xa, ya));</span>
+<span class="source-line-no">061</span><span id="line-61">            }</span>
+<span class="source-line-no">062</span><span id="line-62">            return new DataSet&lt;&gt;(samples);</span>
+<span class="source-line-no">063</span><span id="line-63">        }</span>
+<span class="source-line-no">064</span><span id="line-64"></span>
+<span class="source-line-no">065</span><span id="line-65">        public DataSet&lt;N&gt; loadEvenX(float min, float max, int n) {</span>
+<span class="source-line-no">066</span><span id="line-66">            List&lt;DataSet.Sample&lt;N&gt;&gt; samples = new ArrayList&lt;&gt;();</span>
+<span class="source-line-no">067</span><span id="line-67">            N range = typeSupport.subtract(typeSupport.valueOf(max), typeSupport.valueOf(min));</span>
+<span class="source-line-no">068</span><span id="line-68">            N counter = typeSupport.zero();</span>
+<span class="source-line-no">069</span><span id="line-69">            N n_min_1 = typeSupport.valueOf(n - 1);</span>
+<span class="source-line-no">070</span><span id="line-70">            for (int i = 0; i &lt; n; i++) {</span>
+<span class="source-line-no">071</span><span id="line-71">                N x = typeSupport.add(typeSupport.multiply(typeSupport.divide(range, n_min_1), counter), typeSupport.valueOf(min));</span>
+<span class="source-line-no">072</span><span id="line-72">                N y = typeSupport.valueOf(targetOutputs(x.floatValue()) + noiseScale * (float) random.nextGaussian(0.0, noiseScale));</span>
+<span class="source-line-no">073</span><span id="line-73">                Array&lt;N&gt; xa = typeSupport.createArray(1);</span>
+<span class="source-line-no">074</span><span id="line-74">                xa.set(0, x);</span>
+<span class="source-line-no">075</span><span id="line-75">                Array&lt;N&gt; ya = typeSupport.createArray(1);</span>
+<span class="source-line-no">076</span><span id="line-76">                ya.set(0, y);</span>
+<span class="source-line-no">077</span><span id="line-77">                samples.add(new DataSet.Sample&lt;&gt;(xa, ya));</span>
+<span class="source-line-no">078</span><span id="line-78">                counter = typeSupport.add(counter, typeSupport.one());</span>
+<span class="source-line-no">079</span><span id="line-79">            }</span>
+<span class="source-line-no">080</span><span id="line-80">            return new DataSet&lt;&gt;(samples);</span>
+<span class="source-line-no">081</span><span id="line-81">        }</span>
+<span class="source-line-no">082</span><span id="line-82"></span>
+<span class="source-line-no">083</span><span id="line-83">        public DataSet&lt;N&gt; load(int n, float min, float max) {</span>
+<span class="source-line-no">084</span><span id="line-84">            return loadEvenX(min, max, n);</span>
+<span class="source-line-no">085</span><span id="line-85">        }</span>
+<span class="source-line-no">086</span><span id="line-86"></span>
+<span class="source-line-no">087</span><span id="line-87">        public DataSet&lt;N&gt; load(int n) {</span>
+<span class="source-line-no">088</span><span id="line-88">            return loadEvenX(0.0f, 1.0f, n);</span>
+<span class="source-line-no">089</span><span id="line-89">        }</span>
+<span class="source-line-no">090</span><span id="line-90"></span>
+<span class="source-line-no">091</span><span id="line-91">        public DataSet&lt;N&gt; load() {</span>
+<span class="source-line-no">092</span><span id="line-92">            return loadEvenX(0.0f, 1.0f, 1000);</span>
+<span class="source-line-no">093</span><span id="line-93">        }</span>
+<span class="source-line-no">094</span><span id="line-94"></span>
+<span class="source-line-no">095</span><span id="line-95">        protected abstract float targetOutputs(float x);</span>
+<span class="source-line-no">096</span><span id="line-96"></span>
+<span class="source-line-no">097</span><span id="line-97">        public UnaryEstimationFunction&lt;N&gt; getEstimationFunction() {</span>
+<span class="source-line-no">098</span><span id="line-98">            return new UnaryEstimationFunction&lt;&gt;() {</span>
+<span class="source-line-no">099</span><span id="line-99">                @Override</span>
+<span class="source-line-no">100</span><span id="line-100">                public N estimateUnary(N input) {</span>
+<span class="source-line-no">101</span><span id="line-101">                    return typeSupport.valueOf(targetOutputs(input.floatValue()));</span>
+<span class="source-line-no">102</span><span id="line-102">                }</span>
+<span class="source-line-no">103</span><span id="line-103"></span>
+<span class="source-line-no">104</span><span id="line-104">                @Override</span>
+<span class="source-line-no">105</span><span id="line-105">                public JavaNumberTypeSupport&lt;N&gt; getNumberTypeSupport() {</span>
+<span class="source-line-no">106</span><span id="line-106">                    return typeSupport;</span>
+<span class="source-line-no">107</span><span id="line-107">                }</span>
+<span class="source-line-no">108</span><span id="line-108">            };</span>
+<span class="source-line-no">109</span><span id="line-109">        }</span>
+<span class="source-line-no">110</span><span id="line-110">    }</span>
+<span class="source-line-no">111</span><span id="line-111"></span>
+<span class="source-line-no">112</span><span id="line-112">    public static &lt;N extends Number&gt; SyntheticDataSet&lt;N&gt; line(float bias, float weight, JavaNumberTypeSupport&lt;N&gt; typeSupport) {</span>
+<span class="source-line-no">113</span><span id="line-113">        return new SyntheticDataSet&lt;&gt;(typeSupport) {</span>
+<span class="source-line-no">114</span><span id="line-114">            @Override</span>
+<span class="source-line-no">115</span><span id="line-115">            public float targetOutputs(float x) {</span>
+<span class="source-line-no">116</span><span id="line-116">                return weight * x + bias;</span>
+<span class="source-line-no">117</span><span id="line-117">            }</span>
+<span class="source-line-no">118</span><span id="line-118">        };</span>
+<span class="source-line-no">119</span><span id="line-119">    }</span>
+<span class="source-line-no">120</span><span id="line-120"></span>
+<span class="source-line-no">121</span><span id="line-121">    public static &lt;N extends Number&gt; SyntheticDataSet&lt;N&gt; sinus(JavaNumberTypeSupport&lt;N&gt; typeSupport) {</span>
+<span class="source-line-no">122</span><span id="line-122">        return sinus(1.0f, (float) Math.PI * 2, typeSupport);</span>
+<span class="source-line-no">123</span><span id="line-123">    }</span>
+<span class="source-line-no">124</span><span id="line-124"></span>
+<span class="source-line-no">125</span><span id="line-125">    public static &lt;N extends Number&gt; SyntheticDataSet&lt;N&gt; sinus(float scale, float period, JavaNumberTypeSupport&lt;N&gt; typeSupport) {</span>
+<span class="source-line-no">126</span><span id="line-126">        return new SyntheticDataSet&lt;&gt;(typeSupport) {</span>
+<span class="source-line-no">127</span><span id="line-127">            @Override</span>
+<span class="source-line-no">128</span><span id="line-128">            public float targetOutputs(float x) {</span>
+<span class="source-line-no">129</span><span id="line-129">                return scale * (float) Math.sin(x * period);</span>
+<span class="source-line-no">130</span><span id="line-130">            }</span>
+<span class="source-line-no">131</span><span id="line-131">        };</span>
+<span class="source-line-no">132</span><span id="line-132">    }</span>
+<span class="source-line-no">133</span><span id="line-133"></span>
+<span class="source-line-no">134</span><span id="line-134">}</span>
 
 
 

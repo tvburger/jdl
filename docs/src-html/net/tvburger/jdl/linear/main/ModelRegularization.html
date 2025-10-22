@@ -88,7 +88,7 @@
 <span class="source-line-no">075</span><span id="line-75">        DataSet&lt;N&gt; testSet = dataSetGenerator.load(1000);</span>
 <span class="source-line-no">076</span><span id="line-76">        Map&lt;String, DataSet&lt;N&gt;&gt; testSets = new LinkedHashMap&lt;&gt;();</span>
 <span class="source-line-no">077</span><span id="line-77">        testSets.put("Test Set", testSet);</span>
-<span class="source-line-no">078</span><span id="line-78">        return new LinearRegression&lt;&gt;(basisFunctionGenerator, trainSet, testSets, new L2RegularizedClosedSolutionOptimizer&lt;&gt;(basisFunctionGenerator.getCurrentNumberType()), Regimes.oneShot());</span>
+<span class="source-line-no">078</span><span id="line-78">        return new LinearRegression&lt;&gt;(basisFunctionGenerator, trainSet, testSets, new L2RegularizedClosedSolutionOptimizer&lt;&gt;(basisFunctionGenerator.getNumberTypeSupport()), Regimes.oneShot());</span>
 <span class="source-line-no">079</span><span id="line-79">    }</span>
 <span class="source-line-no">080</span><span id="line-80"></span>
 <span class="source-line-no">081</span><span id="line-81">}</span>

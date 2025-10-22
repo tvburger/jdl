@@ -13,84 +13,86 @@
 <div class="source-container">
 <pre><span class="source-line-no">001</span><span id="line-1">package net.tvburger.jdl.model.nn.training.optimizers;</span>
 <span class="source-line-no">002</span><span id="line-2"></span>
-<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.patterns.Strategy;</span>
-<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.linalg.TypedVector;</span>
-<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.linalg.Vector;</span>
-<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.model.nn.ActivationsCachedNeuron;</span>
-<span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.model.nn.NeuralNetwork;</span>
-<span class="source-line-no">008</span><span id="line-8">import net.tvburger.jdl.model.nn.Neuron;</span>
-<span class="source-line-no">009</span><span id="line-9">import net.tvburger.jdl.model.scalars.LinearCombination;</span>
-<span class="source-line-no">010</span><span id="line-10">import net.tvburger.jdl.model.scalars.activations.ActivationFunction;</span>
-<span class="source-line-no">011</span><span id="line-11">import net.tvburger.jdl.model.training.optimizer.GradientDescentModelDecomposer;</span>
-<span class="source-line-no">012</span><span id="line-12"></span>
-<span class="source-line-no">013</span><span id="line-13">import java.util.ArrayList;</span>
-<span class="source-line-no">014</span><span id="line-14">import java.util.IdentityHashMap;</span>
-<span class="source-line-no">015</span><span id="line-15">import java.util.List;</span>
-<span class="source-line-no">016</span><span id="line-16">import java.util.Map;</span>
-<span class="source-line-no">017</span><span id="line-17">import java.util.stream.Stream;</span>
-<span class="source-line-no">018</span><span id="line-18"></span>
-<span class="source-line-no">019</span><span id="line-19">@Strategy(Strategy.Role.CONCRETE)</span>
-<span class="source-line-no">020</span><span id="line-20">public class BackPropagation implements GradientDescentModelDecomposer&lt;NeuralNetwork, Float&gt; {</span>
-<span class="source-line-no">021</span><span id="line-21"></span>
-<span class="source-line-no">022</span><span id="line-22">    @Override</span>
-<span class="source-line-no">023</span><span id="line-23">    public Stream&lt;GradientDecomposition&lt;Float&gt;&gt; calculateDecompositionGradients(NeuralNetwork neuralNetwork, Vector&lt;Float&gt; objectiveGradients, Float[] inputs) {</span>
-<span class="source-line-no">024</span><span id="line-24">        List&lt;GradientDecomposition&lt;Float&gt;&gt; decompositions = new ArrayList&lt;&gt;();</span>
-<span class="source-line-no">025</span><span id="line-25">        Map&lt;Neuron, Float&gt; errorSignals = new IdentityHashMap&lt;&gt;();</span>
-<span class="source-line-no">026</span><span id="line-26">        for (int k = 0; k &lt; neuralNetwork.coArity(); k++) {</span>
-<span class="source-line-no">027</span><span id="line-27">            decomposeAndSetErrorSignalForOutputNode(decompositions, neuralNetwork, objectiveGradients, errorSignals, k);</span>
-<span class="source-line-no">028</span><span id="line-28">        }</span>
-<span class="source-line-no">029</span><span id="line-29">        for (int l = neuralNetwork.getDepth() - 1; l &gt;= 1; l--) {</span>
-<span class="source-line-no">030</span><span id="line-30">            int width = neuralNetwork.getWidth(l);</span>
-<span class="source-line-no">031</span><span id="line-31">            for (int j = 0; j &lt; width; j++) {</span>
-<span class="source-line-no">032</span><span id="line-32">                decomposeAndSetErrorSignalForHiddenNode(decompositions, neuralNetwork, errorSignals, l, j);</span>
-<span class="source-line-no">033</span><span id="line-33">            }</span>
-<span class="source-line-no">034</span><span id="line-34">        }</span>
-<span class="source-line-no">035</span><span id="line-35">        return decompositions.stream();</span>
-<span class="source-line-no">036</span><span id="line-36">    }</span>
-<span class="source-line-no">037</span><span id="line-37"></span>
-<span class="source-line-no">038</span><span id="line-38">    private static void decomposeAndSetErrorSignalForOutputNode(List&lt;GradientDecomposition&lt;Float&gt;&gt; decompositions, NeuralNetwork neuralNetwork, Vector&lt;Float&gt; objectiveGradients, Map&lt;Neuron, Float&gt; errorSignals, int j) {</span>
-<span class="source-line-no">039</span><span id="line-39">        ActivationsCachedNeuron outputNode = neuralNetwork.getNeuron(neuralNetwork.getDepth(), j, ActivationsCachedNeuron.class);</span>
-<span class="source-line-no">040</span><span id="line-40">        ActivationsCachedNeuron.Activation activation = outputNode.getCache().removeLast();</span>
-<span class="source-line-no">041</span><span id="line-41"></span>
-<span class="source-line-no">042</span><span id="line-42">        // determine error signal for output node</span>
-<span class="source-line-no">043</span><span id="line-43">        ActivationFunction activationFunction = outputNode.getNeuronFunction().getActivationFunction();</span>
-<span class="source-line-no">044</span><span id="line-44">        float errorSignal = objectiveGradients.get(j + 1) * activationFunction.determineGradientForOutput(activation.output());</span>
-<span class="source-line-no">045</span><span id="line-45">        decompositions.add(decompose(outputNode.getNeuronFunction().getLinearCombination(), activation.inputs(), errorSignal));</span>
-<span class="source-line-no">046</span><span id="line-46">        errorSignals.put(outputNode, errorSignal);</span>
-<span class="source-line-no">047</span><span id="line-47">    }</span>
-<span class="source-line-no">048</span><span id="line-48"></span>
-<span class="source-line-no">049</span><span id="line-49">    private static void decomposeAndSetErrorSignalForHiddenNode(List&lt;GradientDecomposition&lt;Float&gt;&gt; decompositions, NeuralNetwork neuralNetwork, Map&lt;Neuron, Float&gt; errorSignals, int l, int j) {</span>
-<span class="source-line-no">050</span><span id="line-50">        ActivationsCachedNeuron hiddenNode = neuralNetwork.getNeuron(l, j, ActivationsCachedNeuron.class);</span>
-<span class="source-line-no">051</span><span id="line-51">        ActivationsCachedNeuron.Activation activation = hiddenNode.getCache().removeLast();</span>
-<span class="source-line-no">052</span><span id="line-52"></span>
-<span class="source-line-no">053</span><span id="line-53">        // determine error signal for hidden node using back propagation</span>
-<span class="source-line-no">054</span><span id="line-54">        float backPropagation = calculateBackPropagation(neuralNetwork, errorSignals, l, j);</span>
-<span class="source-line-no">055</span><span id="line-55">        ActivationFunction activationFunction = hiddenNode.getNeuronFunction().getActivationFunction();</span>
-<span class="source-line-no">056</span><span id="line-56">        float errorSignal = backPropagation * activationFunction.determineGradientForOutput(activation.output());</span>
-<span class="source-line-no">057</span><span id="line-57">        decompositions.add(decompose(hiddenNode.getNeuronFunction().getLinearCombination(), activation.inputs(), errorSignal));</span>
-<span class="source-line-no">058</span><span id="line-58">        errorSignals.put(hiddenNode, errorSignal);</span>
-<span class="source-line-no">059</span><span id="line-59">    }</span>
-<span class="source-line-no">060</span><span id="line-60"></span>
-<span class="source-line-no">061</span><span id="line-61">    private static &lt;N extends NeuralNetwork&gt; float calculateBackPropagation(N neuralNetwork, Map&lt;Neuron, Float&gt; errorSignals, int l, int j) {</span>
-<span class="source-line-no">062</span><span id="line-62">        float backPropagation = 0.0f;</span>
-<span class="source-line-no">063</span><span id="line-63">        Map&lt;Neuron, Float&gt; downstreamNodes = neuralNetwork.getOutputConnections(l, j);</span>
-<span class="source-line-no">064</span><span id="line-64">        for (Map.Entry&lt;Neuron, Float&gt; entry : downstreamNodes.entrySet()) {</span>
-<span class="source-line-no">065</span><span id="line-65">            float downstreamWeight = entry.getValue();</span>
-<span class="source-line-no">066</span><span id="line-66">            float downstreamErrorSignal = errorSignals.getOrDefault(entry.getKey(), 0.0f);</span>
-<span class="source-line-no">067</span><span id="line-67">            backPropagation += downstreamErrorSignal * downstreamWeight;</span>
-<span class="source-line-no">068</span><span id="line-68">        }</span>
-<span class="source-line-no">069</span><span id="line-69">        return backPropagation;</span>
-<span class="source-line-no">070</span><span id="line-70">    }</span>
-<span class="source-line-no">071</span><span id="line-71"></span>
-<span class="source-line-no">072</span><span id="line-72">    private static GradientDecomposition&lt;Float&gt; decompose(LinearCombination&lt;Float&gt; linearCombination, Float[] inputs, float errorSignal) {</span>
-<span class="source-line-no">073</span><span id="line-73">        Float[] parameterGradients = new Float[inputs.length + 1];</span>
-<span class="source-line-no">074</span><span id="line-74">        parameterGradients[0] = errorSignal; // bias term</span>
-<span class="source-line-no">075</span><span id="line-75">        for (int d = 1; d &lt; parameterGradients.length; d++) {</span>
-<span class="source-line-no">076</span><span id="line-76">            parameterGradients[d] = errorSignal * inputs[d - 1];</span>
-<span class="source-line-no">077</span><span id="line-77">        }</span>
-<span class="source-line-no">078</span><span id="line-78">        return new GradientDecomposition&lt;&gt;(linearCombination, new TypedVector&lt;&gt;(parameterGradients, true, linearCombination.getCurrentNumberType()));</span>
-<span class="source-line-no">079</span><span id="line-79">    }</span>
-<span class="source-line-no">080</span><span id="line-80">}</span>
+<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.numbers.Array;</span>
+<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;</span>
+<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.common.patterns.Strategy;</span>
+<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.linalg.TypedVector;</span>
+<span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.linalg.Vector;</span>
+<span class="source-line-no">008</span><span id="line-8">import net.tvburger.jdl.model.nn.ActivationsCachedNeuron;</span>
+<span class="source-line-no">009</span><span id="line-9">import net.tvburger.jdl.model.nn.NeuralNetwork;</span>
+<span class="source-line-no">010</span><span id="line-10">import net.tvburger.jdl.model.nn.Neuron;</span>
+<span class="source-line-no">011</span><span id="line-11">import net.tvburger.jdl.model.scalars.LinearCombination;</span>
+<span class="source-line-no">012</span><span id="line-12">import net.tvburger.jdl.model.scalars.activations.ActivationFunction;</span>
+<span class="source-line-no">013</span><span id="line-13">import net.tvburger.jdl.model.training.optimizer.GradientDescentModelDecomposer;</span>
+<span class="source-line-no">014</span><span id="line-14"></span>
+<span class="source-line-no">015</span><span id="line-15">import java.util.ArrayList;</span>
+<span class="source-line-no">016</span><span id="line-16">import java.util.IdentityHashMap;</span>
+<span class="source-line-no">017</span><span id="line-17">import java.util.List;</span>
+<span class="source-line-no">018</span><span id="line-18">import java.util.Map;</span>
+<span class="source-line-no">019</span><span id="line-19">import java.util.stream.Stream;</span>
+<span class="source-line-no">020</span><span id="line-20"></span>
+<span class="source-line-no">021</span><span id="line-21">@Strategy(Strategy.Role.CONCRETE)</span>
+<span class="source-line-no">022</span><span id="line-22">public class BackPropagation implements GradientDescentModelDecomposer&lt;NeuralNetwork, Float&gt; {</span>
+<span class="source-line-no">023</span><span id="line-23"></span>
+<span class="source-line-no">024</span><span id="line-24">    @Override</span>
+<span class="source-line-no">025</span><span id="line-25">    public Stream&lt;GradientDecomposition&lt;Float&gt;&gt; calculateDecompositionGradients(NeuralNetwork neuralNetwork, Vector&lt;Float&gt; objectiveGradients, Array&lt;Float&gt; inputs) {</span>
+<span class="source-line-no">026</span><span id="line-26">        List&lt;GradientDecomposition&lt;Float&gt;&gt; decompositions = new ArrayList&lt;&gt;();</span>
+<span class="source-line-no">027</span><span id="line-27">        Map&lt;Neuron, Float&gt; errorSignals = new IdentityHashMap&lt;&gt;();</span>
+<span class="source-line-no">028</span><span id="line-28">        for (int k = 0; k &lt; neuralNetwork.coArity(); k++) {</span>
+<span class="source-line-no">029</span><span id="line-29">            decomposeAndSetErrorSignalForOutputNode(decompositions, neuralNetwork, objectiveGradients, errorSignals, k);</span>
+<span class="source-line-no">030</span><span id="line-30">        }</span>
+<span class="source-line-no">031</span><span id="line-31">        for (int l = neuralNetwork.getDepth() - 1; l &gt;= 1; l--) {</span>
+<span class="source-line-no">032</span><span id="line-32">            int width = neuralNetwork.getWidth(l);</span>
+<span class="source-line-no">033</span><span id="line-33">            for (int j = 0; j &lt; width; j++) {</span>
+<span class="source-line-no">034</span><span id="line-34">                decomposeAndSetErrorSignalForHiddenNode(decompositions, neuralNetwork, errorSignals, l, j);</span>
+<span class="source-line-no">035</span><span id="line-35">            }</span>
+<span class="source-line-no">036</span><span id="line-36">        }</span>
+<span class="source-line-no">037</span><span id="line-37">        return decompositions.stream();</span>
+<span class="source-line-no">038</span><span id="line-38">    }</span>
+<span class="source-line-no">039</span><span id="line-39"></span>
+<span class="source-line-no">040</span><span id="line-40">    private static void decomposeAndSetErrorSignalForOutputNode(List&lt;GradientDecomposition&lt;Float&gt;&gt; decompositions, NeuralNetwork neuralNetwork, Vector&lt;Float&gt; objectiveGradients, Map&lt;Neuron, Float&gt; errorSignals, int j) {</span>
+<span class="source-line-no">041</span><span id="line-41">        ActivationsCachedNeuron outputNode = neuralNetwork.getNeuron(neuralNetwork.getDepth(), j, ActivationsCachedNeuron.class);</span>
+<span class="source-line-no">042</span><span id="line-42">        ActivationsCachedNeuron.Activation activation = outputNode.getCache().removeLast();</span>
+<span class="source-line-no">043</span><span id="line-43"></span>
+<span class="source-line-no">044</span><span id="line-44">        // determine error signal for output node</span>
+<span class="source-line-no">045</span><span id="line-45">        ActivationFunction activationFunction = outputNode.getNeuronFunction().getActivationFunction();</span>
+<span class="source-line-no">046</span><span id="line-46">        float errorSignal = objectiveGradients.get(j + 1) * activationFunction.determineGradientForOutput(activation.output());</span>
+<span class="source-line-no">047</span><span id="line-47">        decompositions.add(decompose(outputNode.getNeuronFunction().getLinearCombination(), activation.inputs(), errorSignal));</span>
+<span class="source-line-no">048</span><span id="line-48">        errorSignals.put(outputNode, errorSignal);</span>
+<span class="source-line-no">049</span><span id="line-49">    }</span>
+<span class="source-line-no">050</span><span id="line-50"></span>
+<span class="source-line-no">051</span><span id="line-51">    private static void decomposeAndSetErrorSignalForHiddenNode(List&lt;GradientDecomposition&lt;Float&gt;&gt; decompositions, NeuralNetwork neuralNetwork, Map&lt;Neuron, Float&gt; errorSignals, int l, int j) {</span>
+<span class="source-line-no">052</span><span id="line-52">        ActivationsCachedNeuron hiddenNode = neuralNetwork.getNeuron(l, j, ActivationsCachedNeuron.class);</span>
+<span class="source-line-no">053</span><span id="line-53">        ActivationsCachedNeuron.Activation activation = hiddenNode.getCache().removeLast();</span>
+<span class="source-line-no">054</span><span id="line-54"></span>
+<span class="source-line-no">055</span><span id="line-55">        // determine error signal for hidden node using back propagation</span>
+<span class="source-line-no">056</span><span id="line-56">        float backPropagation = calculateBackPropagation(neuralNetwork, errorSignals, l, j);</span>
+<span class="source-line-no">057</span><span id="line-57">        ActivationFunction activationFunction = hiddenNode.getNeuronFunction().getActivationFunction();</span>
+<span class="source-line-no">058</span><span id="line-58">        float errorSignal = backPropagation * activationFunction.determineGradientForOutput(activation.output());</span>
+<span class="source-line-no">059</span><span id="line-59">        decompositions.add(decompose(hiddenNode.getNeuronFunction().getLinearCombination(), activation.inputs(), errorSignal));</span>
+<span class="source-line-no">060</span><span id="line-60">        errorSignals.put(hiddenNode, errorSignal);</span>
+<span class="source-line-no">061</span><span id="line-61">    }</span>
+<span class="source-line-no">062</span><span id="line-62"></span>
+<span class="source-line-no">063</span><span id="line-63">    private static &lt;N extends NeuralNetwork&gt; float calculateBackPropagation(N neuralNetwork, Map&lt;Neuron, Float&gt; errorSignals, int l, int j) {</span>
+<span class="source-line-no">064</span><span id="line-64">        float backPropagation = 0.0f;</span>
+<span class="source-line-no">065</span><span id="line-65">        Map&lt;Neuron, Float&gt; downstreamNodes = neuralNetwork.getOutputConnections(l, j);</span>
+<span class="source-line-no">066</span><span id="line-66">        for (Map.Entry&lt;Neuron, Float&gt; entry : downstreamNodes.entrySet()) {</span>
+<span class="source-line-no">067</span><span id="line-67">            float downstreamWeight = entry.getValue();</span>
+<span class="source-line-no">068</span><span id="line-68">            float downstreamErrorSignal = errorSignals.getOrDefault(entry.getKey(), 0.0f);</span>
+<span class="source-line-no">069</span><span id="line-69">            backPropagation += downstreamErrorSignal * downstreamWeight;</span>
+<span class="source-line-no">070</span><span id="line-70">        }</span>
+<span class="source-line-no">071</span><span id="line-71">        return backPropagation;</span>
+<span class="source-line-no">072</span><span id="line-72">    }</span>
+<span class="source-line-no">073</span><span id="line-73"></span>
+<span class="source-line-no">074</span><span id="line-74">    private static GradientDecomposition&lt;Float&gt; decompose(LinearCombination&lt;Float&gt; linearCombination, Array&lt;Float&gt; inputs, float errorSignal) {</span>
+<span class="source-line-no">075</span><span id="line-75">        Array&lt;Float&gt; parameterGradients = JavaNumberTypeSupport.FLOAT.createArray(inputs.length() + 1);</span>
+<span class="source-line-no">076</span><span id="line-76">        parameterGradients.set(0, errorSignal); // bias term</span>
+<span class="source-line-no">077</span><span id="line-77">        for (int d = 1; d &lt; parameterGradients.length(); d++) {</span>
+<span class="source-line-no">078</span><span id="line-78">            parameterGradients.set(d, errorSignal * inputs.get(d - 1));</span>
+<span class="source-line-no">079</span><span id="line-79">        }</span>
+<span class="source-line-no">080</span><span id="line-80">        return new GradientDecomposition&lt;&gt;(linearCombination, new TypedVector&lt;&gt;(parameterGradients, true, linearCombination.getNumberTypeSupport()));</span>
+<span class="source-line-no">081</span><span id="line-81">    }</span>
+<span class="source-line-no">082</span><span id="line-82">}</span>
 
 
 

@@ -1,11 +1,11 @@
 package net.tvburger.jdl.model.training.regularization;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.patterns.StaticUtility;
 import net.tvburger.jdl.linalg.TypedVector;
 import net.tvburger.jdl.linalg.Vector;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -20,14 +20,14 @@ public final class Regularizations {
         if (regularizations.isEmpty()) {
             return gradients;
         }
-        N[] values = Arrays.copyOf(gradients.asArray(), gradients.getDimensions());
+        Array<N> values = gradients.asArray().clone();
         for (ExplicitRegularization<N> regularization : regularizations) {
             for (int i = 0; i < thetas.getDimensions(); i++) {
                 N adjustment = regularization.gradientAdjustment(thetas.get(i + 1));
-                values[i] = regularization.getCurrentNumberType().add(values[i], adjustment);
+                values.set(i, regularization.getNumberTypeSupport().add(values.get(i), adjustment));
             }
         }
-        return new TypedVector<>(values, gradients.isColumnVector(), gradients.getCurrentNumberType());
+        return new TypedVector<>(values, gradients.isColumnVector(), gradients.getNumberTypeSupport());
     }
 
     private static final Map<JavaNumberTypeSupport<?>, RegularizationFactory<?>> factories = new HashMap<>();

@@ -1,5 +1,6 @@
 package net.tvburger.jdl.datasets;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.numbers.NumberTypeAgnostic;
 import net.tvburger.jdl.model.DataSet;
@@ -23,7 +24,7 @@ public final class SyntheticDataSets {
         }
 
         @Override
-        public JavaNumberTypeSupport<N> getCurrentNumberType() {
+        public JavaNumberTypeSupport<N> getNumberTypeSupport() {
             return typeSupport;
         }
 
@@ -52,10 +53,10 @@ public final class SyntheticDataSets {
             for (int i = 0; i < n; i++) {
                 float x = (max - min) * random.nextFloat() + min;
                 float y = targetOutputs(x) + noiseScale * (float) random.nextGaussian(0.0, noiseScale) + bias;
-                N[] xa = typeSupport.createArray(1);
-                xa[0] = typeSupport.valueOf(x);
-                N[] ya = typeSupport.createArray(1);
-                ya[0] = typeSupport.valueOf(y);
+                Array<N> xa = typeSupport.createArray(1);
+                xa.set(0, typeSupport.valueOf(x));
+                Array<N> ya = typeSupport.createArray(1);
+                ya.set(0, typeSupport.valueOf(y));
                 samples.add(new DataSet.Sample<>(xa, ya));
             }
             return new DataSet<>(samples);
@@ -69,10 +70,10 @@ public final class SyntheticDataSets {
             for (int i = 0; i < n; i++) {
                 N x = typeSupport.add(typeSupport.multiply(typeSupport.divide(range, n_min_1), counter), typeSupport.valueOf(min));
                 N y = typeSupport.valueOf(targetOutputs(x.floatValue()) + noiseScale * (float) random.nextGaussian(0.0, noiseScale));
-                N[] xa = typeSupport.createArray(1);
-                xa[0] = x;
-                N[] ya = typeSupport.createArray(1);
-                ya[0] = y;
+                Array<N> xa = typeSupport.createArray(1);
+                xa.set(0, x);
+                Array<N> ya = typeSupport.createArray(1);
+                ya.set(0, y);
                 samples.add(new DataSet.Sample<>(xa, ya));
                 counter = typeSupport.add(counter, typeSupport.one());
             }
@@ -101,7 +102,7 @@ public final class SyntheticDataSets {
                 }
 
                 @Override
-                public JavaNumberTypeSupport<N> getCurrentNumberType() {
+                public JavaNumberTypeSupport<N> getNumberTypeSupport() {
                     return typeSupport;
                 }
             };

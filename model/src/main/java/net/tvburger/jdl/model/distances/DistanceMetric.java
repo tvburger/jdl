@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model.distances;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.patterns.DomainObject;
 import net.tvburger.jdl.common.patterns.Strategy;
 
@@ -17,6 +18,6 @@ public interface DistanceMetric {
      * @param point2 point2 to compare
      * @return the difference between point1 and point2
      */
-    float distance(Float[] point1, Float[] point2);
+    float distance(Array<Float> point1, Array<Float> point2);
 
 }

@@ -33,10 +33,10 @@
 <span class="source-line-no">020</span><span id="line-20"></span>
 <span class="source-line-no">021</span><span id="line-21">    @SuppressWarnings("unchecked")</span>
 <span class="source-line-no">022</span><span id="line-22">    @Override</span>
-<span class="source-line-no">023</span><span id="line-23">    public Rational&lt;Integer&gt;[] createArray(int length) {</span>
+<span class="source-line-no">023</span><span id="line-23">    public Array&lt;Rational&lt;Integer&gt;&gt; createArray(int length) {</span>
 <span class="source-line-no">024</span><span id="line-24">        Rational&lt;Integer&gt;[] array = (Rational&lt;Integer&gt;[]) new Rational&lt;?&gt;[length];</span>
 <span class="source-line-no">025</span><span id="line-25">        Arrays.fill(array, ZERO);</span>
-<span class="source-line-no">026</span><span id="line-26">        return array;</span>
+<span class="source-line-no">026</span><span id="line-26">        return Array.of(array);</span>
 <span class="source-line-no">027</span><span id="line-27">    }</span>
 <span class="source-line-no">028</span><span id="line-28"></span>
 <span class="source-line-no">029</span><span id="line-29">    @SuppressWarnings("unchecked")</span>

@@ -44,7 +44,7 @@ public class ModelComplexity {
             float weights = 0.0f;
             List<Float> floats = new ArrayList<>();
             for (N weight : model.getParameters()) {
-                weights += model.getCurrentNumberType().absolute(weight).floatValue();
+                weights += model.getNumberTypeSupport().absolute(weight).floatValue();
                 floats.add(weight.floatValue());
             }
             System.out.println("m = " + m + "; weights: " + floats);
@@ -75,7 +75,7 @@ public class ModelComplexity {
         DataSet<N> testSet = dataSetGenerator.load(1000);
         Map<String, DataSet<N>> testSets = new LinkedHashMap<>();
         testSets.put("Test Set", testSet);
-        return new LinearRegression<>(basisFunctionGenerator, trainSet, testSets, new ClosedSolutionOptimizer<>(basisFunctionGenerator.getCurrentNumberType()), Regimes.oneShot());
+        return new LinearRegression<>(basisFunctionGenerator, trainSet, testSets, new ClosedSolutionOptimizer<>(basisFunctionGenerator.getNumberTypeSupport()), Regimes.oneShot());
     }
 
 }

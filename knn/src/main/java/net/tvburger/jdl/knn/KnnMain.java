@@ -1,12 +1,11 @@
 package net.tvburger.jdl.knn;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.datasets.SyntheticDataSets;
 import net.tvburger.jdl.model.DataSet;
 import net.tvburger.jdl.model.distances.Metrics;
 import net.tvburger.jdl.model.training.Trainer;
-
-import java.util.Arrays;
 
 public class KnnMain {
 
@@ -22,8 +21,8 @@ public class KnnMain {
         nearestNeighborsTrainer.train(nearestNeighbors, trainingSet);
 
         for (DataSet.Sample<Float> sample : validationSet) {
-            Float[] estimate = nearestNeighbors.estimate(sample.features());
-            System.out.println("with noise = " + Arrays.toString(sample.targetOutputs()) + " estimated = " + Arrays.toString(estimate) + " real = " + Arrays.toString(sinus.getEstimationFunction().estimate(sample.features())));
+            Array<Float> estimate = nearestNeighbors.estimate(sample.features());
+            System.out.println("with noise = " + Array.toString(sample.targetOutputs()) + " estimated = " + Array.toString(estimate) + " real = " + Array.toString(sinus.getEstimationFunction().estimate(sample.features())));
         }
     }
 }

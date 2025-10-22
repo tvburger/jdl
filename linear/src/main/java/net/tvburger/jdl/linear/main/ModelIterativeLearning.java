@@ -1,5 +1,6 @@
 package net.tvburger.jdl.linear.main;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.utils.Pair;
 import net.tvburger.jdl.common.utils.SimpleHolder;
@@ -22,11 +23,8 @@ import net.tvburger.jdl.model.training.regimes.ChainedRegime;
 import net.tvburger.jdl.model.training.regimes.EpochRegime;
 import net.tvburger.jdl.model.training.regimes.Regimes;
 import net.tvburger.jdl.model.training.regularization.ExplicitRegularization;
-import net.tvburger.jdl.model.training.regularization.RegularizationFactory;
-import net.tvburger.jdl.model.training.regularization.Regularizations;
 import net.tvburger.jdl.plots.Plot;
 
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -66,12 +64,12 @@ public class ModelIterativeLearning {
                     mrePlot.addToSeries(currentRmeEntry.getKey() + " RME", new float[]{currentEpoch}, new float[]{currentRmeEntry.getValue()});
                 }
                 mrePlot.redraw();
-                weightPlot.addToSeries("Total Weights", new float[]{currentEpoch}, new float[]{(float) (Arrays.stream(model.getParameters()).mapToDouble(p -> model.getCurrentNumberType().absolute(p).doubleValue()).sum())});
+                weightPlot.addToSeries("Total Weights", new float[]{currentEpoch}, new float[]{(float) (Array.stream(model.getParameters()).mapToDouble(p -> model.getNumberTypeSupport().absolute(p).doubleValue()).sum())});
                 weightPlot.redraw();
                 fitPlot.plotTargetOutput(linearBasisFunctionModel, "Fit");
                 fitPlot.redraw();
                 if (currentEpoch == epochs) {
-                    System.out.println(title + ": " + Arrays.toString(model.getParameters()));
+                    System.out.println(title + ": " + Array.toString(model.getParameters()));
                 }
             }
         })).batch();

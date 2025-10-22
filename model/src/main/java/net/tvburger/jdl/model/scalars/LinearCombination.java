@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model.scalars;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.patterns.Strategy;
 
@@ -18,8 +19,8 @@ import net.tvburger.jdl.common.patterns.Strategy;
 @Strategy(Strategy.Role.CONCRETE)
 public class LinearCombination<N extends Number> implements TrainableScalarFunction<N> {
 
-    private final N[] parameters;
     private final JavaNumberTypeSupport<N> typeSupport;
+    private Array<N> parameters;
 
     /**
      * Creates a new {@code LinearCombination} with the specified number of input dimensions.
@@ -38,13 +39,13 @@ public class LinearCombination<N extends Number> implements TrainableScalarFunct
      *
      * @param parameters parameter vector (weights)
      */
-    public LinearCombination(N[] parameters, JavaNumberTypeSupport<N> typeSupport) {
+    public LinearCombination(Array<N> parameters, JavaNumberTypeSupport<N> typeSupport) {
         this.parameters = parameters;
         this.typeSupport = typeSupport;
     }
 
     @Override
-    public JavaNumberTypeSupport<N> getCurrentNumberType() {
+    public JavaNumberTypeSupport<N> getNumberTypeSupport() {
         return typeSupport;
     }
 
@@ -61,13 +62,13 @@ public class LinearCombination<N extends Number> implements TrainableScalarFunct
      * @throws IllegalArgumentException if {@code inputs.length != arity()}
      */
     @Override
-    public N estimateScalar(N[] inputs) {
-        if (inputs.length != parameters.length) {
+    public N estimateScalar(Array<N> inputs) {
+        if (inputs.length() != parameters.length()) {
             throw new IllegalArgumentException();
         }
         N sum = typeSupport.zero();
-        for (int d = 1; d <= parameters.length; d++) {
-            sum = typeSupport.add(sum, typeSupport.multiply(inputs[d - 1], getWeight(d)));
+        for (int d = 1; d <= parameters.length(); d++) {
+            sum = typeSupport.add(sum, typeSupport.multiply(inputs.get(d - 1), getWeight(d)));
         }
         return sum;
     }
@@ -85,7 +86,7 @@ public class LinearCombination<N extends Number> implements TrainableScalarFunct
      * @return the gradient vector (weight parameterGradients)
      */
     @Override
-    public N[] calculateParameterGradients(N[] inputs) {
+    public Array<N> calculateParameterGradients(Array<N> inputs) {
         return inputs;
     }
 
@@ -94,7 +95,7 @@ public class LinearCombination<N extends Number> implements TrainableScalarFunct
      */
     @Override
     public int getParameterCount() {
-        return parameters.length;
+        return parameters.length();
     }
 
     /**
@@ -103,7 +104,7 @@ public class LinearCombination<N extends Number> implements TrainableScalarFunct
      * @return the parameter array
      */
     @Override
-    public N[] getParameters() {
+    public Array<N> getParameters() {
         return parameters;
     }
 
@@ -112,15 +113,15 @@ public class LinearCombination<N extends Number> implements TrainableScalarFunct
      */
     @Override
     public N getParameter(int p) {
-        return parameters[p];
+        return parameters.get(p);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void setParameters(N[] values) {
-        System.arraycopy(values, 0, parameters, 0, parameters.length);
+    public void setParameters(Array<N> values) {
+        this.parameters = values;
     }
 
     /**
@@ -128,7 +129,7 @@ public class LinearCombination<N extends Number> implements TrainableScalarFunct
      */
     @Override
     public void setParameter(int p, N value) {
-        parameters[p] = value;
+        parameters.set(p, value);
     }
 
     /**
@@ -139,7 +140,7 @@ public class LinearCombination<N extends Number> implements TrainableScalarFunct
      */
     @Override
     public int arity() {
-        return parameters.length;
+        return parameters.length();
     }
 
     /**
@@ -150,7 +151,7 @@ public class LinearCombination<N extends Number> implements TrainableScalarFunct
      * @throws IllegalArgumentException if {@code d} is out of range
      */
     protected final int validDimension(int d) {
-        if (d < 1 || d > parameters.length) {
+        if (d < 1 || d > parameters.length()) {
             throw new IllegalArgumentException("Invalid dimension!");
         }
         return d;
@@ -161,7 +162,7 @@ public class LinearCombination<N extends Number> implements TrainableScalarFunct
      *
      * @return the weight vector
      */
-    public N[] getWeights() {
+    public Array<N> getWeights() {
         return parameters;
     }
 
@@ -171,11 +172,11 @@ public class LinearCombination<N extends Number> implements TrainableScalarFunct
      * @param weights the new weight vector
      * @throws IllegalArgumentException if the number of weights does not match {@link #arity()}
      */
-    public void setWeights(N[] weights) {
-        if (weights.length != parameters.length) {
+    public void setWeights(Array<N> weights) {
+        if (weights.length() != parameters.length()) {
             throw new IllegalArgumentException("Invalid number of weights!");
         }
-        System.arraycopy(weights, 0, parameters, 0, parameters.length);
+        this.parameters = weights;
     }
 
     /**
@@ -186,7 +187,7 @@ public class LinearCombination<N extends Number> implements TrainableScalarFunct
      * @throws IllegalArgumentException if {@code d} is out of range
      */
     public N getWeight(int d) {
-        return parameters[validDimension(d) - 1];
+        return parameters.get(validDimension(d) - 1);
     }
 
     /**
@@ -197,7 +198,7 @@ public class LinearCombination<N extends Number> implements TrainableScalarFunct
      * @throws IllegalArgumentException if {@code d} is out of range
      */
     public void setWeight(int d, N weight) {
-        parameters[validDimension(d) - 1] = weight;
+        parameters.set(validDimension(d) - 1, weight);
     }
 
     /**
@@ -208,7 +209,7 @@ public class LinearCombination<N extends Number> implements TrainableScalarFunct
      * @throws IllegalArgumentException if {@code d} is out of range
      */
     public void adjustWeight(int d, N delta) {
-        parameters[d - 1] = typeSupport.add(parameters[validDimension(d) - 1], delta);
+        parameters.set(d - 1, typeSupport.add(parameters.get(validDimension(d) - 1), delta));
     }
 
 }

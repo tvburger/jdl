@@ -1,16 +1,15 @@
 package net.tvburger.jdl.linalg;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
-
-import java.util.Arrays;
 
 public class TypedVector<N extends Number> implements Vector<N> {
 
-    private final N[] values;
+    private final Array<N> values;
     private final boolean columnVector;
     private final JavaNumberTypeSupport<N> typeSupport;
 
-    public TypedVector(N[] values, boolean columnVector, JavaNumberTypeSupport<N> typeSupport) {
+    public TypedVector(Array<N> values, boolean columnVector, JavaNumberTypeSupport<N> typeSupport) {
         this.values = values;
         this.columnVector = columnVector;
         this.typeSupport = typeSupport;
@@ -18,7 +17,7 @@ public class TypedVector<N extends Number> implements Vector<N> {
 
     @Override
     public int getDimensions() {
-        return values.length;
+        return values.length();
     }
 
     @Override
@@ -35,52 +34,42 @@ public class TypedVector<N extends Number> implements Vector<N> {
     public TypedMatrix<N> asMatrix() {
         N[][] matrixValues;
         if (columnVector) {
-            matrixValues = typeSupport.createArrayOfArrays(values.length, 1);
-            for (int i = 0; i < values.length; i++) {
-                matrixValues[i][0] = values[i];
+            matrixValues = typeSupport.createArrayOfArrays(values.length(), 1);
+            for (int i = 0; i < values.length(); i++) {
+                matrixValues[i][0] = values.get(i);
             }
         } else {
-            matrixValues = typeSupport.createArrayOfArrays(1, values.length);
-            System.arraycopy(values, 0, matrixValues[0], 0, values.length);
+            matrixValues = typeSupport.createArrayOfArrays(1, values.length());
+            for (int i = 0; i < values.length(); i++) {
+                matrixValues[0][i] = values.get(i);
+            }
         }
         return new TypedMatrix<>(matrixValues, typeSupport);
     }
 
     @Override
-    public N[] asArray() {
+    public Array<N> asArray() {
         return values;
     }
 
     @Override
     public N get(int i) {
-        return values[i - 1];
+        return values.get(i - 1);
     }
 
     @Override
     public TypedVector<N> multiply(N value) {
-        N[] multipliedValues = typeSupport.createArray(values.length);
-        for (int i = 0; i < values.length; i++) {
-            multipliedValues[i] = typeSupport.multiply(values[i], value);
-        }
-        return new TypedVector<>(multipliedValues, columnVector, typeSupport);
+        return new TypedVector<>(values.clone().apply(n -> typeSupport.multiply(n, value)), columnVector, typeSupport);
     }
 
     @Override
     public Vector<N> divide(N value) {
-        N[] dividedValues = typeSupport.createArray(values.length);
-        for (int i = 0; i < values.length; i++) {
-            dividedValues[i] = typeSupport.divide(values[i], value);
-        }
-        return new TypedVector<>(dividedValues, columnVector, typeSupport);
+        return new TypedVector<>(values.clone().apply(n -> typeSupport.divide(n, value)), columnVector, typeSupport);
     }
 
     @Override
     public TypedVector<N> add(N value) {
-        N[] addedValues = typeSupport.createArray(values.length);
-        for (int i = 0; i < values.length; i++) {
-            addedValues[i] = typeSupport.add(values[i], value);
-        }
-        return new TypedVector<>(addedValues, columnVector, typeSupport);
+        return new TypedVector<>(values.clone().apply(n -> typeSupport.add(n, value)), columnVector, typeSupport);
     }
 
     @Override
@@ -90,9 +79,9 @@ public class TypedVector<N extends Number> implements Vector<N> {
 
     @Override
     public TypedVector<N> add(Vector<N> vector) {
-        N[] addedValues = typeSupport.createArray(values.length);
-        for (int i = 0; i < values.length; i++) {
-            addedValues[i] = typeSupport.add(values[i], vector.get(i + 1));
+        Array<N> addedValues = values.clone();
+        for (int i = 0; i < values.length(); i++) {
+            addedValues.set(i, typeSupport.add(values.get(i), vector.get(i + 1)));
         }
         return new TypedVector<>(addedValues, columnVector, typeSupport);
     }
@@ -108,8 +97,8 @@ public class TypedVector<N extends Number> implements Vector<N> {
         if (vector.getDimensions() != getDimensions()) {
             throw new IllegalArgumentException();
         }
-        for (int i = 0; i < values.length; i++) {
-            result = typeSupport.add(result, typeSupport.multiply(values[i], vector.get(i + 1)));
+        for (int i = 0; i < values.length(); i++) {
+            result = typeSupport.add(result, typeSupport.multiply(values.get(i), vector.get(i + 1)));
         }
         return result;
     }
@@ -125,16 +114,17 @@ public class TypedVector<N extends Number> implements Vector<N> {
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(values) * (columnVector ? -1 : 1);
+        return values.hashCode() * (columnVector ? -1 : 1);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {
             return true;
         }
         if (obj instanceof TypedVector<?> v) {
-            return columnVector == v.columnVector && Arrays.equals(values, v.values);
+            return columnVector == v.columnVector && Array.equals(values, (Array<N>) v.values, typeSupport);
         } else {
             return false;
         }
@@ -151,7 +141,7 @@ public class TypedVector<N extends Number> implements Vector<N> {
     }
 
     @Override
-    public JavaNumberTypeSupport<N> getCurrentNumberType() {
+    public JavaNumberTypeSupport<N> getNumberTypeSupport() {
         return typeSupport;
     }
 }

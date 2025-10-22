@@ -1,5 +1,7 @@
 package net.tvburger.jdl.model.nn.training.optimizers;
 
+import net.tvburger.jdl.common.numbers.Array;
+import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.patterns.Strategy;
 import net.tvburger.jdl.linalg.TypedVector;
 import net.tvburger.jdl.linalg.Vector;
@@ -20,7 +22,7 @@ import java.util.stream.Stream;
 public class BackPropagation implements GradientDescentModelDecomposer<NeuralNetwork, Float> {
 
     @Override
-    public Stream<GradientDecomposition<Float>> calculateDecompositionGradients(NeuralNetwork neuralNetwork, Vector<Float> objectiveGradients, Float[] inputs) {
+    public Stream<GradientDecomposition<Float>> calculateDecompositionGradients(NeuralNetwork neuralNetwork, Vector<Float> objectiveGradients, Array<Float> inputs) {
         List<GradientDecomposition<Float>> decompositions = new ArrayList<>();
         Map<Neuron, Float> errorSignals = new IdentityHashMap<>();
         for (int k = 0; k < neuralNetwork.coArity(); k++) {
@@ -69,12 +71,12 @@ public class BackPropagation implements GradientDescentModelDecomposer<NeuralNet
         return backPropagation;
     }
 
-    private static GradientDecomposition<Float> decompose(LinearCombination<Float> linearCombination, Float[] inputs, float errorSignal) {
-        Float[] parameterGradients = new Float[inputs.length + 1];
-        parameterGradients[0] = errorSignal; // bias term
-        for (int d = 1; d < parameterGradients.length; d++) {
-            parameterGradients[d] = errorSignal * inputs[d - 1];
+    private static GradientDecomposition<Float> decompose(LinearCombination<Float> linearCombination, Array<Float> inputs, float errorSignal) {
+        Array<Float> parameterGradients = JavaNumberTypeSupport.FLOAT.createArray(inputs.length() + 1);
+        parameterGradients.set(0, errorSignal); // bias term
+        for (int d = 1; d < parameterGradients.length(); d++) {
+            parameterGradients.set(d, errorSignal * inputs.get(d - 1));
         }
-        return new GradientDecomposition<>(linearCombination, new TypedVector<>(parameterGradients, true, linearCombination.getCurrentNumberType()));
+        return new GradientDecomposition<>(linearCombination, new TypedVector<>(parameterGradients, true, linearCombination.getNumberTypeSupport()));
     }
 }

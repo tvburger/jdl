@@ -1,5 +1,6 @@
 package net.tvburger.jdl.adaline;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.datasets.SyntheticDataSets;
 import net.tvburger.jdl.model.DataSet;
@@ -9,8 +10,6 @@ import net.tvburger.jdl.model.training.Trainer;
 import net.tvburger.jdl.model.training.loss.Objectives;
 import net.tvburger.jdl.model.training.regimes.ChainedRegime;
 import net.tvburger.jdl.model.training.regimes.Regimes;
-
-import java.util.Arrays;
 
 public class AdalineLineMain {
 
@@ -29,8 +28,8 @@ public class AdalineLineMain {
         NeuralNetworks.dump(adaline);
 
         for (DataSet.Sample<Float> sample : testSet) {
-            Float[] estimate = adaline.estimate(sample.features());
-            System.out.println("with noise = " + Arrays.toString(sample.targetOutputs()) + " estimated = " + Arrays.toString(estimate) + " real = " + Arrays.toString(syntheticDataSet.getEstimationFunction().estimate(sample.features())));
+            Array<Float> estimate = adaline.estimate(sample.features());
+            System.out.println("with noise = " + Array.toString(sample.targetOutputs()) + " estimated = " + Array.toString(estimate) + " real = " + Array.toString(syntheticDataSet.getEstimationFunction().estimate(sample.features())));
         }
     }
 

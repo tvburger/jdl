@@ -13,41 +13,42 @@
 <div class="source-container">
 <pre><span class="source-line-no">001</span><span id="line-1">package net.tvburger.jdl.adaline;</span>
 <span class="source-line-no">002</span><span id="line-2"></span>
-<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.model.DataSet;</span>
-<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.model.nn.Neuron;</span>
-<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.model.training.ObjectiveFunction;</span>
-<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.model.training.Optimizer;</span>
-<span class="source-line-no">007</span><span id="line-7"></span>
-<span class="source-line-no">008</span><span id="line-8">public class LeastMeanSquares implements Optimizer.Stochastic&lt;Adaline, Float&gt; {</span>
-<span class="source-line-no">009</span><span id="line-9"></span>
-<span class="source-line-no">010</span><span id="line-10">    private float learningRate;</span>
-<span class="source-line-no">011</span><span id="line-11"></span>
-<span class="source-line-no">012</span><span id="line-12">    public LeastMeanSquares(float learningRate) {</span>
-<span class="source-line-no">013</span><span id="line-13">        this.learningRate = learningRate;</span>
-<span class="source-line-no">014</span><span id="line-14">    }</span>
-<span class="source-line-no">015</span><span id="line-15"></span>
-<span class="source-line-no">016</span><span id="line-16">    public float getLearningRate() {</span>
-<span class="source-line-no">017</span><span id="line-17">        return learningRate;</span>
-<span class="source-line-no">018</span><span id="line-18">    }</span>
-<span class="source-line-no">019</span><span id="line-19"></span>
-<span class="source-line-no">020</span><span id="line-20">    public void setLearningRate(float learningRate) {</span>
-<span class="source-line-no">021</span><span id="line-21">        this.learningRate = learningRate;</span>
-<span class="source-line-no">022</span><span id="line-22">    }</span>
-<span class="source-line-no">023</span><span id="line-23"></span>
-<span class="source-line-no">024</span><span id="line-24">    @Override</span>
-<span class="source-line-no">025</span><span id="line-25">    public void optimize(Adaline adaline, DataSet.Sample&lt;Float&gt; sample, ObjectiveFunction&lt;Float&gt; objective, int step) {</span>
-<span class="source-line-no">026</span><span id="line-26">        Float[] estimated = adaline.estimate(sample.features());</span>
-<span class="source-line-no">027</span><span id="line-27">        Float[] gradients = objective.calculateGradient_dJ_da(1, estimated, sample.targetOutputs());</span>
-<span class="source-line-no">028</span><span id="line-28">        for (int j = 0; j &lt; estimated.length; j++) {</span>
-<span class="source-line-no">029</span><span id="line-29">            Neuron node = adaline.getNeuron(adaline.getDepth(), j, Neuron.class);</span>
-<span class="source-line-no">030</span><span id="line-30">            float errorSignal = -1 * gradients[j];</span>
-<span class="source-line-no">031</span><span id="line-31">            for (int d = 1; d &lt;= sample.featureCount(); d++) {</span>
-<span class="source-line-no">032</span><span id="line-32">                node.getNeuronFunction().adjustParameter(d, learningRate * errorSignal * sample.features()[d - 1]);</span>
-<span class="source-line-no">033</span><span id="line-33">            }</span>
-<span class="source-line-no">034</span><span id="line-34">            node.adjustParameter(0, learningRate * errorSignal);</span>
-<span class="source-line-no">035</span><span id="line-35">        }</span>
-<span class="source-line-no">036</span><span id="line-36">    }</span>
-<span class="source-line-no">037</span><span id="line-37">}</span>
+<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.numbers.Array;</span>
+<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.model.DataSet;</span>
+<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.model.nn.Neuron;</span>
+<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.model.training.ObjectiveFunction;</span>
+<span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.model.training.Optimizer;</span>
+<span class="source-line-no">008</span><span id="line-8"></span>
+<span class="source-line-no">009</span><span id="line-9">public class LeastMeanSquares implements Optimizer.Stochastic&lt;Adaline, Float&gt; {</span>
+<span class="source-line-no">010</span><span id="line-10"></span>
+<span class="source-line-no">011</span><span id="line-11">    private float learningRate;</span>
+<span class="source-line-no">012</span><span id="line-12"></span>
+<span class="source-line-no">013</span><span id="line-13">    public LeastMeanSquares(float learningRate) {</span>
+<span class="source-line-no">014</span><span id="line-14">        this.learningRate = learningRate;</span>
+<span class="source-line-no">015</span><span id="line-15">    }</span>
+<span class="source-line-no">016</span><span id="line-16"></span>
+<span class="source-line-no">017</span><span id="line-17">    public float getLearningRate() {</span>
+<span class="source-line-no">018</span><span id="line-18">        return learningRate;</span>
+<span class="source-line-no">019</span><span id="line-19">    }</span>
+<span class="source-line-no">020</span><span id="line-20"></span>
+<span class="source-line-no">021</span><span id="line-21">    public void setLearningRate(float learningRate) {</span>
+<span class="source-line-no">022</span><span id="line-22">        this.learningRate = learningRate;</span>
+<span class="source-line-no">023</span><span id="line-23">    }</span>
+<span class="source-line-no">024</span><span id="line-24"></span>
+<span class="source-line-no">025</span><span id="line-25">    @Override</span>
+<span class="source-line-no">026</span><span id="line-26">    public void optimize(Adaline adaline, DataSet.Sample&lt;Float&gt; sample, ObjectiveFunction&lt;Float&gt; objective, int step) {</span>
+<span class="source-line-no">027</span><span id="line-27">        Array&lt;Float&gt; estimated = adaline.estimate(sample.features());</span>
+<span class="source-line-no">028</span><span id="line-28">        Array&lt;Float&gt; gradients = objective.calculateGradient_dJ_da(1, estimated, sample.targetOutputs());</span>
+<span class="source-line-no">029</span><span id="line-29">        for (int j = 0; j &lt; estimated.length(); j++) {</span>
+<span class="source-line-no">030</span><span id="line-30">            Neuron node = adaline.getNeuron(adaline.getDepth(), j, Neuron.class);</span>
+<span class="source-line-no">031</span><span id="line-31">            float errorSignal = -1 * gradients.get(j);</span>
+<span class="source-line-no">032</span><span id="line-32">            for (int d = 1; d &lt;= sample.featureCount(); d++) {</span>
+<span class="source-line-no">033</span><span id="line-33">                node.getNeuronFunction().adjustParameter(d, learningRate * errorSignal * sample.features().get(d - 1));</span>
+<span class="source-line-no">034</span><span id="line-34">            }</span>
+<span class="source-line-no">035</span><span id="line-35">            node.adjustParameter(0, learningRate * errorSignal);</span>
+<span class="source-line-no">036</span><span id="line-36">        }</span>
+<span class="source-line-no">037</span><span id="line-37">    }</span>
+<span class="source-line-no">038</span><span id="line-38">}</span>
 
 
 

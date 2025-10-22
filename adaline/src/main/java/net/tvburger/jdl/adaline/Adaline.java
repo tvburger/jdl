@@ -1,5 +1,6 @@
 package net.tvburger.jdl.adaline;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.utils.Floats;
 import net.tvburger.jdl.model.nn.DefaultNeuralNetwork;
 import net.tvburger.jdl.model.nn.InputNeuron;
@@ -26,11 +27,11 @@ public class Adaline extends DefaultNeuralNetwork {
         super(layers);
     }
 
-    public boolean[] classify(Float[] inputs) {
-        Float[] estimate = estimate(inputs);
-        boolean[] classifications = new boolean[estimate.length];
-        for (int i = 0; i < estimate.length; i++) {
-            classifications[i] = Floats.greaterThan(estimate[i], 0.0f);
+    public Array<Boolean> classify(Array<Float> inputs) {
+        Array<Float> estimate = estimate(inputs);
+        Array<Boolean> classifications = Array.of(new Boolean[estimate.length()]);
+        for (int i = 0; i < estimate.length(); i++) {
+            classifications.set(i, Floats.greaterThan(estimate.get(i), 0.0f));
         }
         return classifications;
     }

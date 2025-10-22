@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model.training.regularization;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.model.HyperparameterConfigurable;
 
@@ -20,7 +21,7 @@ public class LASSO<N extends Number> implements ExplicitRegularization<N>, Hyper
     }
 
     @Override
-    public JavaNumberTypeSupport<N> getCurrentNumberType() {
+    public JavaNumberTypeSupport<N> getNumberTypeSupport() {
         return typeSupport;
     }
 
@@ -33,22 +34,22 @@ public class LASSO<N extends Number> implements ExplicitRegularization<N>, Hyper
     }
 
     @Override
-    public N lossPenalty(N[] parameters) {
-        N sum = getCurrentNumberType().zero();
+    public N lossPenalty(Array<N> parameters) {
+        N sum = getNumberTypeSupport().zero();
         for (N param : parameters) {
-            sum = getCurrentNumberType().add(sum, getCurrentNumberType().absolute(param));
+            sum = getNumberTypeSupport().add(sum, getNumberTypeSupport().absolute(param));
         }
-        return getCurrentNumberType().multiply(sum, lambda);
+        return getNumberTypeSupport().multiply(sum, lambda);
     }
 
     @Override
     public N gradientAdjustment(N parameter) {
-        if (getCurrentNumberType().isZero(parameter)) {
-            return getCurrentNumberType().zero();
-        } else if (getCurrentNumberType().isPositive(parameter)) {
+        if (getNumberTypeSupport().isZero(parameter)) {
+            return getNumberTypeSupport().zero();
+        } else if (getNumberTypeSupport().isPositive(parameter)) {
             return lambda;
         } else {
-            return getCurrentNumberType().negate(lambda);
+            return getNumberTypeSupport().negate(lambda);
         }
     }
 
@@ -60,7 +61,7 @@ public class LASSO<N extends Number> implements ExplicitRegularization<N>, Hyper
     @Override
     public void setHyperparameter(String name, Object value) {
         if (name.equals(HP_LAMBDA)) {
-            setLambda(getCurrentNumberType().cast(value));
+            setLambda(getNumberTypeSupport().cast(value));
         }
     }
 }

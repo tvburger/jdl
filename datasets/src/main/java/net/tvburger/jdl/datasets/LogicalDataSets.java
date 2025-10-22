@@ -11,13 +11,13 @@ public final class LogicalDataSets {
     public static DataSet<Float> toMinusSet(DataSet<Float> dataSet) {
         for (DataSet.Sample<Float> sample : dataSet) {
             for (int i = 0; i < sample.featureCount(); i++) {
-                if (Floats.equals(sample.features()[i], 0.0f)) {
-                    sample.features()[i] = -1.0f;
+                if (Floats.equals(sample.features().get(i), 0.0f)) {
+                    sample.features().set(i, -1.0f);
                 }
             }
             for (int i = 0; i < sample.targetCount(); i++) {
-                if (Floats.equals(sample.targetOutputs()[i], 0.0f)) {
-                    sample.targetOutputs()[i] = -1.0f;
+                if (Floats.equals(sample.targetOutputs().get(i), 0.0f)) {
+                    sample.targetOutputs().set(i, -1.0f);
                 }
             }
         }

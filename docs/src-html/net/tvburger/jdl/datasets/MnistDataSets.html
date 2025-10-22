@@ -13,46 +13,51 @@
 <div class="source-container">
 <pre><span class="source-line-no">001</span><span id="line-1">package net.tvburger.jdl.datasets;</span>
 <span class="source-line-no">002</span><span id="line-2"></span>
-<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.model.DataSet;</span>
-<span class="source-line-no">004</span><span id="line-4"></span>
-<span class="source-line-no">005</span><span id="line-5">import java.io.IOException;</span>
-<span class="source-line-no">006</span><span id="line-6">import java.util.Arrays;</span>
-<span class="source-line-no">007</span><span id="line-7"></span>
-<span class="source-line-no">008</span><span id="line-8">public final class MnistDataSets {</span>
+<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.cnn.ConvolutionalShape;</span>
+<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.numbers.Array;</span>
+<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.model.DataSet;</span>
+<span class="source-line-no">006</span><span id="line-6"></span>
+<span class="source-line-no">007</span><span id="line-7">import java.io.IOException;</span>
+<span class="source-line-no">008</span><span id="line-8">import java.util.Arrays;</span>
 <span class="source-line-no">009</span><span id="line-9"></span>
-<span class="source-line-no">010</span><span id="line-10">    private MnistDataSets() {</span>
-<span class="source-line-no">011</span><span id="line-11">    }</span>
-<span class="source-line-no">012</span><span id="line-12"></span>
-<span class="source-line-no">013</span><span id="line-13">    @SuppressWarnings("unchecked")</span>
-<span class="source-line-no">014</span><span id="line-14">    public static DataSet&lt;Float&gt; loadDigits() throws IOException {</span>
-<span class="source-line-no">015</span><span id="line-15">        MnistReader.MnistData mnistData = MnistReader.readImagesLabels(</span>
-<span class="source-line-no">016</span><span id="line-16">                "mnist/train-images.idx3-ubyte",</span>
-<span class="source-line-no">017</span><span id="line-17">                "mnist/train-labels.idx1-ubyte");</span>
-<span class="source-line-no">018</span><span id="line-18">        DataSet.Sample&lt;Float&gt;[] samples = new DataSet.Sample[mnistData.images.size()];</span>
-<span class="source-line-no">019</span><span id="line-19">        for (int i = 0; i &lt; samples.length; i++) {</span>
-<span class="source-line-no">020</span><span id="line-20">            samples[i] = DataSet.Sample.of(</span>
-<span class="source-line-no">021</span><span id="line-21">                    imageToFloatFeatures(mnistData.images.get(i)),</span>
-<span class="source-line-no">022</span><span id="line-22">                    labelToFloatOutputs(mnistData.labels[i]));</span>
-<span class="source-line-no">023</span><span id="line-23">        }</span>
-<span class="source-line-no">024</span><span id="line-24">        return DataSet.of(samples);</span>
-<span class="source-line-no">025</span><span id="line-25">    }</span>
-<span class="source-line-no">026</span><span id="line-26"></span>
-<span class="source-line-no">027</span><span id="line-27">    private static Float[] imageToFloatFeatures(int[] imagePixels) {</span>
-<span class="source-line-no">028</span><span id="line-28">        Float[] features = new Float[imagePixels.length];</span>
-<span class="source-line-no">029</span><span id="line-29">        for (int i = 0; i &lt; imagePixels.length; i++) {</span>
-<span class="source-line-no">030</span><span id="line-30">            features[i] = imagePixels[i] / 255.0f;</span>
-<span class="source-line-no">031</span><span id="line-31">        }</span>
-<span class="source-line-no">032</span><span id="line-32">        return features;</span>
-<span class="source-line-no">033</span><span id="line-33">    }</span>
-<span class="source-line-no">034</span><span id="line-34"></span>
-<span class="source-line-no">035</span><span id="line-35">    private static Float[] labelToFloatOutputs(byte label) {</span>
-<span class="source-line-no">036</span><span id="line-36">        Float[] outputs = new Float[10];</span>
-<span class="source-line-no">037</span><span id="line-37">        Arrays.fill(outputs, 0.0f);</span>
-<span class="source-line-no">038</span><span id="line-38">        outputs[label] = 1.0f;</span>
-<span class="source-line-no">039</span><span id="line-39">        return outputs;</span>
-<span class="source-line-no">040</span><span id="line-40">    }</span>
-<span class="source-line-no">041</span><span id="line-41"></span>
-<span class="source-line-no">042</span><span id="line-42">}</span>
+<span class="source-line-no">010</span><span id="line-10">public final class MnistDataSets {</span>
+<span class="source-line-no">011</span><span id="line-11"></span>
+<span class="source-line-no">012</span><span id="line-12">    private MnistDataSets() {</span>
+<span class="source-line-no">013</span><span id="line-13">    }</span>
+<span class="source-line-no">014</span><span id="line-14"></span>
+<span class="source-line-no">015</span><span id="line-15">    public static ConvolutionalShape digitAsShape(Array&lt;Float&gt; features) throws IOException {</span>
+<span class="source-line-no">016</span><span id="line-16">        return new ConvolutionalShape(28, 28, ConvolutionalShape.DEFAULT_CHANNELS, ConvolutionalShape.DEFAULT_INDEX, features);</span>
+<span class="source-line-no">017</span><span id="line-17">    }</span>
+<span class="source-line-no">018</span><span id="line-18"></span>
+<span class="source-line-no">019</span><span id="line-19">    public static DataSet&lt;Float&gt; loadDigits() throws IOException {</span>
+<span class="source-line-no">020</span><span id="line-20">        MnistReader.MnistData mnistData = MnistReader.readImagesLabels(</span>
+<span class="source-line-no">021</span><span id="line-21">                "mnist/train-images.idx3-ubyte",</span>
+<span class="source-line-no">022</span><span id="line-22">                "mnist/train-labels.idx1-ubyte");</span>
+<span class="source-line-no">023</span><span id="line-23">        DataSet.Sample&lt;Float&gt;[] samples = new DataSet.Sample[mnistData.images.size()];</span>
+<span class="source-line-no">024</span><span id="line-24">        for (int i = 0; i &lt; samples.length; i++) {</span>
+<span class="source-line-no">025</span><span id="line-25">            samples[i] = DataSet.Sample.of(</span>
+<span class="source-line-no">026</span><span id="line-26">                    imageToFloatFeatures(mnistData.images.get(i)),</span>
+<span class="source-line-no">027</span><span id="line-27">                    labelToFloatOutputs(mnistData.labels[i]));</span>
+<span class="source-line-no">028</span><span id="line-28">        }</span>
+<span class="source-line-no">029</span><span id="line-29">        return DataSet.of(samples);</span>
+<span class="source-line-no">030</span><span id="line-30">    }</span>
+<span class="source-line-no">031</span><span id="line-31"></span>
+<span class="source-line-no">032</span><span id="line-32">    private static Array&lt;Float&gt; imageToFloatFeatures(int[] imagePixels) {</span>
+<span class="source-line-no">033</span><span id="line-33">        Float[] features = new Float[imagePixels.length];</span>
+<span class="source-line-no">034</span><span id="line-34">        for (int i = 0; i &lt; imagePixels.length; i++) {</span>
+<span class="source-line-no">035</span><span id="line-35">            features[i] = imagePixels[i] / 255.0f;</span>
+<span class="source-line-no">036</span><span id="line-36">        }</span>
+<span class="source-line-no">037</span><span id="line-37">        return Array.of(features);</span>
+<span class="source-line-no">038</span><span id="line-38">    }</span>
+<span class="source-line-no">039</span><span id="line-39"></span>
+<span class="source-line-no">040</span><span id="line-40">    private static Array&lt;Float&gt; labelToFloatOutputs(byte label) {</span>
+<span class="source-line-no">041</span><span id="line-41">        Float[] outputs = new Float[10];</span>
+<span class="source-line-no">042</span><span id="line-42">        Arrays.fill(outputs, 0.0f);</span>
+<span class="source-line-no">043</span><span id="line-43">        outputs[label] = 1.0f;</span>
+<span class="source-line-no">044</span><span id="line-44">        return Array.of(outputs);</span>
+<span class="source-line-no">045</span><span id="line-45">    }</span>
+<span class="source-line-no">046</span><span id="line-46"></span>
+<span class="source-line-no">047</span><span id="line-47">}</span>
 
 
 

@@ -1,5 +1,7 @@
 package net.tvburger.jdl.datasets;
 
+import net.tvburger.jdl.cnn.ConvolutionalShape;
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.model.DataSet;
 
 import java.io.IOException;
@@ -10,7 +12,10 @@ public final class MnistDataSets {
     private MnistDataSets() {
     }
 
-    @SuppressWarnings("unchecked")
+    public static ConvolutionalShape digitAsShape(Array<Float> features) throws IOException {
+        return new ConvolutionalShape(28, 28, ConvolutionalShape.DEFAULT_CHANNELS, ConvolutionalShape.DEFAULT_INDEX, features);
+    }
+
     public static DataSet<Float> loadDigits() throws IOException {
         MnistReader.MnistData mnistData = MnistReader.readImagesLabels(
                 "mnist/train-images.idx3-ubyte",
@@ -24,19 +29,19 @@ public final class MnistDataSets {
         return DataSet.of(samples);
     }
 
-    private static Float[] imageToFloatFeatures(int[] imagePixels) {
+    private static Array<Float> imageToFloatFeatures(int[] imagePixels) {
         Float[] features = new Float[imagePixels.length];
         for (int i = 0; i < imagePixels.length; i++) {
             features[i] = imagePixels[i] / 255.0f;
         }
-        return features;
+        return Array.of(features);
     }
 
-    private static Float[] labelToFloatOutputs(byte label) {
+    private static Array<Float> labelToFloatOutputs(byte label) {
         Float[] outputs = new Float[10];
         Arrays.fill(outputs, 0.0f);
         outputs[label] = 1.0f;
-        return outputs;
+        return Array.of(outputs);
     }
 
 }

@@ -1,13 +1,11 @@
 package net.tvburger.jdl.linear.optimizer;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.linalg.*;
 import net.tvburger.jdl.linear.FeatureMatrices;
 import net.tvburger.jdl.linear.LinearBasisFunctionModel;
 import net.tvburger.jdl.model.DataSet;
-import net.tvburger.jdl.model.training.ObjectiveFunction;
-import net.tvburger.jdl.model.training.Optimizer;
-import net.tvburger.jdl.model.training.optimizer.UpdateStep;
 
 public class L2RegularizedClosedSolutionOptimizer<N extends Number> implements LinearModelOptimizer<N> {
 
@@ -21,7 +19,7 @@ public class L2RegularizedClosedSolutionOptimizer<N extends Number> implements L
     }
 
     @Override
-    public JavaNumberTypeSupport<N> getCurrentNumberType() {
+    public JavaNumberTypeSupport<N> getNumberTypeSupport() {
         return typeSupport;
     }
 
@@ -43,16 +41,16 @@ public class L2RegularizedClosedSolutionOptimizer<N extends Number> implements L
 
     @Override
     public void setOptimalWeights(LinearBasisFunctionModel<N> regression, DataSet<N> trainingSet) {
-        JavaNumberTypeSupport<N> typeSupport = regression.getCurrentNumberType();
+        JavaNumberTypeSupport<N> typeSupport = regression.getNumberTypeSupport();
         if (debugOutput) {
             System.out.println("Number type = " + typeSupport.name());
         }
 
-        N[] values = typeSupport.createArray(trainingSet.size());
-        for (int i = 0; i < values.length; i++) {
-            values[i] = trainingSet.samples().get(i).targetOutputs()[0];
+        Array<N> values = typeSupport.createArray(trainingSet.size());
+        for (int i = 0; i < values.length(); i++) {
+            values.set(i, trainingSet.samples().get(i).targetOutputs().get(0));
         }
-        TypedVector<N> y = Vectors.of(typeSupport, values).transpose();
+        TypedVector<N> y = new TypedVector<>(values, true, typeSupport);
         if (debugOutput) {
             y.print("y");
         }

@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model.training.regularization;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.model.HyperparameterConfigurable;
 
@@ -20,7 +21,7 @@ public class Ridge<N extends Number> implements ExplicitRegularization<N>, Hyper
     }
 
     @Override
-    public JavaNumberTypeSupport<N> getCurrentNumberType() {
+    public JavaNumberTypeSupport<N> getNumberTypeSupport() {
         return typeSupport;
     }
 
@@ -30,21 +31,21 @@ public class Ridge<N extends Number> implements ExplicitRegularization<N>, Hyper
 
     public void setLambda(N lambda) {
         this.lambda = lambda;
-        this.lambdaTwice = getCurrentNumberType().add(lambda, lambda);
+        this.lambdaTwice = getNumberTypeSupport().add(lambda, lambda);
     }
 
     @Override
-    public N lossPenalty(N[] parameters) {
-        N sum = getCurrentNumberType().zero();
+    public N lossPenalty(Array<N> parameters) {
+        N sum = getNumberTypeSupport().zero();
         for (N param : parameters) {
-            sum = getCurrentNumberType().add(sum, getCurrentNumberType().multiply(param, param));
+            sum = getNumberTypeSupport().add(sum, getNumberTypeSupport().multiply(param, param));
         }
-        return getCurrentNumberType().multiply(sum, lambda);
+        return getNumberTypeSupport().multiply(sum, lambda);
     }
 
     @Override
     public N gradientAdjustment(N parameter) {
-        return getCurrentNumberType().multiply(lambdaTwice, parameter);
+        return getNumberTypeSupport().multiply(lambdaTwice, parameter);
     }
 
     @Override
@@ -55,7 +56,7 @@ public class Ridge<N extends Number> implements ExplicitRegularization<N>, Hyper
     @Override
     public void setHyperparameter(String name, Object value) {
         if (name.equals(HP_LAMBDA)) {
-            this.lambda = getCurrentNumberType().cast(value);
+            this.lambda = getNumberTypeSupport().cast(value);
         }
     }
 }

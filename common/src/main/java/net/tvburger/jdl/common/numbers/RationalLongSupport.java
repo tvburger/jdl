@@ -20,10 +20,10 @@ public final class RationalLongSupport implements JavaNumberTypeSupport<Rational
 
     @SuppressWarnings("unchecked")
     @Override
-    public Rational<Long>[] createArray(int length) {
+    public Array<Rational<Long>> createArray(int length) {
         Rational<Long>[] array = (Rational<Long>[]) new Rational<?>[length];
         Arrays.fill(array, ZERO);
-        return array;
+        return Array.of(array);
     }
 
     @SuppressWarnings("unchecked")

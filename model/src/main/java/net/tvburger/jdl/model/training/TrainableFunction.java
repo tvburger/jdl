@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model.training;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.model.EstimationFunction;
 
 /**
@@ -24,7 +25,7 @@ public interface TrainableFunction<N extends Number> extends EstimationFunction<
      *
      * @return the array of parameters
      */
-    N[] getParameters();
+    Array<N> getParameters();
 
     /**
      * Returns the parameter at the given index.
@@ -42,7 +43,7 @@ public interface TrainableFunction<N extends Number> extends EstimationFunction<
      * @throws IllegalArgumentException if the array length does not match
      *                                  {@link #getParameterCount()}
      */
-    void setParameters(N[] values);
+    void setParameters(Array<N> values);
 
     /**
      * Sets the parameter at the given index to the specified value.
@@ -59,9 +60,9 @@ public interface TrainableFunction<N extends Number> extends EstimationFunction<
      *
      * @param deltas an array of additive updates, aligned with the parameter vector
      */
-    default void adjustParameters(N[] deltas) {
-        for (int i = 0; i < deltas.length; i++) {
-            adjustParameter(i, deltas[i]);
+    default void adjustParameters(Array<N> deltas) {
+        for (int i = 0; i < deltas.length(); i++) {
+            adjustParameter(i, deltas.get(i));
         }
     }
 
@@ -73,7 +74,7 @@ public interface TrainableFunction<N extends Number> extends EstimationFunction<
      * @throws ArrayIndexOutOfBoundsException if the index is out of range
      */
     default void adjustParameter(int p, N delta) {
-        setParameter(p, getCurrentNumberType().add(getParameter(p), delta));
+        setParameter(p, getNumberTypeSupport().add(getParameter(p), delta));
     }
 
 }

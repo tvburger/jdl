@@ -31,7 +31,7 @@ public class RegularizationFactory<N extends Number> implements NumberTypeAgnost
     }
 
     @Override
-    public JavaNumberTypeSupport<N> getCurrentNumberType() {
+    public JavaNumberTypeSupport<N> getNumberTypeSupport() {
         return typeSupport;
     }
 }

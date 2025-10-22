@@ -13,27 +13,27 @@
 <div class="source-container">
 <pre><span class="source-line-no">001</span><span id="line-1">package net.tvburger.jdl.mlp;</span>
 <span class="source-line-no">002</span><span id="line-2"></span>
-<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;</span>
-<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.datasets.SyntheticDataSets;</span>
-<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.model.DataSet;</span>
-<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.model.nn.NeuralNetwork;</span>
-<span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.model.nn.NeuralNetworks;</span>
-<span class="source-line-no">008</span><span id="line-8">import net.tvburger.jdl.model.nn.training.initializers.NeuralNetworkInitializer;</span>
-<span class="source-line-no">009</span><span id="line-9">import net.tvburger.jdl.model.nn.training.initializers.XavierInitializer;</span>
-<span class="source-line-no">010</span><span id="line-10">import net.tvburger.jdl.model.nn.training.optimizers.NeuralNetworkOptimizers;</span>
-<span class="source-line-no">011</span><span id="line-11">import net.tvburger.jdl.model.scalars.activations.Activations;</span>
-<span class="source-line-no">012</span><span id="line-12">import net.tvburger.jdl.model.training.ObjectiveFunction;</span>
-<span class="source-line-no">013</span><span id="line-13">import net.tvburger.jdl.model.training.Trainer;</span>
-<span class="source-line-no">014</span><span id="line-14">import net.tvburger.jdl.model.training.loss.Objectives;</span>
-<span class="source-line-no">015</span><span id="line-15">import net.tvburger.jdl.model.training.optimizer.GradientDescentOptimizer;</span>
-<span class="source-line-no">016</span><span id="line-16">import net.tvburger.jdl.model.training.regimes.ChainedRegime;</span>
-<span class="source-line-no">017</span><span id="line-17">import net.tvburger.jdl.model.training.regimes.EpochRegime;</span>
-<span class="source-line-no">018</span><span id="line-18">import net.tvburger.jdl.model.training.regimes.Regimes;</span>
-<span class="source-line-no">019</span><span id="line-19">import net.tvburger.jdl.model.training.regularization.RegularizationFactory;</span>
-<span class="source-line-no">020</span><span id="line-20">import net.tvburger.jdl.model.training.regularization.Regularizations;</span>
-<span class="source-line-no">021</span><span id="line-21">import net.tvburger.jdl.plots.listeners.EpochRmePlotter;</span>
-<span class="source-line-no">022</span><span id="line-22"></span>
-<span class="source-line-no">023</span><span id="line-23">import java.util.Arrays;</span>
+<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.numbers.Array;</span>
+<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;</span>
+<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.datasets.SyntheticDataSets;</span>
+<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.model.DataSet;</span>
+<span class="source-line-no">007</span><span id="line-7">import net.tvburger.jdl.model.nn.NeuralNetwork;</span>
+<span class="source-line-no">008</span><span id="line-8">import net.tvburger.jdl.model.nn.NeuralNetworks;</span>
+<span class="source-line-no">009</span><span id="line-9">import net.tvburger.jdl.model.nn.training.initializers.NeuralNetworkInitializer;</span>
+<span class="source-line-no">010</span><span id="line-10">import net.tvburger.jdl.model.nn.training.initializers.XavierInitializer;</span>
+<span class="source-line-no">011</span><span id="line-11">import net.tvburger.jdl.model.nn.training.optimizers.NeuralNetworkOptimizers;</span>
+<span class="source-line-no">012</span><span id="line-12">import net.tvburger.jdl.model.scalars.activations.Activations;</span>
+<span class="source-line-no">013</span><span id="line-13">import net.tvburger.jdl.model.training.ObjectiveFunction;</span>
+<span class="source-line-no">014</span><span id="line-14">import net.tvburger.jdl.model.training.Trainer;</span>
+<span class="source-line-no">015</span><span id="line-15">import net.tvburger.jdl.model.training.loss.Objectives;</span>
+<span class="source-line-no">016</span><span id="line-16">import net.tvburger.jdl.model.training.optimizer.GradientDescentOptimizer;</span>
+<span class="source-line-no">017</span><span id="line-17">import net.tvburger.jdl.model.training.regimes.ChainedRegime;</span>
+<span class="source-line-no">018</span><span id="line-18">import net.tvburger.jdl.model.training.regimes.EpochRegime;</span>
+<span class="source-line-no">019</span><span id="line-19">import net.tvburger.jdl.model.training.regimes.Regimes;</span>
+<span class="source-line-no">020</span><span id="line-20">import net.tvburger.jdl.model.training.regularization.RegularizationFactory;</span>
+<span class="source-line-no">021</span><span id="line-21">import net.tvburger.jdl.model.training.regularization.Regularizations;</span>
+<span class="source-line-no">022</span><span id="line-22">import net.tvburger.jdl.plots.listeners.EpochRmePlotter;</span>
+<span class="source-line-no">023</span><span id="line-23"></span>
 <span class="source-line-no">024</span><span id="line-24">import java.util.Random;</span>
 <span class="source-line-no">025</span><span id="line-25"></span>
 <span class="source-line-no">026</span><span id="line-26">public class MLPLineMain {</span>
@@ -64,8 +64,8 @@
 <span class="source-line-no">051</span><span id="line-51">        NeuralNetworks.dump(mlp);</span>
 <span class="source-line-no">052</span><span id="line-52"></span>
 <span class="source-line-no">053</span><span id="line-53">        for (DataSet.Sample&lt;Float&gt; sample : testSet) {</span>
-<span class="source-line-no">054</span><span id="line-54">            Float[] estimate = mlp.estimate(sample.features());</span>
-<span class="source-line-no">055</span><span id="line-55">            System.out.println("with noise = " + Arrays.toString(sample.targetOutputs()) + " estimated = " + Arrays.toString(estimate) + " real = " + Arrays.toString(line.getEstimationFunction().estimate(sample.features())));</span>
+<span class="source-line-no">054</span><span id="line-54">            Array&lt;Float&gt; estimate = mlp.estimate(sample.features());</span>
+<span class="source-line-no">055</span><span id="line-55">            System.out.println("with noise = " + Array.toString(sample.targetOutputs()) + " estimated = " + Array.toString(estimate) + " real = " + Array.toString(line.getEstimationFunction().estimate(sample.features())));</span>
 <span class="source-line-no">056</span><span id="line-56">        }</span>
 <span class="source-line-no">057</span><span id="line-57">    }</span>
 <span class="source-line-no">058</span><span id="line-58">}</span>

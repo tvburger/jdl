@@ -24,13 +24,13 @@
 <span class="source-line-no">011</span><span id="line-11">    public static DataSet&lt;Float&gt; toMinusSet(DataSet&lt;Float&gt; dataSet) {</span>
 <span class="source-line-no">012</span><span id="line-12">        for (DataSet.Sample&lt;Float&gt; sample : dataSet) {</span>
 <span class="source-line-no">013</span><span id="line-13">            for (int i = 0; i &lt; sample.featureCount(); i++) {</span>
-<span class="source-line-no">014</span><span id="line-14">                if (Floats.equals(sample.features()[i], 0.0f)) {</span>
-<span class="source-line-no">015</span><span id="line-15">                    sample.features()[i] = -1.0f;</span>
+<span class="source-line-no">014</span><span id="line-14">                if (Floats.equals(sample.features().get(i), 0.0f)) {</span>
+<span class="source-line-no">015</span><span id="line-15">                    sample.features().set(i, -1.0f);</span>
 <span class="source-line-no">016</span><span id="line-16">                }</span>
 <span class="source-line-no">017</span><span id="line-17">            }</span>
 <span class="source-line-no">018</span><span id="line-18">            for (int i = 0; i &lt; sample.targetCount(); i++) {</span>
-<span class="source-line-no">019</span><span id="line-19">                if (Floats.equals(sample.targetOutputs()[i], 0.0f)) {</span>
-<span class="source-line-no">020</span><span id="line-20">                    sample.targetOutputs()[i] = -1.0f;</span>
+<span class="source-line-no">019</span><span id="line-19">                if (Floats.equals(sample.targetOutputs().get(i), 0.0f)) {</span>
+<span class="source-line-no">020</span><span id="line-20">                    sample.targetOutputs().set(i, -1.0f);</span>
 <span class="source-line-no">021</span><span id="line-21">                }</span>
 <span class="source-line-no">022</span><span id="line-22">            }</span>
 <span class="source-line-no">023</span><span id="line-23">        }</span>

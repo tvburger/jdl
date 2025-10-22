@@ -1,5 +1,6 @@
 package net.tvburger.jdl.linear;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.patterns.Strategy;
 import net.tvburger.jdl.linear.basis.BasisFunction;
@@ -23,11 +24,11 @@ public class LinearBasisFunctionModel<N extends Number> extends AffineTransforma
     }
 
     protected LinearBasisFunctionModel(int modelComplexity, BasisFunction.Generator<N> basisFunctionGenerator) {
-        this(basisFunctionGenerator.generate(modelComplexity), basisFunctionGenerator.getCurrentNumberType().zero(), basisFunctionGenerator.getCurrentNumberType().createArray(modelComplexity), basisFunctionGenerator.getCurrentNumberType());
+        this(basisFunctionGenerator.generate(modelComplexity), basisFunctionGenerator.getNumberTypeSupport().createArray(modelComplexity + 1), basisFunctionGenerator.getNumberTypeSupport());
     }
 
-    private LinearBasisFunctionModel(FeatureExtractor<N> featureExtractor, N bias, N[] weights, JavaNumberTypeSupport<N> typeSupport) {
-        super(bias, weights, typeSupport);
+    private LinearBasisFunctionModel(FeatureExtractor<N> featureExtractor, Array<N> parameters, JavaNumberTypeSupport<N> typeSupport) {
+        super(parameters, typeSupport);
         this.featureExtractor = featureExtractor;
     }
 
@@ -41,16 +42,16 @@ public class LinearBasisFunctionModel<N extends Number> extends AffineTransforma
 
     @Override
     public N estimateUnary(N input) {
-        N[] features = featureExtractor.extractFeatures(input);
+        Array<N> features = featureExtractor.extractFeatures(input);
         return super.estimateScalar(features);
     }
 
     @Override
-    public N estimateScalar(N[] inputs) {
-        if (inputs.length != 1) {
+    public N estimateScalar(Array<N> inputs) {
+        if (inputs.length() != 1) {
             throw new IllegalArgumentException("Invalid arity!");
         }
-        return estimateUnary(inputs[0]);
+        return estimateUnary(inputs.get(0));
     }
 
 }

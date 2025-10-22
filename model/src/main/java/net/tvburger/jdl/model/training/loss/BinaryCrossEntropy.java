@@ -119,7 +119,7 @@ public class BinaryCrossEntropy<N extends Number> implements DimensionLossFuncti
      * {@inheritDoc}
      */
     @Override
-    public JavaNumberTypeSupport<N> getCurrentNumberType() {
+    public JavaNumberTypeSupport<N> getNumberTypeSupport() {
         return typeSupport;
     }
 }

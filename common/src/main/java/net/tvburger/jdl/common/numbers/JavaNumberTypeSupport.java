@@ -3,7 +3,7 @@ package net.tvburger.jdl.common.numbers;
 import java.math.BigInteger;
 import java.util.Comparator;
 
-public interface JavaNumberTypeSupport<N> {
+public interface JavaNumberTypeSupport<N> extends Comparator<N> {
 
     JavaNumberTypeSupport<Rational<BigInteger>> RATIONAL_BIGINT = new RationalBigIntegerSupport();
     JavaNumberTypeSupport<Rational<Long>> RATIONAL_LONG = new RationalLongSupport();
@@ -13,7 +13,7 @@ public interface JavaNumberTypeSupport<N> {
 
     String name();
 
-    N[] createArray(int length);
+    Array<N> createArray(int length);
 
     N[][] createArrayOfArrays(int rows, int columns);
 
@@ -119,4 +119,14 @@ public interface JavaNumberTypeSupport<N> {
         }
     }
 
+    @Override
+    default int compare(N first, N second) {
+        if (isGreaterThan(first, second)) {
+            return 1;
+        } else if (isGreaterThan(second, first)) {
+            return -1;
+        } else {
+            return 0;
+        }
+    }
 }

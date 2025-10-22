@@ -1,64 +1,59 @@
 package net.tvburger.jdl.cnn;
 
-import net.tvburger.jdl.model.scalars.activations.ActivationFunction;
-
 import java.util.ArrayList;
 import java.util.List;
 
-public class PoolingLayer {
+// For now only supports 2D pooling
+public class PoolingLayer implements ConvolutionalNetworkLayer {
 
     private final ConvolutionalShape inputShape;
     private final ConvolutionalShape outputShape;
-    private final List<ConvolutionalFilter> filters;
+    private final PoolingFunction poolingFunction;
+    private final int size;
     private final int stride;
     private final int padding;
 
-    public static PoolingLayer create(int width, int height, ActivationFunction activationFunction) {
-        return create(width, height, 1, activationFunction);
+    public static PoolingLayer create(int width, int height, int size, PoolingFunction poolingFunction) {
+        ConvolutionalShape inputShape = new ConvolutionalShape(width, height, ConvolutionalShape.DEFAULT_CHANNELS, ConvolutionalShape.DEFAULT_COUNT, null);
+        return create(inputShape, size, poolingFunction);
     }
 
-    public static PoolingLayer create(int width, int height, int depth, ActivationFunction activationFunction) {
-        return create(width, height, depth, 3, 1, 0, activationFunction);
+    public static PoolingLayer create(ConvolutionalShape inputShape, int size, PoolingFunction poolingFunction) {
+        return create(inputShape, size, size, 0, poolingFunction);
     }
 
-    public static PoolingLayer create(int width, int height, int depth, int size, int stride, int padding, ActivationFunction activationFunction) {
-        ConvolutionalShape inputShape = new ConvolutionalShape(width, height, depth, 1, null);
-        return create(inputShape, size, stride, padding, 1, activationFunction);
-    }
-
-    public static PoolingLayer create(ConvolutionalShape inputShape, int size, int dimensions, int stride, int padding, ActivationFunction activationFunction) {
+    public static PoolingLayer create(ConvolutionalShape inputShape, int size, int stride, int padding, PoolingFunction poolingFunction) {
         int outputWidth = (inputShape.getWidth() - size + 2 * padding) / stride + 1;
         int outputHeight = (inputShape.getHeight() - size + 2 * padding) / stride + 1;
-        ConvolutionalShape outputShape = new ConvolutionalShape(outputWidth, outputHeight, dimensions, 1, null);
-        return create(inputShape, outputShape, dimensions, stride, padding, activationFunction);
+        ConvolutionalShape outputShape = new ConvolutionalShape(outputWidth, outputHeight, ConvolutionalShape.DEFAULT_CHANNELS, ConvolutionalShape.DEFAULT_COUNT, null);
+        return new PoolingLayer(inputShape, outputShape, poolingFunction, size, stride, padding);
     }
 
-    public static PoolingLayer create(ConvolutionalShape inputShape, ConvolutionalShape outputShape, int size, int stride, int padding, ActivationFunction activationFunction) {
-        List<ConvolutionalFilter> filters = new ArrayList<>();
-        for (int i = 0; i < outputShape.getChannels(); i++) {
-            filters.add(ConvolutionalFilter.create(size, inputShape.getChannels()));
-        }
-        return new PoolingLayer(inputShape, outputShape, filters, stride, padding);
-    }
-
-    private PoolingLayer(ConvolutionalShape inputShape, ConvolutionalShape outputShape, List<ConvolutionalFilter> filters, int stride, int padding) {
+    private PoolingLayer(ConvolutionalShape inputShape, ConvolutionalShape outputShape, PoolingFunction poolingFunction, int size, int stride, int padding) {
         this.inputShape = inputShape;
         this.outputShape = outputShape;
-        this.filters = filters;
+        this.poolingFunction = poolingFunction;
+        this.size = size;
         this.stride = stride;
         this.padding = padding;
     }
 
+    @Override
     public ConvolutionalShape getInputShape() {
         return inputShape;
     }
 
+    @Override
     public ConvolutionalShape getOutputShape() {
         return outputShape;
     }
 
-    public List<ConvolutionalFilter> getFilters() {
-        return filters;
+    public PoolingFunction getPoolingFunction() {
+        return poolingFunction;
+    }
+
+    public int getSize() {
+        return size;
     }
 
     public int getStride() {
@@ -69,19 +64,17 @@ public class PoolingLayer {
         return padding;
     }
 
-    public int getDimensions() {
-        return filters.size();
-    }
-
+    @Override
     public ConvolutionalShape transform(ConvolutionalShape input) {
         ConvolutionalShape output = getOutputShape().clone();
-        for (int d = 0; d < getDimensions(); d++) {
-            ConvolutionalFilter filter = filters.get(d);
-            for (int y = 0; y < output.getHeight(); y++) {
-                for (int x = 0; x < output.getWidth(); x++) {
-                    for (Float[] field : getFields(input, output)) {
-                        float value = filter.estimate(field)[0];
-                        output.setPixel(value, x, y, d + 1);
+        for (int i = 0; i < output.getCount(); i++) {
+            for (int c = 1; c <= output.getChannels(); c++) {
+                for (int y = 0; y < output.getHeight(); y++) {
+                    for (int x = 0; x < output.getWidth(); x++) {
+                        for (ConvolutionalShape window : getWindows(input)) {
+                            float value = poolingFunction.pool(window.getElements());
+                            output.setElement(value, x, y, c, i);
+                        }
                     }
                 }
             }
@@ -89,33 +82,29 @@ public class PoolingLayer {
         return output;
     }
 
-    private List<Float[]> getFields(ConvolutionalShape input, ConvolutionalShape output) {
-        if (filters.isEmpty()) {
-            return List.of();
-        }
-        ConvolutionalShape filterSize = filters.getFirst().getShape();
-        List<Float[]> fields = new ArrayList<>();
-        for (int x = -padding; x < output.getWidth() - filterSize.getWidth() + padding; x = x + stride) {
-            for (int y = -padding; y < input.getWidth() - filterSize.getHeight() + padding; y = y + stride) {
+    private List<ConvolutionalShape> getWindows(ConvolutionalShape input) {
+        List<ConvolutionalShape> windows = new ArrayList<>();
+        for (int x = -padding; x <= input.getWidth() - size + padding; x = x + stride) {
+            for (int y = -padding; y <= input.getHeight() - size + padding; y = y + stride) {
                 for (int c = 1; c <= input.getChannels(); c++) {
                     for (int i = 0; i < input.getCount(); i++) {
-                        ConvolutionalShape fieldShape = filterSize.clone();
-                        for (int yi = 0; yi < fieldShape.getHeight(); yi++) {
-                            for (int xi = 0; xi < fieldShape.getWidth(); xi++) {
+                        ConvolutionalShape window = new ConvolutionalShape(size, size);
+                        for (int yi = 0; yi < window.getHeight(); yi++) {
+                            for (int xi = 0; xi < window.getWidth(); xi++) {
                                 float value;
                                 if (x + xi < 0 || x + xi >= input.getWidth() || y + yi < 0 || y + yi >= input.getHeight()) {
                                     value = 0f;
                                 } else {
-                                    value = input.getPixel(x + xi, y + yi, c, i);
+                                    value = input.getElement(x + xi, y + yi, c, i);
                                 }
-                                fieldShape.setPixel(value, xi, yi, c, i);
+                                window.setElement(value, xi, yi, c, i);
                             }
                         }
-                        fields.add(fieldShape.getPixels());
+                        windows.add(window);
                     }
                 }
             }
         }
-        return fields;
+        return windows;
     }
 }

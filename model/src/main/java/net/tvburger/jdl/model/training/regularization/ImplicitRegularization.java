@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model.training.regularization;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.model.DataSet;
 
 /**
@@ -17,7 +18,7 @@ public interface ImplicitRegularization<N extends Number> extends Regularization
         return trainingSet;
     }
 
-    default N[] onActivations(int layer, N[] activations) {
+    default Array<N> onActivations(int layer, Array<N> activations) {
         return activations;
     }
 

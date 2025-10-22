@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.numbers.NumberTypeAgnostic;
 import net.tvburger.jdl.common.patterns.DomainObject;
 import net.tvburger.jdl.common.patterns.Strategy;
@@ -19,7 +20,7 @@ public interface EstimationFunction<N extends Number> extends NumberTypeAgnostic
      * @param inputs an array of input values (e.g., features, signals)
      * @return an array of output values computed by the estimation function
      */
-    N[] estimate(N[] inputs);
+    Array<N> estimate(Array<N> inputs);
 
     /**
      * Returns the <b>arity</b> of this function, i.e. the number of inputs

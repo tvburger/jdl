@@ -48,7 +48,7 @@ public class MeanError<N extends Number> implements SampleLossFunction<N>, Batch
      * {@inheritDoc}
      */
     @Override
-    public JavaNumberTypeSupport<N> getCurrentNumberType() {
+    public JavaNumberTypeSupport<N> getNumberTypeSupport() {
         return typeSupport;
     }
 

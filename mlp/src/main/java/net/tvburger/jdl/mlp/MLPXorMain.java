@@ -1,5 +1,6 @@
 package net.tvburger.jdl.mlp;
 
+import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.datasets.LogicalDataSets;
 import net.tvburger.jdl.model.DataSet;
@@ -17,8 +18,6 @@ import net.tvburger.jdl.model.training.regimes.ChainedRegime;
 import net.tvburger.jdl.model.training.regimes.EpochRegime;
 import net.tvburger.jdl.model.training.regimes.Regimes;
 import net.tvburger.jdl.plots.listeners.EpochRmePlotter;
-
-import java.util.Arrays;
 
 public class MLPXorMain {
 
@@ -44,8 +43,8 @@ public class MLPXorMain {
         NeuralNetworks.dump(mlp);
 
         for (DataSet.Sample<Float> sample : testSet) {
-            Float[] estimate = mlp.estimate(sample.features());
-            System.out.println("real = " + Arrays.toString(sample.targetOutputs()) + " vs estimated = " + Arrays.toString(estimate) + " | features " + Arrays.toString(sample.features()));
+            Array<Float> estimate = mlp.estimate(sample.features());
+            System.out.println("real = " + Array.toString(sample.targetOutputs()) + " vs estimated = " + Array.toString(estimate) + " | features " + Array.toString(sample.features()));
         }
     }
 }

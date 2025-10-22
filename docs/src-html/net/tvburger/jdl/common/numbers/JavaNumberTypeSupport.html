@@ -16,7 +16,7 @@
 <span class="source-line-no">003</span><span id="line-3">import java.math.BigInteger;</span>
 <span class="source-line-no">004</span><span id="line-4">import java.util.Comparator;</span>
 <span class="source-line-no">005</span><span id="line-5"></span>
-<span class="source-line-no">006</span><span id="line-6">public interface JavaNumberTypeSupport&lt;N&gt; {</span>
+<span class="source-line-no">006</span><span id="line-6">public interface JavaNumberTypeSupport&lt;N&gt; extends Comparator&lt;N&gt; {</span>
 <span class="source-line-no">007</span><span id="line-7"></span>
 <span class="source-line-no">008</span><span id="line-8">    JavaNumberTypeSupport&lt;Rational&lt;BigInteger&gt;&gt; RATIONAL_BIGINT = new RationalBigIntegerSupport();</span>
 <span class="source-line-no">009</span><span id="line-9">    JavaNumberTypeSupport&lt;Rational&lt;Long&gt;&gt; RATIONAL_LONG = new RationalLongSupport();</span>
@@ -26,7 +26,7 @@
 <span class="source-line-no">013</span><span id="line-13"></span>
 <span class="source-line-no">014</span><span id="line-14">    String name();</span>
 <span class="source-line-no">015</span><span id="line-15"></span>
-<span class="source-line-no">016</span><span id="line-16">    N[] createArray(int length);</span>
+<span class="source-line-no">016</span><span id="line-16">    Array&lt;N&gt; createArray(int length);</span>
 <span class="source-line-no">017</span><span id="line-17"></span>
 <span class="source-line-no">018</span><span id="line-18">    N[][] createArrayOfArrays(int rows, int columns);</span>
 <span class="source-line-no">019</span><span id="line-19"></span>
@@ -132,7 +132,17 @@
 <span class="source-line-no">119</span><span id="line-119">        }</span>
 <span class="source-line-no">120</span><span id="line-120">    }</span>
 <span class="source-line-no">121</span><span id="line-121"></span>
-<span class="source-line-no">122</span><span id="line-122">}</span>
+<span class="source-line-no">122</span><span id="line-122">    @Override</span>
+<span class="source-line-no">123</span><span id="line-123">    default int compare(N first, N second) {</span>
+<span class="source-line-no">124</span><span id="line-124">        if (isGreaterThan(first, second)) {</span>
+<span class="source-line-no">125</span><span id="line-125">            return 1;</span>
+<span class="source-line-no">126</span><span id="line-126">        } else if (isGreaterThan(second, first)) {</span>
+<span class="source-line-no">127</span><span id="line-127">            return -1;</span>
+<span class="source-line-no">128</span><span id="line-128">        } else {</span>
+<span class="source-line-no">129</span><span id="line-129">            return 0;</span>
+<span class="source-line-no">130</span><span id="line-130">        }</span>
+<span class="source-line-no">131</span><span id="line-131">    }</span>
+<span class="source-line-no">132</span><span id="line-132">}</span>
 
 
 

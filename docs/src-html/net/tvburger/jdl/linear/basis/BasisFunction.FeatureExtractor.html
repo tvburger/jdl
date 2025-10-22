@@ -13,60 +13,61 @@
 <div class="source-container">
 <pre><span class="source-line-no">001</span><span id="line-1">package net.tvburger.jdl.linear.basis;</span>
 <span class="source-line-no">002</span><span id="line-2"></span>
-<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;</span>
-<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.numbers.NumberTypeAgnostic;</span>
-<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.common.patterns.Strategy;</span>
-<span class="source-line-no">006</span><span id="line-6"></span>
-<span class="source-line-no">007</span><span id="line-7">import java.util.List;</span>
-<span class="source-line-no">008</span><span id="line-8"></span>
-<span class="source-line-no">009</span><span id="line-9">@Strategy(Strategy.Role.INTERFACE)</span>
-<span class="source-line-no">010</span><span id="line-10">public interface BasisFunction&lt;N extends Number&gt; extends NumberTypeAgnostic&lt;N&gt; {</span>
-<span class="source-line-no">011</span><span id="line-11"></span>
-<span class="source-line-no">012</span><span id="line-12">    N apply(N input);</span>
-<span class="source-line-no">013</span><span id="line-13"></span>
-<span class="source-line-no">014</span><span id="line-14">    interface Generator&lt;N extends Number&gt; extends NumberTypeAgnostic&lt;N&gt; {</span>
-<span class="source-line-no">015</span><span id="line-15"></span>
-<span class="source-line-no">016</span><span id="line-16">        FeatureExtractor&lt;N&gt; generate(int featureCount);</span>
-<span class="source-line-no">017</span><span id="line-17"></span>
-<span class="source-line-no">018</span><span id="line-18">    }</span>
-<span class="source-line-no">019</span><span id="line-19"></span>
-<span class="source-line-no">020</span><span id="line-20">    @Strategy(Strategy.Role.CONCRETE)</span>
-<span class="source-line-no">021</span><span id="line-21">    class FeatureExtractor&lt;N extends Number&gt; implements net.tvburger.jdl.linear.FeatureExtractor&lt;N&gt; {</span>
-<span class="source-line-no">022</span><span id="line-22"></span>
-<span class="source-line-no">023</span><span id="line-23">        private final List&lt;BasisFunction&lt;N&gt;&gt; basis;</span>
-<span class="source-line-no">024</span><span id="line-24">        private final JavaNumberTypeSupport&lt;N&gt; typeSupport;</span>
-<span class="source-line-no">025</span><span id="line-25"></span>
-<span class="source-line-no">026</span><span id="line-26">        public FeatureExtractor(List&lt;BasisFunction&lt;N&gt;&gt; basis, JavaNumberTypeSupport&lt;N&gt; typeSupport) {</span>
-<span class="source-line-no">027</span><span id="line-27">            this.basis = basis;</span>
-<span class="source-line-no">028</span><span id="line-28">            this.typeSupport = typeSupport;</span>
-<span class="source-line-no">029</span><span id="line-29">        }</span>
-<span class="source-line-no">030</span><span id="line-30"></span>
-<span class="source-line-no">031</span><span id="line-31">        @Override</span>
-<span class="source-line-no">032</span><span id="line-32">        public JavaNumberTypeSupport&lt;N&gt; getTypeSupport() {</span>
-<span class="source-line-no">033</span><span id="line-33">            return typeSupport;</span>
-<span class="source-line-no">034</span><span id="line-34">        }</span>
-<span class="source-line-no">035</span><span id="line-35"></span>
-<span class="source-line-no">036</span><span id="line-36">        /**</span>
-<span class="source-line-no">037</span><span id="line-37">         * {@inheritDoc}</span>
-<span class="source-line-no">038</span><span id="line-38">         */</span>
-<span class="source-line-no">039</span><span id="line-39">        public N[] extractFeatures(N input) {</span>
-<span class="source-line-no">040</span><span id="line-40">            int m = basis.size();</span>
-<span class="source-line-no">041</span><span id="line-41">            N[] features = typeSupport.createArray(m);</span>
-<span class="source-line-no">042</span><span id="line-42">            for (int i = 0; i &lt; m; i++) {</span>
-<span class="source-line-no">043</span><span id="line-43">                features[i] = basis.get(i).apply(input);</span>
-<span class="source-line-no">044</span><span id="line-44">            }</span>
-<span class="source-line-no">045</span><span id="line-45">            return features;</span>
-<span class="source-line-no">046</span><span id="line-46">        }</span>
-<span class="source-line-no">047</span><span id="line-47"></span>
-<span class="source-line-no">048</span><span id="line-48">        /**</span>
-<span class="source-line-no">049</span><span id="line-49">         * {@inheritDoc}</span>
-<span class="source-line-no">050</span><span id="line-50">         */</span>
-<span class="source-line-no">051</span><span id="line-51">        public int featureCount() {</span>
-<span class="source-line-no">052</span><span id="line-52">            return basis.size();</span>
-<span class="source-line-no">053</span><span id="line-53">        }</span>
-<span class="source-line-no">054</span><span id="line-54"></span>
-<span class="source-line-no">055</span><span id="line-55">    }</span>
-<span class="source-line-no">056</span><span id="line-56">}</span>
+<span class="source-line-no">003</span><span id="line-3">import net.tvburger.jdl.common.numbers.Array;</span>
+<span class="source-line-no">004</span><span id="line-4">import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;</span>
+<span class="source-line-no">005</span><span id="line-5">import net.tvburger.jdl.common.numbers.NumberTypeAgnostic;</span>
+<span class="source-line-no">006</span><span id="line-6">import net.tvburger.jdl.common.patterns.Strategy;</span>
+<span class="source-line-no">007</span><span id="line-7"></span>
+<span class="source-line-no">008</span><span id="line-8">import java.util.List;</span>
+<span class="source-line-no">009</span><span id="line-9"></span>
+<span class="source-line-no">010</span><span id="line-10">@Strategy(Strategy.Role.INTERFACE)</span>
+<span class="source-line-no">011</span><span id="line-11">public interface BasisFunction&lt;N extends Number&gt; extends NumberTypeAgnostic&lt;N&gt; {</span>
+<span class="source-line-no">012</span><span id="line-12"></span>
+<span class="source-line-no">013</span><span id="line-13">    N apply(N input);</span>
+<span class="source-line-no">014</span><span id="line-14"></span>
+<span class="source-line-no">015</span><span id="line-15">    interface Generator&lt;N extends Number&gt; extends NumberTypeAgnostic&lt;N&gt; {</span>
+<span class="source-line-no">016</span><span id="line-16"></span>
+<span class="source-line-no">017</span><span id="line-17">        FeatureExtractor&lt;N&gt; generate(int featureCount);</span>
+<span class="source-line-no">018</span><span id="line-18"></span>
+<span class="source-line-no">019</span><span id="line-19">    }</span>
+<span class="source-line-no">020</span><span id="line-20"></span>
+<span class="source-line-no">021</span><span id="line-21">    @Strategy(Strategy.Role.CONCRETE)</span>
+<span class="source-line-no">022</span><span id="line-22">    class FeatureExtractor&lt;N extends Number&gt; implements net.tvburger.jdl.linear.FeatureExtractor&lt;N&gt; {</span>
+<span class="source-line-no">023</span><span id="line-23"></span>
+<span class="source-line-no">024</span><span id="line-24">        private final List&lt;BasisFunction&lt;N&gt;&gt; basis;</span>
+<span class="source-line-no">025</span><span id="line-25">        private final JavaNumberTypeSupport&lt;N&gt; typeSupport;</span>
+<span class="source-line-no">026</span><span id="line-26"></span>
+<span class="source-line-no">027</span><span id="line-27">        public FeatureExtractor(List&lt;BasisFunction&lt;N&gt;&gt; basis, JavaNumberTypeSupport&lt;N&gt; typeSupport) {</span>
+<span class="source-line-no">028</span><span id="line-28">            this.basis = basis;</span>
+<span class="source-line-no">029</span><span id="line-29">            this.typeSupport = typeSupport;</span>
+<span class="source-line-no">030</span><span id="line-30">        }</span>
+<span class="source-line-no">031</span><span id="line-31"></span>
+<span class="source-line-no">032</span><span id="line-32">        @Override</span>
+<span class="source-line-no">033</span><span id="line-33">        public JavaNumberTypeSupport&lt;N&gt; getTypeSupport() {</span>
+<span class="source-line-no">034</span><span id="line-34">            return typeSupport;</span>
+<span class="source-line-no">035</span><span id="line-35">        }</span>
+<span class="source-line-no">036</span><span id="line-36"></span>
+<span class="source-line-no">037</span><span id="line-37">        /**</span>
+<span class="source-line-no">038</span><span id="line-38">         * {@inheritDoc}</span>
+<span class="source-line-no">039</span><span id="line-39">         */</span>
+<span class="source-line-no">040</span><span id="line-40">        public Array&lt;N&gt; extractFeatures(N input) {</span>
+<span class="source-line-no">041</span><span id="line-41">            int m = basis.size();</span>
+<span class="source-line-no">042</span><span id="line-42">            Array&lt;N&gt; features = typeSupport.createArray(m);</span>
+<span class="source-line-no">043</span><span id="line-43">            for (int i = 0; i &lt; m; i++) {</span>
+<span class="source-line-no">044</span><span id="line-44">                features.set(i, basis.get(i).apply(input));</span>
+<span class="source-line-no">045</span><span id="line-45">            }</span>
+<span class="source-line-no">046</span><span id="line-46">            return features;</span>
+<span class="source-line-no">047</span><span id="line-47">        }</span>
+<span class="source-line-no">048</span><span id="line-48"></span>
+<span class="source-line-no">049</span><span id="line-49">        /**</span>
+<span class="source-line-no">050</span><span id="line-50">         * {@inheritDoc}</span>
+<span class="source-line-no">051</span><span id="line-51">         */</span>
+<span class="source-line-no">052</span><span id="line-52">        public int featureCount() {</span>
+<span class="source-line-no">053</span><span id="line-53">            return basis.size();</span>
+<span class="source-line-no">054</span><span id="line-54">        }</span>
+<span class="source-line-no">055</span><span id="line-55"></span>
+<span class="source-line-no">056</span><span id="line-56">    }</span>
+<span class="source-line-no">057</span><span id="line-57">}</span>
 
 
 
