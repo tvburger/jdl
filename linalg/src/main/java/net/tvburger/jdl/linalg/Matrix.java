@@ -1,8 +1,9 @@
 package net.tvburger.jdl.linalg;
 
 import net.tvburger.jdl.common.numbers.NumberTypeAgnostic;
+import net.tvburger.jdl.common.numbers.Tensor;
 
-public interface Matrix<N extends Number> extends Transposable<Matrix<N>>, Invertible<Matrix<N>>, NumberTypeAgnostic<N> {
+public interface Matrix<N extends Number> extends Transposable<Matrix<N>>, Invertible<Matrix<N>>, Tensor<N>, NumberTypeAgnostic<N> {
 
     Matrix<N> add(N value);
 

@@ -40,7 +40,7 @@ public class ModelL1Regularization {
         int epochs = 100_000;
         int m = 9; // model complexity
 
-        VanillaGradientDescent<N> vanilla = new VanillaGradientDescent<>(learningRate);
+        VanillaGradientDescent<N> vanilla = new VanillaGradientDescent<>(numberTypeSupport, learningRate);
         ExplicitRegularization<N> elasticNet = regularizationFactory.createElasticNet(0.001, 0.0001);
         ExplicitRegularization<N> l1 = regularizationFactory.createLASSO(0.001);
         ExplicitRegularization<N> l2 = regularizationFactory.createRidge(0.0001);

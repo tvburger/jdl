@@ -140,8 +140,4 @@ public class TypedVector<N extends Number> implements Vector<N> {
         asMatrix().print(name);
     }
 
-    @Override
-    public JavaNumberTypeSupport<N> getNumberTypeSupport() {
-        return typeSupport;
-    }
 }

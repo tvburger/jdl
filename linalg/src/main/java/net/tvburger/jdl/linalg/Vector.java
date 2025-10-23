@@ -1,9 +1,9 @@
 package net.tvburger.jdl.linalg;
 
 import net.tvburger.jdl.common.numbers.Array;
-import net.tvburger.jdl.common.numbers.NumberTypeAgnostic;
+import net.tvburger.jdl.common.numbers.Tensor;
 
-public interface Vector<N extends Number> extends Transposable<Vector<N>>, NumberTypeAgnostic<N> {
+public interface Vector<N extends Number> extends Transposable<Vector<N>>, Tensor<N> {
 
     int getDimensions();
 

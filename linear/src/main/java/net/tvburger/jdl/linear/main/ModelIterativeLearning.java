@@ -38,7 +38,7 @@ public class ModelIterativeLearning {
         int epochs = 10_000_000;
         int m = 9; // model complexity
 
-        VanillaGradientDescent<N> vanilla = new VanillaGradientDescent<>(learningRate);
+        VanillaGradientDescent<N> vanilla = new VanillaGradientDescent<>(numberTypeSupport, learningRate);
         showForNumberType(numberTypeSupport, "Vanilla", createOptimizer(vanilla), Set.of(), epochs, m);
     }
 

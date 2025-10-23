@@ -53,7 +53,7 @@ public class NewOptimizers {
         mrePlot.setYRange(0.0f, 1.0f);
         mrePlot.display();
 
-        VanillaGradientDescent<N> vanilla = new VanillaGradientDescent<>(learningRate);
+        VanillaGradientDescent<N> vanilla = new VanillaGradientDescent<>(typeSupport, learningRate);
         AdaGrad<N> adagrad = new AdaGrad<>(learningRate);
         RMSProp<N> rmsProp = new RMSProp<>(learningRate, typeSupport.valueOf(0.9));
         Adam<N> adam = new Adam<>(learningRate, typeSupport.valueOf(0.9), typeSupport.valueOf(0.999));

@@ -1,7 +1,9 @@
 package net.tvburger.jdl.model.scalars;
 
+import net.tvburger.jdl.model.ParameterizedTrainableScalarEstimationFunction;
 import net.tvburger.jdl.common.numbers.Array;
 import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
+import net.tvburger.jdl.common.numbers.Tensor;
 import net.tvburger.jdl.common.patterns.Strategy;
 
 /**
@@ -17,7 +19,7 @@ import net.tvburger.jdl.common.patterns.Strategy;
  * @see AffineTransformation
  */
 @Strategy(Strategy.Role.CONCRETE)
-public class LinearCombination<N extends Number> implements TrainableScalarFunction<N> {
+public class LinearCombination<N extends Number> implements ParameterizedTrainableScalarEstimationFunction<N, N, N> {
 
     private final JavaNumberTypeSupport<N> typeSupport;
     private Array<N> parameters;
@@ -86,7 +88,7 @@ public class LinearCombination<N extends Number> implements TrainableScalarFunct
      * @return the gradient vector (weight parameterGradients)
      */
     @Override
-    public Array<N> calculateParameterGradients(Array<N> inputs) {
+    public Array<N> getParameterGradients(Array<N> inputs) {
         return inputs;
     }
 
@@ -212,4 +214,8 @@ public class LinearCombination<N extends Number> implements TrainableScalarFunct
         parameters.set(d - 1, typeSupport.add(parameters.get(validDimension(d) - 1), delta));
     }
 
+    @Override
+    public Tensor<N> mapToTensor(Tensor<N> tensor) {
+        return null;
+    }
 }

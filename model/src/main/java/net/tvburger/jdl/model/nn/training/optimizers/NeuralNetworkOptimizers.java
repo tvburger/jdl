@@ -1,5 +1,6 @@
 package net.tvburger.jdl.model.nn.training.optimizers;
 
+import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.common.patterns.StaticUtility;
 import net.tvburger.jdl.model.nn.NeuralNetwork;
 import net.tvburger.jdl.model.training.optimizer.GradientDescentOptimizer;
@@ -23,7 +24,7 @@ public final class NeuralNetworkOptimizers {
     }
 
     public static GradientDescentOptimizer<NeuralNetwork, Float> vanilla(float learningRate) {
-        return new GradientDescentOptimizer<>(BACK_PROPAGATION, new VanillaGradientDescent<>(learningRate));
+        return new GradientDescentOptimizer<>(BACK_PROPAGATION, new VanillaGradientDescent<>(JavaNumberTypeSupport.FLOAT, learningRate));
     }
 
     public static GradientDescentOptimizer<NeuralNetwork, Float> adaGrad() {

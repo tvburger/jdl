@@ -1,12 +1,14 @@
 package net.tvburger.jdl.model.scalars.activations;
 
+import net.tvburger.jdl.common.function.UnaryFunction;
+import net.tvburger.jdl.common.numbers.Scalar;
 import net.tvburger.jdl.common.patterns.Strategy;
 
 /**
  * An ActivationFunction maps a logit to an output.
  */
 @Strategy(Strategy.Role.INTERFACE)
-public interface ActivationFunction {
+public interface ActivationFunction extends UnaryFunction<Float, Float> {
 
     /**
      * Name of the activation function.
@@ -24,6 +26,10 @@ public interface ActivationFunction {
      * @return the corresponding output value
      */
     float activate(float logit);
+
+    default Scalar<Float> apply(Scalar<Float> input) {
+        return Scalar.of(activate(input.get()));
+    }
 
     /**
      * Determine the slope (gradient) at the given output value

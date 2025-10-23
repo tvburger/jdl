@@ -1,13 +1,24 @@
 package net.tvburger.jdl.common.numbers;
 
+import net.tvburger.jdl.common.function.UnaryFunction;
+
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Spliterators;
-import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public interface Array<N> extends Iterable<N>, Cloneable {
+public interface Array<N> extends Tensor<N>, Iterable<N>, Cloneable {
+
+    @Override
+    default int[] dimensions() {
+        return new int[length()];
+    }
+
+    @Override
+    default N get(int... i) {
+        return get(i[0]);
+    }
 
     N get(int index);
 
@@ -35,7 +46,7 @@ public interface Array<N> extends Iterable<N>, Cloneable {
 
     Array<N> slice(int offset, int length, int stride);
 
-    Array<N> apply(Function<N, N> function);
+    Array<N> apply(UnaryFunction<N, N> function);
 
     N[] backingArray();
 
@@ -87,10 +98,10 @@ public interface Array<N> extends Iterable<N>, Cloneable {
         }
 
         @Override
-        public Array<N> apply(Function<N, N> function) {
+        public Array<N> apply(UnaryFunction<N, N> function) {
             int limit = offset + length * stride;
             for (int i = offset; i < limit; i += stride) {
-                values[i] = function.apply(values[i]);
+                values[i] = function.mapToScalar(values[i]);
             }
             return this;
         }
@@ -206,10 +217,10 @@ public interface Array<N> extends Iterable<N>, Cloneable {
             }
 
             @Override
-            public Array<N> apply(Function<N, N> function) {
+            public Array<N> apply(UnaryFunction<N, N> function) {
                 int limit = offset + length;
                 for (int i = offset; i < limit; i++) {
-                    values[i] = function.apply(values[i]);
+                    values[i] = function.mapToScalar(values[i]);
                 }
                 return this;
             }

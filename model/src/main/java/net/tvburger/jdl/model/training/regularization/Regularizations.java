@@ -20,14 +20,18 @@ public final class Regularizations {
         if (regularizations.isEmpty()) {
             return gradients;
         }
+        JavaNumberTypeSupport<N> typeSupport = null;
         Array<N> values = gradients.asArray().clone();
         for (ExplicitRegularization<N> regularization : regularizations) {
+            if (typeSupport == null) {
+                typeSupport = regularization.getNumberTypeSupport();
+            }
             for (int i = 0; i < thetas.getDimensions(); i++) {
                 N adjustment = regularization.gradientAdjustment(thetas.get(i + 1));
-                values.set(i, regularization.getNumberTypeSupport().add(values.get(i), adjustment));
+                values.set(i, typeSupport.add(values.get(i), adjustment));
             }
         }
-        return new TypedVector<>(values, gradients.isColumnVector(), gradients.getNumberTypeSupport());
+        return new TypedVector<>(values, gradients.isColumnVector(), typeSupport);
     }
 
     private static final Map<JavaNumberTypeSupport<?>, RegularizationFactory<?>> factories = new HashMap<>();

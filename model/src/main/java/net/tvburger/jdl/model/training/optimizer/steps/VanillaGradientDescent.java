@@ -1,9 +1,9 @@
 package net.tvburger.jdl.model.training.optimizer.steps;
 
 import net.tvburger.jdl.common.numbers.Array;
+import net.tvburger.jdl.common.numbers.JavaNumberTypeSupport;
 import net.tvburger.jdl.linalg.TypedVector;
 import net.tvburger.jdl.linalg.Vector;
-import net.tvburger.jdl.linalg.Vectors;
 import net.tvburger.jdl.model.scalars.LinearCombination;
 import net.tvburger.jdl.model.training.optimizer.LearningRateConfigurable;
 import net.tvburger.jdl.model.training.optimizer.UpdateStep;
@@ -15,9 +15,11 @@ import java.util.Set;
 
 public class VanillaGradientDescent<N extends Number> implements UpdateStep<LinearCombination<N>, N>, LearningRateConfigurable<N> {
 
+    private final JavaNumberTypeSupport<N> typeSupport;
     private N learningRate;
 
-    public VanillaGradientDescent(N learningRate) {
+    public VanillaGradientDescent(JavaNumberTypeSupport<N> typeSupport, N learningRate) {
+        this.typeSupport = typeSupport;
         this.learningRate = learningRate;
     }
 
@@ -40,5 +42,10 @@ public class VanillaGradientDescent<N extends Number> implements UpdateStep<Line
         if (HP_LEARNING_RATE.equals(name)) {
             this.learningRate = (N) value;
         }
+    }
+
+    @Override
+    public JavaNumberTypeSupport<N> getNumberTypeSupport() {
+        return typeSupport;
     }
 }

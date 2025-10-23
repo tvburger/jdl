@@ -72,7 +72,7 @@ public class PoolingLayer implements ConvolutionalNetworkLayer {
                 for (int y = 0; y < output.getHeight(); y++) {
                     for (int x = 0; x < output.getWidth(); x++) {
                         for (ConvolutionalShape window : getWindows(input)) {
-                            float value = poolingFunction.pool(window.getElements());
+                            float value = poolingFunction.mapToScalar(window.getElements());
                             output.setElement(value, x, y, c, i);
                         }
                     }

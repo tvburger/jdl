@@ -1,9 +1,11 @@
 package net.tvburger.jdl.model.nn;
 
 import net.tvburger.jdl.common.numbers.Array;
+import net.tvburger.jdl.common.numbers.Tensor;
 import net.tvburger.jdl.common.patterns.DomainObject;
 import net.tvburger.jdl.common.patterns.Entity;
 import net.tvburger.jdl.model.EstimationFunction;
+import net.tvburger.jdl.model.ParameterizedTrainableEstimationFunction;
 import net.tvburger.jdl.model.training.TrainableFunction;
 
 import java.util.Map;
@@ -30,7 +32,7 @@ import java.util.Set;
  */
 @DomainObject
 @Entity
-public interface NeuralNetwork extends TrainableFunction<Float> {
+public interface NeuralNetwork<N extends Number, I extends Tensor<N>, O extends Tensor<N>> extends NeuralNetworkLayer<N, I, O> {
 
     /**
      * Returns the number of neurons in the given layer.
@@ -90,24 +92,6 @@ public interface NeuralNetwork extends TrainableFunction<Float> {
      */
     Set<Neuron> getTargetNeurons(Neuron neuron);
 
-    /**
-     * Returns the total number of trainable parameters in the network
-     * (typically weights + biases).
-     *
-     * @return the number of parameters
-     */
-    int getParameterCount();
-
-    /**
-     * Returns all parameters (weights, biases) of the network as a flat array.
-     * <p>
-     * The order of parameters is implementation-defined but must be consistent
-     * across calls to enable saving and restoring network state.
-     * </p>
-     *
-     * @return a flat array of parameters
-     */
-    Array<Float> getParameters();
 
     /**
      * Accepts a {@link net.tvburger.jdl.model.nn.NeuronVisitor} to traverse
